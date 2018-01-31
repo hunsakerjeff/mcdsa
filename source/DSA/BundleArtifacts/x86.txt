@@ -1,0 +1,3 @@
+MainPackage=D:\Dev\mastercard-dsa-windows\output\DSA\x86\Debug\DSA_1.3.0.0_x86_Debug.appx
+ResourcePack=D:\Dev\mastercard-dsa-windows\output\DSA\x86\Debug\DSA_1.3.0.0_scale-140.appx
+ResourcePack=D:\Dev\mastercard-dsa-windows\output\DSA\x86\Debug\DSA_1.3.0.0_scale-180.appx

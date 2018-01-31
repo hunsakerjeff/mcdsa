@@ -1,0 +1,123 @@
+﻿<UserControl
+    x:Name = "BrowserPanel"
+    x:Class="DSA.Shell.Controls.MenuBrowser.MenuBrowserPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:behaviors="using:DSA.Shell.Behaviors"
+    mc:Ignorable="d"
+    d:DesignHeight="300" Width="389">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
+            <DataTemplate x:Key="MediaItemDataTemplate" >
+                <Grid HorizontalAlignment="Stretch" Margin="0" MinHeight="45">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Image Source="{Binding TypeLogo}" Width="40" Height="40"/>
+                    <TextBlock Grid.Column="1"
+                       Text="{Binding Name}"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="14,0,0,0"/>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="CategoryDataTemplate">
+                <Grid HorizontalAlignment="Stretch" Margin="0" Height="45" Background="Transparent">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                       Text="{Binding Name}"
+                       TextLineBounds="Tight"
+                       VerticalAlignment="Center"
+                       Margin="14,0,0,0" />
+                    <TextBlock Text="&#xE017;" Grid.Column="1" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Segoe UI Symbol"/>
+                </Grid>
+            </DataTemplate>
+            <behaviors:MenuBrowserTemplateSelector x:Key="selector" CategoryTemplate="{StaticResource CategoryDataTemplate}" MediaTemplate="{StaticResource MediaItemDataTemplate}"/>
+            <Style x:Key="MenuBrowserListViewItemStyle" TargetType="ListViewItem">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListViewItem">
+                            <ListViewItemPresenter
+                    ContentTransitions="{TemplateBinding ContentTransitions}"
+                    Padding="{TemplateBinding Padding}"
+                    SelectionCheckMarkVisualEnabled="False"
+                    CheckHintBrush="{ThemeResource ListViewItemCheckHintThemeBrush}"
+                    CheckSelectingBrush="{ThemeResource ListViewItemCheckSelectingThemeBrush}"
+                    CheckBrush="{ThemeResource ListViewItemCheckThemeBrush}"
+                    DragBackground="{ThemeResource ListViewItemDragBackgroundThemeBrush}"
+                    DragForeground="{ThemeResource ListViewItemDragForegroundThemeBrush}"
+                    FocusBorderBrush="{ThemeResource ListViewItemFocusBorderThemeBrush}" 
+                    PlaceholderBackground="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}"
+                    PointerOverBackground="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}"  
+                    SelectedBorderThickness="{ThemeResource ListViewItemCompactSelectedBorderThemeThickness}"
+                    SelectedBackground="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}"   
+                    SelectedPointerOverBackground="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}"
+                    SelectedPointerOverBorderBrush="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}"
+                    SelectedForeground="{ThemeResource ListViewItemSelectedForegroundThemeBrush}"
+                    DisabledOpacity="{ThemeResource ListViewItemDisabledThemeOpacity}"
+                    DragOpacity="{ThemeResource ListViewItemDragThemeOpacity}"
+                    ReorderHintOffset="{ThemeResource ListViewItemReorderHintThemeOffset}"
+                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                    PointerOverBackgroundMargin="1"
+                    ContentMargin="4"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" >
+            <TextBlock x:Name="headerTextBlock" 
+                         HorizontalAlignment="Left" 
+                         Margin="10,10,0,0" 
+                         TextWrapping="Wrap" 
+                         Text="{Binding ElementName=BrowserPanel, Path=Header, Mode=TwoWay}" 
+                         VerticalAlignment="Top"
+                         Width="369"
+                         Style="{StaticResource SubheaderTextBlockStyle}"
+                        />
+        </Grid>
+        <ListView x:Name="listView"
+                  HorizontalAlignment="Left"
+                  Width="369"
+                  Grid.Row="1"
+                  ItemsSource="{Binding ElementName=BrowserPanel, Path=CategoryContent, Mode=TwoWay}" 
+                  Margin="10,0,0,0"
+                  SelectedItem="{Binding ElementName=BrowserPanel, Path=SelectedItem, Mode=TwoWay}"
+                  ItemTemplateSelector="{StaticResource selector}" 
+                  ItemContainerStyle="{StaticResource MenuBrowserListViewItemStyle}">
+            <interactivity:Interaction.Behaviors>
+                <core:EventTriggerBehavior EventName="SelectionChanged">
+                    <core:InvokeCommandAction Command="{Binding Path=SelectionChangedCommand}" CommandParameter="{Binding SelectedItem, ElementName=listView}"/>
+                </core:EventTriggerBehavior>
+            </interactivity:Interaction.Behaviors>
+        </ListView>
+
+    </Grid>
+</UserControl>

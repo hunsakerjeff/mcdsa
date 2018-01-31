@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5FACCE42-A3AF-49E6-A99F-F74B8CC9589F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DSA.Model</RootNamespace>
+    <AssemblyName>DSA.Model</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformVersion>8.1</TargetPlatformVersion>
+    <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Dto\BrowserData.cs" />
+    <Compile Include="Dto\ButtonConfigurationDTO.cs" />
+    <Compile Include="Dto\ButtonDTO.cs" />
+    <Compile Include="Dto\CategoryInfo.cs" />
+    <Compile Include="Dto\CategoryDTO.cs" />
+    <Compile Include="Dto\ContactDTO.cs" />
+    <Compile Include="Dto\ContentReviewInfo.cs" />
+    <Compile Include="Dto\DocumentInfo.cs" />
+    <Compile Include="Dto\CategoryBrowserDTO.cs" />
+    <Compile Include="Dto\FixedSizedQueue.cs" />
+    <Compile Include="Dto\GeolocationInfo.cs" />
+    <Compile Include="Dto\MediaWrapper.cs" />
+    <Compile Include="Dto\PlayListCollection.cs" />
+    <Compile Include="Dto\UserSettingsDto.cs" />
+    <Compile Include="Dto\ContentDistribution.cs" />
+    <Compile Include="Enums\IHaveMedia.cs" />
+    <Compile Include="Enums\IHavePlaylist.cs" />
+    <Compile Include="Enums\PageOrientations.cs" />
+    <Compile Include="Enums\SynchronizationMode.cs" />
+    <Compile Include="Messages\AppResumingMessage.cs" />
+    <Compile Include="Messages\CheckInOutChangedMessage.cs" />
+    <Compile Include="Messages\HistoryChangedMessage.cs" />
+    <Compile Include="Messages\InternalModeMessage.cs" />
+    <Compile Include="Messages\IsCheckInFlyoutOpenMessage.cs" />
+    <Compile Include="Messages\MobileConfigurationChangedMessage.cs" />
+    <Compile Include="Messages\NavigateVisualBrowserTopLevelMessage.cs" />
+    <Compile Include="Messages\NetworkStatusChangedMessage.cs" />
+    <Compile Include="Messages\NewContentAvaliableMessage.cs" />
+    <Compile Include="Messages\NewPlaylistAddedMessage.cs" />
+    <Compile Include="Messages\OrientationStateMessage.cs" />
+    <Compile Include="Messages\PlaylistChangedMessage.cs" />
+    <Compile Include="Messages\PlaylistSelectedMessage.cs" />
+    <Compile Include="Messages\SearchQuerySubmitted.cs" />
+    <Compile Include="Messages\ShowSelectConfigurationDialogMessage.cs" />
+    <Compile Include="Messages\StartStoryboardMessage.cs" />
+    <Compile Include="Messages\StopStoryboardMessage.cs" />
+    <Compile Include="Messages\SwipeMessage.cs" />
+    <Compile Include="Messages\SynchronizationCancelMessage.cs" />
+    <Compile Include="Messages\SynchronizationClosePopup.cs" />
+    <Compile Include="Messages\SynchronizationCompleteMessage.cs" />
+    <Compile Include="Messages\SynchronizationProgressMessage.cs" />
+    <Compile Include="Messages\UserLogInMessage.cs" />
+    <Compile Include="Enums\SearchMode.cs" />
+    <Compile Include="Models\ContentReview.cs" />
+    <Compile Include="Models\DocumentAssetType.cs" />
+    <Compile Include="Models\DocumentProductType.cs" />
+    <Compile Include="Models\DocumentTitle.cs" />
+    <Compile Include="Models\EntitySubscription.cs" />
+    <Compile Include="Models\Event.cs" />
+    <Compile Include="Models\LoginAccount.cs" />
+    <Compile Include="Models\NewCategoryContent.cs" />
+    <Compile Include="Models\PlaylistContent.cs" />
+    <Compile Include="Models\SearchTerms.cs" />
+    <Compile Include="Models\SuccessfulSyncState.cs" />
+    <Compile Include="Models\ContentDocument.cs" />
+    <Compile Include="Models\Playlist.cs" />
+    <Compile Include="Models\CategoryMobileConfig.cs" />
+    <Compile Include="Models\Category.cs" />
+    <Compile Include="Models\CategoryContent.cs" />
+    <Compile Include="Dto\HistoryItemDto.cs" />
+    <Compile Include="Dto\MediaLink.cs" />
+    <Compile Include="Models\AttachmentMetadata.cs" />
+    <Compile Include="Models\MobileAppConfig.cs" />
+    <Compile Include="Dto\MobileConfigurationDTO.cs" />
+    <Compile Include="Dto\PlaylistData.cs" />
+    <Compile Include="Dto\SpotlightItem.cs" />
+    <Compile Include="Models\DocumentsTag.cs" />
+    <Compile Include="Models\SyncLog.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SfdcConfig.cs" />
+    <Compile Include="Util\IdConverter.cs" />
+    <Compile Include="Util\MediaTypeResolver.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WeeGems.Option, Version=1.0.1.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WeeGems.Option.1.0.1.1\lib\portable-win+net40\WeeGems.Option.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WeeGems.Require, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WeeGems.Require.1.0.1.0\lib\portable-win+net40\WeeGems.Require.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Salesforce.SDK.Core\Salesforce.SDK.Core.csproj">
+      <Project>{cd53c7b7-c3ff-4982-935b-22fb096cd559}</Project>
+      <Name>Salesforce.SDK.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
+    <VisualStudioVersion>12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

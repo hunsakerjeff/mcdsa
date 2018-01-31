@@ -1,0 +1,140 @@
+﻿<UserControl
+    x:Class="DSA.Shell.Controls.VisualBrowser.ControlBar.Synchronization.SynchronizationControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:DSA.Shell.Converters"
+    xmlns:synchronization="using:DSA.Shell.Controls.VisualBrowser.ControlBar.Synchronization"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="725">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <Style x:Key="CloseCancelButton" TargetType="Button">
+                <Setter Property="Background" Value="{ThemeResource ButtonBackgroundThemeBrush}" />
+                <Setter Property="Foreground" Value="Blue"/>
+                <Setter Property="BorderBrush" Value="{ThemeResource ButtonBorderThemeBrush}" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="12,4,12,4" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="PointerOver"/>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Border"
+                                                                       Storyboard.TargetProperty="Background">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPressedBackgroundThemeBrush}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter"
+                                                                       Storyboard.TargetProperty="Foreground">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPressedForegroundThemeBrush}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled" />
+                                    </VisualStateGroup>
+                                    <VisualStateGroup x:Name="FocusStates">
+                                        <VisualState x:Name="Focused" />
+                                        <VisualState x:Name="Unfocused" />
+                                        <VisualState x:Name="PointerFocused" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Margin="3">
+                                    <ContentPresenter x:Name="ContentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTransitions="{TemplateBinding ContentTransitions}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                              AutomationProperties.AccessibilityView="Raw"/>
+                                </Border>
+                                <Rectangle x:Name="FocusVisualWhite"
+                                   IsHitTestVisible="False"
+                                   Stroke="{ThemeResource FocusVisualWhiteStrokeThemeBrush}"
+                                   StrokeEndLineCap="Square"
+                                   StrokeDashArray="1,1"
+                                   Opacity="0"
+                                   StrokeDashOffset="1.5" />
+                                <Rectangle x:Name="FocusVisualBlack"
+                                   IsHitTestVisible="False"
+                                   Stroke="{ThemeResource FocusVisualBlackStrokeThemeBrush}"
+                                   StrokeEndLineCap="Square"
+                                   StrokeDashArray="1,1"
+                                   Opacity="0"
+                                   StrokeDashOffset="0.5" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Popup x:Name="OverlayPopup" LayoutUpdated="OnGridLayoutUpdated"
+               IsOpen="{Binding IsPopupOpen}">
+            <Grid x:Name="OverlayGrid" >
+                <Grid.Background>
+                    <SolidColorBrush Color="Black" Opacity="0.3"/>
+                </Grid.Background>
+            </Grid>
+        </Popup>
+        <Popup x:Name="MCPopup" LayoutUpdated="OnLayoutUpdated"
+            IsOpen="{Binding IsPopupOpen}" >
+            <Grid x:Name="gdChild" Background="White" Width="725" Height="300">
+                <Grid Margin="60,15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="{Binding Header}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="40" FontWeight="Bold">
+                        <TextBlock.Foreground>
+                            <SolidColorBrush Color="#FF05678E" />
+                        </TextBlock.Foreground>
+                    </TextBlock>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <synchronization:SynchronizationStepControl DataContext="{Binding QueueingStep}" />
+                        </Grid>
+                        <Grid Grid.Column="1">
+                            <synchronization:SynchronizationStepControl DataContext="{Binding ConfigurationStep}" />
+                        </Grid>
+                        <Grid Grid.Column="2">
+                            <synchronization:SynchronizationStepControl DataContext="{Binding ContentStep}" />
+                        </Grid>
+                        <Grid Grid.Column="3">
+                            <synchronization:SynchronizationStepControl DataContext="{Binding FinishingStep}" />
+                        </Grid>
+                    </Grid>
+                    <TextBlock Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding ResultsMessage}" Margin="0,10,0,0" Foreground="Black"/>
+                    <ProgressBar Grid.Row="2" Value="{Binding PercentageDownloaded}" Margin="0,10,0,15" Maximum="100" Height="15" IsIndeterminate="False" Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#FF60C2EA" BorderThickness="1" BorderBrush="#FF60C2EA" />
+                    <Button Grid.Row="2" Style="{StaticResource CloseCancelButton}" Content="{Binding CloseCancelButtonContent}" Command="{Binding CancelSynchronizationCommand}"/>
+                </Grid>
+            </Grid>
+        </Popup>
+    </Grid>
+</UserControl>

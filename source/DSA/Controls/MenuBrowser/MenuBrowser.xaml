@@ -1,0 +1,42 @@
+﻿<UserControl
+    x:Class="DSA.Shell.Controls.MenuBrowser.MenuBrowser"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:util="using:DSA.Util"
+    xmlns:menuBrowser="using:DSA.Shell.Controls.MenuBrowser"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid HorizontalAlignment="Stretch">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                      VerticalScrollBarVisibility="Disabled" 
+                      VerticalScrollMode="Disabled"
+                      ZoomMode="Disabled">
+            <interactivity:Interaction.Behaviors>
+                <util:AutoScrollBehavior />
+            </interactivity:Interaction.Behaviors>
+            <ItemsControl 
+                ItemsSource="{Binding Categories}"
+                VerticalAlignment="Stretch"
+                Height="Auto" >
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate >
+                        <StackPanel Orientation="Horizontal" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Visible"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <menuBrowser:MenuBrowserPanel Header="{Binding Header}" CategoryContent="{Binding CategoryContent}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
+
+
+

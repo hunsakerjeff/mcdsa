@@ -1,0 +1,35 @@
+﻿<UserControl
+    x:Class="DSA.Shell.Controls.Media.AddNewPlaylistControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:DSA.Shell.Converters"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Name="BoolToVis" />
+        <converters:BooleanToVisibilityConverter x:Name="BoolToVisRev" IsReversed="True" />
+    </UserControl.Resources>
+
+
+    <Grid Height="52">
+        <Button VerticalAlignment="Stretch"
+                HorizontalAlignment="Stretch"
+                Content="Create new playlist..." 
+                Visibility="{Binding ButtonClicked, Converter={StaticResource BoolToVisRev}}"
+                Command="{Binding CreateNewClickedCommand}"/>
+        <Grid
+            Margin="10"
+            Visibility="{Binding ButtonClicked, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="shelf name" />
+            <Button Grid.Column="1" Content="Create Playlist" Command="{Binding CreateNewPlaylistCommand}" Margin="10,0,0,0" />
+        </Grid>
+    </Grid>
+</UserControl>

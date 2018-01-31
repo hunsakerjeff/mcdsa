@@ -1,0 +1,66 @@
+﻿<UserControl
+    x:Class="DSA.Shell.Controls.Playlist.PersonalLibraryPlaylistControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:playlist="using:DSA.Shell.Controls.Playlist"
+    xmlns:behaviors="using:DSA.Shell.Behaviors"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="EmptyContentTemplate">
+                <Grid Height="140">
+                    <Grid.Background>
+                        <SolidColorBrush Color="#FFA2AEBB"/>
+                    </Grid.Background>
+                    <TextBlock  VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            TextAlignment="Center">
+                   <Run>NO CONTENT</Run>
+                    <LineBreak/>
+                   <Run>Files can be added to your Personal Library in Salesforce</Run>
+                    <LineBreak/>
+                   <Run>by going to the Libraries tab and then Contribute</Run>
+                    </TextBlock>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="HasMediaTemplate">
+                <playlist:PlaylistMediaListControl/>
+            </DataTemplate>
+            <behaviors:PersonalLibraryTemplateSelector x:Name="Selector" EmptyTemplate="{StaticResource EmptyContentTemplate}" HasMediaTemplate="{StaticResource HasMediaTemplate}"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45" />
+            <RowDefinition Height="140" />
+        </Grid.RowDefinitions>
+        <Grid Background="{StaticResource ControlHeaderBackgroundBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <SymbolIcon Grid.Column="0" Symbol="Contact" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" FontSize="18" VerticalAlignment="Center">
+                <Run Text="PERSONAL LIBRARY"/>
+                <Run Text=" "/>
+                <Run Text="Permanent Shelf" FontStyle="Italic"/>
+            </TextBlock>
+        </Grid>
+        <ContentControl Grid.Row="1"
+                        DataContext="{Binding}"
+                        Content="{Binding}"
+                        VerticalContentAlignment="Stretch" 
+                        HorizontalContentAlignment="Stretch"
+                        ContentTemplateSelector="{StaticResource Selector}" />
+    </Grid>
+</UserControl>

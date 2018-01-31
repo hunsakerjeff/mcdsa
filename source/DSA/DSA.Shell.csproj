@@ -1,0 +1,667 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.props" Condition="Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{072B0F41-B0A5-416A-BD10-7C57832CD8A0}</ProjectGuid>
+    <OutputType>AppContainerExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DSA.Shell</RootNamespace>
+    <AssemblyName>DSA.Shell</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformVersion>8.1</TargetPlatformVersion>
+    <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PackageCertificateKeyFile>certificate.pfx</PackageCertificateKeyFile>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <AppxBundlePlatforms>x86</AppxBundlePlatforms>
+    <PackageCertificateThumbprint>7C106D879EA9170C4A89DD214DBE292603615254</PackageCertificateThumbprint>
+    <AppxBundle>Never</AppxBundle>
+    <AppxPackageDir>C:\Packages\</AppxPackageDir>
+    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Common\DSAMenuFlyoutItem.cs" />
+    <Compile Include="Controls\Media\UrlWebViewControl.xaml.cs">
+      <DependentUpon>UrlWebViewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\BrowserControl.xaml.cs">
+      <DependentUpon>BrowserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\ControlBar\CheckInOut\CheckInOutControl.xaml.cs">
+      <DependentUpon>CheckInOutControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\ControlBar\CheckInOut\ContentReviewControl.xaml.cs">
+      <DependentUpon>ContentReviewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\ControlBar\SearchControl.xaml.cs">
+      <DependentUpon>SearchControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\ControlBar\AboutControl.xaml.cs">
+      <DependentUpon>AboutControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\SubCategoriesBrowser.xaml.cs">
+      <DependentUpon>SubCategoriesBrowser.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\TopCategoriesControl.xaml.cs">
+      <DependentUpon>TopCategoriesControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Commands\NavigateToMediaCommand.cs" />
+    <Compile Include="Common\DisplayOrientationsHelper.cs" />
+    <Compile Include="Common\NavigationHelper.cs" />
+    <Compile Include="Behaviors\OrientationStateControlBehavior.cs" />
+    <Compile Include="Converters\DateTimeFormatConverter.cs" />
+    <Compile Include="Pages\Abstract\PageBase.cs" />
+    <Compile Include="Common\SuspensionManager.cs" />
+    <Compile Include="Controls\Abstract\UserControlBase.cs" />
+    <Compile Include="Controls\Common\AppBarButton.xaml.cs">
+      <DependentUpon>AppBarButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Common\NewContentBarControl.xaml.cs">
+      <DependentUpon>NewContentBarControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Media\AddNewPlaylistControl.xaml.cs">
+      <DependentUpon>AddNewPlaylistControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Common\MainAppBar.xaml.cs">
+      <DependentUpon>MainAppBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Media\ImageControl.xaml.cs">
+      <DependentUpon>ImageControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Media\OtherMediaControl.xaml.cs">
+      <DependentUpon>OtherMediaControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\ControlBar\ControlBarControl.xaml.cs">
+      <DependentUpon>ControlBarControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\MainButtonControl.xaml.cs">
+      <DependentUpon>MainButtonControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MenuBrowser\MenuBrowser.xaml.cs">
+      <DependentUpon>MenuBrowser.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MenuBrowser\MenuBrowserPanel.xaml.cs">
+      <DependentUpon>MenuBrowserPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Media\MovieControl.xaml.cs">
+      <DependentUpon>MovieControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Media\PdfViewerControl.xaml.cs">
+      <DependentUpon>PdfViewerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Playlist\PersonalLibraryPlaylistControl.xaml.cs">
+      <DependentUpon>PersonalLibraryPlaylistControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Playlist\PlaylistControl.xaml.cs">
+      <DependentUpon>PlaylistControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Playlist\PlaylistMediaListControl.xaml.cs">
+      <DependentUpon>PlaylistMediaListControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\MainButtonsControl.xaml.cs">
+      <DependentUpon>MainButtonsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\CategoryControl.xaml.cs">
+      <DependentUpon>CategoryControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Media\WebViewControl.xaml.cs">
+      <DependentUpon>WebViewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\ControlBar\SelectConfigurationControl.xaml.cs">
+      <DependentUpon>SelectConfigurationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\ControlBar\Synchronization\SynchronizationControl.xaml.cs">
+      <DependentUpon>SynchronizationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\VisualBrowser\ControlBar\Synchronization\SynchronizationStepControl.xaml.cs">
+      <DependentUpon>SynchronizationStepControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SearchPage.xaml.cs">
+      <DependentUpon>SearchPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\VisualBrowserPage.xaml.cs">
+      <DependentUpon>VisualBrowserPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\MediaContentPage.xaml.cs">
+      <DependentUpon>MediaContentPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SpotlightPage.xaml.cs">
+      <DependentUpon>SpotlightPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\PlaylistsPage.xaml.cs">
+      <DependentUpon>PlaylistsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\HistoryPage.xaml.cs">
+      <DependentUpon>HistoryPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\MenuBrowserPage.xaml.cs">
+      <DependentUpon>MenuBrowserPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Behaviors\OrientationStateBehavior.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Behaviors\AutoScrollBehavior.cs" />
+    <Compile Include="Converters\BooleanToSelectionModeConverter.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\EnumBooleanConverter.cs" />
+    <Compile Include="Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="Behaviors\CheckInMailTemplateSelector.cs" />
+    <Compile Include="Converters\ScreenScaleConverter.cs" />
+    <Compile Include="Converters\ScreenPositionConverter.cs" />
+    <Compile Include="Converters\MarginConverter.cs" />
+    <Compile Include="Behaviors\SwipeHelper.cs" />
+    <Compile Include="Behaviors\FlyoutHelpers.cs" />
+    <Compile Include="Common\ThumbnailIconResolver.cs" />
+    <Compile Include="Behaviors\MediaControlTemplateSelector.cs" />
+    <Compile Include="Behaviors\PersonalLibraryTemplateSelector.cs" />
+    <Compile Include="ViewModels\Abstract\BaseMediaItemViewModel.cs" />
+    <Compile Include="ViewModels\Common\NewContentBarViewModel.cs" />
+    <Compile Include="ViewModels\Search\SearchItemViewModel.cs" />
+    <Compile Include="ViewModels\Search\SearchPageViewModel.cs" />
+    <Compile Include="ViewModels\Spotlight\SpotlightGroupList.cs" />
+    <Compile Include="Behaviors\MenuBrowserTemplateSelector.cs" />
+    <Compile Include="Common\TypeIconResolver.cs" />
+    <Compile Include="ViewModels\Abstract\BaseViewModel.cs" />
+    <Compile Include="ViewModels\Media\AddNewPlaylistViewModel.cs" />
+    <Compile Include="ViewModels\Builders\HistoryItemViewModelBuilder.cs" />
+    <Compile Include="ViewModels\Builders\MediaPlaylistViewModelBuilder.cs" />
+    <Compile Include="ViewModels\Builders\MenuBrowserCategoryContentViewModelBuilder.cs" />
+    <Compile Include="ViewModels\Builders\PlaylistViewModelBuilder.cs" />
+    <Compile Include="ViewModels\Builders\SpotlightItemViewModelBuilder.cs" />
+    <Compile Include="ViewModels\Builders\VisualBrowserViewModelBuilder.cs" />
+    <Compile Include="ViewModels\MenuBrowser\CategoryContentItem.cs" />
+    <Compile Include="ViewModels\History\HistoryItemViewModel.cs" />
+    <Compile Include="ViewModels\History\HistoryViewModel.cs" />
+    <Compile Include="ViewModels\Common\MainAppBarViewModel.cs" />
+    <Compile Include="ViewModels\MenuBrowser\CategoryItem.cs" />
+    <Compile Include="ViewModels\MenuBrowser\MediaItem.cs" />
+    <Compile Include="ViewModels\VisualBrowser\CategoryMediaViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\ControlBar\CheckInOut\CheckInOutViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\ControlBar\CheckInOut\ContactViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\ControlBar\CheckInOut\ContentReviewViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\ControlBar\ControlBarViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\ControlBar\SearchViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\MainButtonViewModel.cs" />
+    <Compile Include="ViewModels\Media\MediaContentViewModel.cs" />
+    <Compile Include="ViewModels\Media\MediaPlaylistViewModel.cs" />
+    <Compile Include="ViewModels\MenuBrowser\MenuBrowserViewModel.cs" />
+    <Compile Include="ViewModels\Playlist\NewPlaylistViewModel.cs" />
+    <Compile Include="ViewModels\Playlist\PlaylistMediaViewModel.cs" />
+    <Compile Include="ViewModels\Playlist\PlaylistsViewModel.cs" />
+    <Compile Include="ViewModels\Playlist\PlaylistViewModel.cs" />
+    <Compile Include="ViewModels\Spotlight\SpotlightItemViewModel.cs" />
+    <Compile Include="ViewModels\Spotlight\SpotlightViewModel.cs" />
+    <Compile Include="ViewModels\ViewModelLocator.cs" />
+    <Compile Include="ViewModels\VisualBrowser\ControlBar\MobileConfigurationsSelectionViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\CategoryContentViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\ControlBar\Synchronization\SynchronizationStepViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\ControlBar\Synchronization\SynchronizationViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\CategoryViewModel.cs" />
+    <Compile Include="ViewModels\VisualBrowser\VisualBrowserViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <Content Include="Assets\about%402x.png" />
+    <Content Include="Assets\AppBar\appbar_icon2.png" />
+    <Content Include="Assets\AppBar\browse_tab%402x.png" />
+    <Content Include="Assets\AppBar\browse_tab.png" />
+    <Content Include="Assets\AppBar\history%402x.png" />
+    <Content Include="Assets\AppBar\history.png" />
+    <Content Include="Assets\AppBar\spotlight-tab%402x.png" />
+    <Content Include="Assets\AppBar\spotlight-tab.png" />
+    <Content Include="Assets\AppBar\star_off%402x.png" />
+    <Content Include="Assets\AppBar\visual_browser_tab%402x.png" />
+    <Content Include="Assets\AppBar\visual_browser_tab.png" />
+    <Content Include="Assets\DAS_Diamond_Logo_ColorTransparent.png" />
+    <Content Include="Assets\DAS_Diamond_Logo_color_whiteText.png" />
+    <Content Include="Assets\Default-Landscape~ipad%402x.png" />
+    <Content Include="Assets\Default-Portrait~ipad%402x.png" />
+    <Content Include="Assets\ico_check-in%402x.png" />
+    <Content Include="Assets\ico_check-out%402x.png" />
+    <Content Include="Assets\Logo.scale-140.png" />
+    <Content Include="Assets\Logo.scale-180.png" />
+    <Content Include="Assets\Logo.scale-80.png" />
+    <Content Include="Assets\MailIcons\mail%402x.png" />
+    <Content Include="Assets\MailIcons\mail_forbidden%402x.png" />
+    <Content Include="Assets\MailIcons\mail_marked%402x.png" />
+    <Content Include="Assets\MenuIcons\about-btn-about%402x.png" />
+    <Content Include="Assets\MenuIcons\about-btn-icon-report%402x.png" />
+    <Content Include="Assets\MenuIcons\about-btn-icon-signin%402x.png" />
+    <Content Include="Assets\MenuIcons\about-btn-icon-signout%402x.png" />
+    <Content Include="Assets\MenuIcons\about-btn-icon-sync%402x.png" />
+    <Content Include="Assets\MenuIcons\about-btn-iconhelp%402x.png" />
+    <Content Include="Assets\MenuIcons\about-btn-iconrate%402x.png" />
+    <Content Include="Assets\MenuIcons\applications-icon%402x.png" />
+    <Content Include="Assets\SalesforceServices%402x.png" />
+    <Content Include="Assets\settings.png" />
+    <Content Include="Assets\SplashScreen.scale-140.png" />
+    <Content Include="Assets\SplashScreen.scale-180.png" />
+    <Content Include="Assets\SplashScreen\SplashScreen.scale-100.png" />
+    <Content Include="Assets\SplashScreen\SplashScreen.scale-140.png" />
+    <Content Include="Assets\SplashScreen\SplashScreen.scale-180.png" />
+    <Content Include="Assets\Square150x150Logo.scale-100.png" />
+    <Content Include="Assets\Square150x150Logo.scale-140.png" />
+    <Content Include="Assets\Square150x150Logo.scale-180.png" />
+    <Content Include="Assets\Square150x150Logo.scale-80.png" />
+    <Content Include="Assets\Square30x30Logo.scale-100.png" />
+    <Content Include="Assets\Sync\sync_step_done.png" />
+    <Content Include="Assets\Sync\sync_step_progress.png" />
+    <Content Include="Assets\Sync\sync_step_waiting.png" />
+    <Content Include="Assets\sync_button%402x.png" />
+    <None Include="certificate.pfx" />
+    <None Include="packages.config" />
+    <None Include="sfdc_key.pfx" />
+    <PRIResource Include="Strings\en-US\Resources.resw" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Icons\ai_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\attachment_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\audio_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\csv_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\eps_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\excel_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\html_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\image_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\keynote_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\mp4_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\pages_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\pdf_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\ppt_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\psd_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\rtf_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\txt_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\unknown_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\url_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\video_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\visio_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\word_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\xml_thumbnail%402x.png" />
+    <Content Include="Assets\Icons\zip_thumbnail%402x.png" />
+    <Content Include="Assets\Logo.scale-100.png" />
+    <Content Include="Assets\SmallLogo.scale-100.png" />
+    <Content Include="Assets\SplashScreen.scale-100.png" />
+    <Content Include="Assets\StoreLogo.scale-100.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="Controls\Common\AppBarButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Common\NewContentBarControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\AddNewPlaylistControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Common\MainAppBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\ImageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\OtherMediaControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\UrlWebViewControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\VisualBrowser\BrowserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\ControlBar\CheckInOut\CheckInOutControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\ControlBar\CheckInOut\ContentReviewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\ControlBar\ControlBarControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\ControlBar\SearchControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\ControlBar\AboutControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\VisualBrowser\MainButtonControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MenuBrowser\MenuBrowser.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MenuBrowser\MenuBrowserPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\MovieControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\PdfViewerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Playlist\PersonalLibraryPlaylistControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Playlist\PlaylistControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Playlist\PlaylistMediaListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\MainButtonsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\CategoryControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\WebViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\ControlBar\SelectConfigurationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\ControlBar\Synchronization\SynchronizationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\ControlBar\Synchronization\SynchronizationStepControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\SubCategoriesBrowser.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\VisualBrowser\TopCategoriesControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\SearchPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\VisualBrowserPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\MediaContentPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\SpotlightPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\PlaylistsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\HistoryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\MenuBrowserPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Skins\MainSkin.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="BehaviorsXamlSDKManaged, Version=12.0">
+      <Name>Behaviors SDK %28XAML%29</Name>
+    </SDKReference>
+    <SDKReference Include="Microsoft.VCLibs, Version=12.0">
+      <Name>Microsoft Visual C++ 2013 Runtime Package for Windows</Name>
+    </SDKReference>
+    <SDKReference Include="SQLite.WinRT81, Version=3.16.2">
+      <Name>SQLite for Windows Runtime %28Windows 8.1%29</Name>
+    </SDKReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.1.0, Culture=neutral, PublicKeyToken=0e99375e54769942, processorArchitecture=MSIL">
+      <HintPath>..\packages\Portable.BouncyCastle.1.8.1.2\lib\netstandard1.0\BouncyCastle.Crypto.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Callisto, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Callisto.1.4.0\lib\netcore451\Callisto.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight, Version=5.3.0.19026, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\windows81\GalaSoft.MvvmLight.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Extras, Version=5.3.0.19032, Culture=neutral, PublicKeyToken=669f0b5e8f868abf, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\windows81\GalaSoft.MvvmLight.Extras.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.3.0.19033, Culture=neutral, PublicKeyToken=7a953f43091b5a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\windows81\GalaSoft.MvvmLight.Platform.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SQLitePCL, Version=3.8.7.2, Culture=neutral, PublicKeyToken=bddade01e9c850c5, processorArchitecture=MSIL">
+      <HintPath>..\packages\SQLitePCL.3.8.7.2\lib\netcore451\SQLitePCL.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\win8\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WeeGems.Option, Version=1.0.1.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WeeGems.Option.1.0.1.1\lib\portable-win+net40\WeeGems.Option.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WeeGems.Require, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WeeGems.Require.1.0.1.0\lib\portable-win+net40\WeeGems.Require.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WinRT.Triggers, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WinRTTriggers.1.6.0\lib\winrt45\WinRT.Triggers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WinRTXamlToolkit, Version=1.8.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WinRTXamlToolkit.Windows.1.8.1.0\lib\netcore451\WinRTXamlToolkit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DSA.Common\DSA.Common.csproj">
+      <Project>{BC3E59B0-0CC3-4CBD-9FB8-55F90E450278}</Project>
+      <Name>DSA.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DSA.Data\DSA.Data.csproj">
+      <Project>{06a873b9-ec0e-4543-98f8-c8e45dfa1c90}</Project>
+      <Name>DSA.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DSA.Model\DSA.Model.csproj">
+      <Project>{5facce42-a3af-49e6-a99f-f74b8cc9589f}</Project>
+      <Name>DSA.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DSA.Sfdc\DSA.Sfdc.csproj">
+      <Project>{deb040ca-597e-4d07-90a7-581fe3e8e2f7}</Project>
+      <Name>DSA.Sfdc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PdfViewModel\PdfViewModel.vcxproj">
+      <Project>{03ebab56-27d7-4273-972d-635ff5500fe4}</Project>
+      <Name>PdfViewModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Salesforce.SDK.App\Salesforce.SDK.App.csproj">
+      <Project>{b1d32173-8770-45b7-aee8-1f29af8cdc87}</Project>
+      <Name>Salesforce.SDK.App</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Salesforce.SDK.Core\Salesforce.SDK.Core.csproj">
+      <Project>{cd53c7b7-c3ff-4982-935b-22fb096cd559}</Project>
+      <Name>Salesforce.SDK.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Salesforce.SDK.SmartStore\Salesforce.SDK.SmartStore.csproj">
+      <Project>{e0838498-6201-4040-b4f1-a2d0c02405a6}</Project>
+      <Name>Salesforce.SDK.SmartStore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Salesforce.SDK.SmartSync\Salesforce.SDK.SmartSync.csproj">
+      <Project>{923dcd08-e0af-4214-86b0-86e37851046b}</Project>
+      <Name>Salesforce.SDK.SmartSync</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Salesforce.SDK.Store\Salesforce.SDK.Store.csproj">
+      <Project>{a107bcc2-ec81-4a4f-8ea2-aa742afe0f01}</Project>
+      <Name>Salesforce.SDK.Store</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.props'))" />
+    <Error Condition="!Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets'))" />
+  </Target>
+  <Import Project="..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets" Condition="Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets')" />
+  <!-- 
+  <PropertyGroup>
+    <SDKReferenceDirectoryRoot>$(SolutionDir)Libs\ExtensionSDKs;$(SDKReferenceDirectoryRoot)</SDKReferenceDirectoryRoot>
+  </PropertyGroup>
+   -->
+</Project>

@@ -1,0 +1,42 @@
+﻿<UserControl
+    x:Class="DSA.Shell.Controls.VisualBrowser.ControlBar.AboutControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid>
+        <Popup x:Name="OverlayPopup" LayoutUpdated="OnGridLayoutUpdated"
+               IsOpen="{Binding IsAboutPopupOpen}">
+            <Grid x:Name="OverlayGrid" >
+                <Grid.Background>
+                    <SolidColorBrush Color="Black" Opacity="0.3"/>
+                </Grid.Background>
+            </Grid>
+        </Popup>
+        <Popup x:Name="MCPopup" LayoutUpdated="OnLayoutUpdated"
+            IsOpen="{Binding IsAboutPopupOpen}"  >
+            <Grid x:Name="gdChild" Width="400" Height="160" Background="WhiteSmoke">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Background="Black">
+                    <Button Content="Close" Command="{Binding ShowHideAboutCommand}" Margin="20,0,0,0" />
+                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="About This App" TextAlignment="Center" FontSize="18" FontWeight="Bold"  />
+                    </Grid>
+                </Grid>
+                <Grid Grid.Row="1" Margin="15">
+                    <TextBlock TextAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Foreground="Black">
+                        Digital Sales Aid
+                    </TextBlock>
+                    <TextBlock  FontSize="20" TextAlignment="Center" Text="{Binding VersionText}" VerticalAlignment="Bottom" Margin="0,0,0,0" Foreground="Black" Style="{StaticResource SubheaderTextBlockStyle}"/>
+                </Grid>
+            </Grid>
+        </Popup>
+    </Grid>
+</UserControl>

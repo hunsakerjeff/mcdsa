@@ -1,0 +1,61 @@
+﻿<abstract:PageBase
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:ignore="http://www.galasoft.ch/ignore"
+                 xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+                 xmlns:abstract="using:DSA.Shell.Pages.Abstract"
+                 xmlns:converters="using:DSA.Shell.Converters"
+                 xmlns:common1="using:DSA.Shell.Controls.Common"
+                 xmlns:controlBar1="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
+                 xmlns:visualBrowser="using:DSA.Shell.Controls.VisualBrowser"
+                 xmlns:behaviors="using:DSA.Shell.Behaviors"
+                 x:Class="DSA.Shell.Pages.VisualBrowserPage"
+                 mc:Ignorable="d ignore"
+                 DataContext="{Binding VisualBrowser, Source={StaticResource Locator}}">
+
+    <abstract:PageBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:BooleanToVisibilityConverter x:Name="BoolToVis" />
+            <converters:BooleanToVisibilityConverter x:Name="BoolToVisRev" IsReversed="True"  />
+
+        </ResourceDictionary>
+    </abstract:PageBase.Resources>
+
+    <interactivity:Interaction.Behaviors>
+        <behaviors:OrientationStateBehavior PortraitFlippedStateName="Portrait" />
+    </interactivity:Interaction.Behaviors>
+
+    <Grid>
+        <Grid.Background>
+            <ImageBrush Stretch="UniformToFill" ImageSource="{Binding BackgroundImage}" AlignmentY="Top" AlignmentX="Center"/>
+        </Grid.Background>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="OrientationStates">
+                <VisualState x:Name="Landscape" />
+                <VisualState x:Name="Portrait" />
+                <VisualState x:Name="Snap" />
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <common1:NewContentBarControl  VerticalAlignment="Top"/>
+
+        <Grid Height="40" Width="600" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,15,0">
+            <controlBar1:ControlBarControl DataContext="{Binding ControlBarViewModel}"/>
+        </Grid>
+
+        <visualBrowser:MainButtonsControl Visibility="{Binding IsCategorySelected, Converter={StaticResource BoolToVisRev}}"/>
+        <visualBrowser:BrowserControl Visibility="{Binding IsCategorySelected, Converter={StaticResource BoolToVis}}"/>
+
+        <common1:MainAppBar VerticalAlignment="Bottom" />
+
+        <Border Style="{StaticResource InternalModeBorder}" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}" />
+    </Grid>
+</abstract:PageBase>
+
+
+

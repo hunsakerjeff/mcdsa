@@ -1,0 +1,37 @@
+﻿<UserControl
+    x:Name="OtherMedia"
+    x:Class="DSA.Shell.Controls.Media.OtherMediaControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Background="{StaticResource PageBackgroundBrush}">
+        <StackPanel Margin="0,20,0,0">
+            <TextBlock Style="{StaticResource SubheaderTextBlockStyle}"
+                   HorizontalAlignment="Center">
+             Preview not available
+            </TextBlock>
+            <Button 
+                Foreground="{StaticResource OpenInExternalAppForeground}"
+                FontWeight="Light"
+                Margin="0,20,0,0"
+                HorizontalAlignment="Center"
+                BorderThickness="0"
+                Command="{Binding Path=OpenInExternalAppCommand, ElementName=OtherMedia, Mode=TwoWay}">
+                Open in external application
+            </Button>
+        </StackPanel>
+        
+    </Grid>
+</UserControl>

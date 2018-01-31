@@ -1,0 +1,52 @@
+﻿<UserControl
+    x:Class="DSA.Shell.Controls.VisualBrowser.ControlBar.Synchronization.SynchronizationStepControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:DSA.Shell.Converters"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="boolToVis" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Rectangle Grid.Column="0" VerticalAlignment="Center" Height="3" Stroke="{Binding LeftLineBrush}" Fill="{Binding LeftLineBrush}" />
+            <Rectangle Grid.Column="1" VerticalAlignment="Center" Height="3" Stroke="{Binding RightLineBrush}" Fill="{Binding RightLineBrush}"  />
+        </Grid>
+        <Grid Grid.Row="0">
+            <Grid>
+                <Image x:Name="WaitingImage" Source="/Assets/Sync/sync_step_waiting.png" Visibility="{Binding IsWaiting, Converter={StaticResource boolToVis}}"  />
+                <Image x:Name="ProgresImage" Unloaded="OnProgresImageUnloaded" Source="/Assets/Sync/sync_step_progress.png" Visibility="{Binding IsProgress, Converter={StaticResource boolToVis}}"  RenderTransformOrigin=".5,.5">
+                    <Image.RenderTransform>
+                        <RotateTransform x:Name="AnimatedRotateTransform" Angle="0" />
+                    </Image.RenderTransform>
+                    <Image.Triggers>
+                        <EventTrigger RoutedEvent="Image.Loaded">
+                            <BeginStoryboard >
+                                <Storyboard x:Name="ProgressImageAnimation">
+                                    <DoubleAnimation Storyboard.TargetName="AnimatedRotateTransform" 
+                                                     Storyboard.TargetProperty="Angle" 
+                                                     To="360" Duration="0:0:2" RepeatBehavior="Forever"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Image.Triggers>
+                </Image>
+                <Image x:Name="DoneImage" Source="/Assets/Sync/sync_step_done.png" Visibility="{Binding IsDone, Converter={StaticResource boolToVis}}" />
+            </Grid>
+        </Grid>
+        <TextBlock Grid.Row="1" Text="{Binding Name}" Foreground="{Binding RightLineBrush}" FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+    </Grid>
+</UserControl>

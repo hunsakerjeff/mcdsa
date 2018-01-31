@@ -1,0 +1,65 @@
+﻿<UserControl
+    x:Class="DSA.Shell.Controls.VisualBrowser.MainButtonControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:DSA.Shell.Converters"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    
+    <UserControl.Resources>
+        <converters:ScreenPositionConverter x:Key="scrPosConvX" PositionType="X" />
+        <converters:ScreenPositionConverter x:Key="scrPosConvY" PositionType="Y" />
+        <converters:ScreenScaleConverter x:Key="scrScConvX" PositionType="X" />
+        <converters:ScreenScaleConverter x:Key="scrScConvY" PositionType="Y" />
+        <converters:ScreenScaleConverter x:Key="scrScConvXRev" PositionType="X" Reverse="True"/>
+        <converters:ScreenScaleConverter x:Key="scrScConvYRev" PositionType="Y" Reverse="True"/>
+        <Style x:Key="MainButtonStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+            <Setter Property="FontSize" Value="25"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <interactivity:Interaction.Behaviors>
+        <core:EventTriggerBehavior EventName="PointerPressed">
+            <core:InvokeCommandAction Command="{Binding ButtonHoldingCommand}"/>
+        </core:EventTriggerBehavior>
+        <core:EventTriggerBehavior EventName="PointerReleased">
+            <core:InvokeCommandAction Command="{Binding SelectCategoryCommand}"/>
+        </core:EventTriggerBehavior>
+        <core:EventTriggerBehavior EventName="PointerExited">
+            <core:InvokeCommandAction Command="{Binding ButtonStopHoldingCommand}"/>
+        </core:EventTriggerBehavior>
+    </interactivity:Interaction.Behaviors>
+    
+    <Grid MinWidth="50" MinHeight="50" VerticalAlignment="Top" HorizontalAlignment="Left">
+        <Grid.RenderTransform>
+            <CompositeTransform 
+                ScaleX="{Binding CurrentImage, Converter={StaticResource scrScConvX}}" 
+                ScaleY="{Binding CurrentImage, Converter={StaticResource scrScConvY}}"
+                TranslateX="{Binding CurrentPositionX, Converter={StaticResource scrPosConvX}}"
+                TranslateY="{Binding CurrentPositionY, Converter={StaticResource scrPosConvY}}"/>
+        </Grid.RenderTransform>
+      
+        <Grid>
+            <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center" Source="{Binding CurrentImage}" ImageOpened="ButtonImage_OnImageOpened"/>
+            <TextBlock x:Name="ButtonText" Text="{Binding Category}" Margin="0,-8,0,0"
+                       Opacity="{Binding Opacity}" LineHeight="28"
+                       Foreground="{Binding CurrentTextColor}" 
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Style="{StaticResource MainButtonStyle}"
+                       TextWrapping="WrapWholeWords"
+                       RenderTransformOrigin="0.5,0.5" >
+                <TextBlock.RenderTransform>
+                    <CompositeTransform 
+                        ScaleX="{Binding CurrentImage, Converter={StaticResource scrScConvXRev}}"
+                        ScaleY="{Binding CurrentImage, Converter={StaticResource scrScConvYRev}}"/>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,29 @@
+trigger IncreaseCountOnInsert on DOWAgroDSA__DSA_Search_Term__c (before insert) {
+    Date dateTerm = trigger.new[0].DOWAgroDSA__Search_Term_Date__c;
+    String terms = trigger.new[0].DOWAgroDSA__Search_Term__c;
+
+    List<DOWAgroDSA__DSA_Search_Term__c> searchTerms =[SELECT DOWAgroDSA__Count__c,DOWAgroDSA__Search_Term_Date__c,DOWAgroDSA__Search_Term__c,Id FROM DOWAgroDSA__DSA_Search_Term__c WHERE DOWAgroDSA__Search_Term_Date__c = :dateTerm AND DOWAgroDSA__Search_Term__c = :terms];
+
+  
+    for(DOWAgroDSA__DSA_Search_Term__c term : searchTerms)
+    {
+        term.DOWAgroDSA__Count__c += 1;
+    }
+    update searchTerms;
+    
+    if(searchTerms.size()>0)
+    {    
+        trigger.new[0].DOWAgroDSA__Count__c = 0;
+    }
+}
+
+
+trigger DeleteAfterCreationEmpty on DOWAgroDSA__DSA_Search_Term__c (after insert) {
+    Date dateTerm = trigger.new[0].DOWAgroDSA__Search_Term_Date__c;
+    String terms = trigger.new[0].DOWAgroDSA__Search_Term__c;
+
+    List<DOWAgroDSA__DSA_Search_Term__c> searchTerms =[SELECT DOWAgroDSA__Count__c,DOWAgroDSA__Search_Term_Date__c,DOWAgroDSA__Search_Term__c,Id FROM DOWAgroDSA__DSA_Search_Term__c WHERE DOWAgroDSA__Search_Term_Date__c = :dateTerm AND DOWAgroDSA__Search_Term__c = :terms AND DOWAgroDSA__Count__c = 0];
+
+    delete searchTerms;
+}
+

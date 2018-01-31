@@ -1,0 +1,92 @@
+﻿<UserControl
+    x:Class="DSA.Shell.Controls.VisualBrowser.ControlBar.ControlBarControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:util="using:DSA.Util"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:DSA.Shell.Converters"
+    xmlns:common1="using:DSA.Shell.Controls.Common"
+    xmlns:checkInOut="using:DSA.Shell.Controls.VisualBrowser.ControlBar.CheckInOut"
+    xmlns:synchronization="using:DSA.Shell.Controls.VisualBrowser.ControlBar.Synchronization"
+    xmlns:controlBar="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
+    mc:Ignorable="d"
+    d:DesignHeight="45"
+    d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:BooleanToVisibilityConverter x:Name="BoolToVis" />
+            <Storyboard x:Name="NewContentButtonSpin">
+                <DoubleAnimation Storyboard.TargetName="SpinButtonRotate"
+                             Storyboard.TargetProperty="Angle" 
+                             To="360" 
+                             Duration="0:0:2"/>
+            </Storyboard>
+            <Style x:Key="CheckInOutFlyoutPresenterStyle" TargetType="FlyoutPresenter">
+                <Setter Property="MinWidth" Value="600"/>
+                <Setter Property="MinHeight" Value="650"/>
+                <Setter Property="Margin" Value="0,0,0,0"/>
+                <Setter Property="Padding" Value="0,0,0,0"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="55" />
+            <ColumnDefinition Width="55" />
+            <ColumnDefinition Width="55" />
+            <ColumnDefinition  />
+        </Grid.ColumnDefinitions>
+        <Button Grid.Column="0" BorderThickness="0" Height="40" Width="55" Command="{Binding NewContentShowDeltaSynchronizationPopupCommand}" Visibility="{Binding NewContentButtonVisibility, Converter={StaticResource BoolToVis}}" >
+            <Grid>
+                <Image x:Name="SyncButton" Source="/Assets/sync_button@2x.png" RenderTransformOrigin=".5,.5">
+                    <Image.RenderTransform>
+                        <RotateTransform x:Name="SpinButtonRotate" Angle="0"/>
+                    </Image.RenderTransform>
+                </Image>
+            </Grid>
+        </Button>
+        <Button Grid.Column="1" BorderThickness="0" Height="40" Width="55" x:Name="CheckInOutButton" Command="{Binding CheckInOutViewModel.CheckInOutOpenCommand}" >
+            <Button.Content>
+                <Image Source="{Binding CheckInOutIcon}"/>
+            </Button.Content>
+            <Button.Flyout>
+                <Flyout util:FlyoutHelpers.Parent="{Binding ElementName=CheckInOutButton}"
+                        util:FlyoutHelpers.IsOpen="{Binding Path=DataContext.IsFlyoutOpen, ElementName=checkInOutControl, Mode=TwoWay}"
+                        FlyoutPresenterStyle="{StaticResource CheckInOutFlyoutPresenterStyle}" >
+                    <checkInOut:CheckInOutControl x:Name="checkInOutControl" DataContext="{Binding CheckInOutViewModel}" />
+                </Flyout>
+            </Button.Flyout>
+        </Button>
+        <Button Grid.Column="2" BorderThickness="0" Height="40" Width="55">
+            <Button.Content>
+                <Image Source="{Binding SettingsIcon}"/>
+            </Button.Content>
+            <Button.Flyout>
+                <MenuFlyout Placement="Bottom" MenuFlyoutPresenterStyle="{StaticResource DSAMenuFlyoutPresenter}">
+                    <common1:DSAMenuFlyoutItem Icon="{Binding LogInLogOutIcon}" Text="{Binding LogInLogOutText}" Command="{Binding LogInLogOutCommand}" Style="{StaticResource DSAMenuFlyoutItemStyle}" />
+                    <common1:DSAMenuFlyoutItem Icon="ms-appx:///Assets/MenuIcons/applications-icon@2x.png" Text="Select Configuration" Command="{Binding ShowHideMobileConfigurationPopup}" Style="{StaticResource DSAMenuFlyoutItemStyle}" />
+                    <ToggleMenuFlyoutItem Text="Internal Mode" Command="{Binding EnableDisableInternalMode}" IsChecked="{Binding IsInternalModeEnableChecked, Mode=TwoWay}" />
+                    <MenuFlyoutSeparator />
+                    <common1:DSAMenuFlyoutItem Icon="ms-appx:///Assets/MenuIcons/about-btn-icon-sync@2x.png" Text="Delta Sync" Command="{Binding ShowDeltaSynchronizationPopup}" Style="{StaticResource DSAMenuFlyoutItemStyle}" />
+                    <common1:DSAMenuFlyoutItem Icon="ms-appx:///Assets/MenuIcons/about-btn-icon-sync@2x.png" Text="Full Sync" Command="{Binding ShowSynchronizationPopup}"  Style="{StaticResource DSAMenuFlyoutItemStyle}"/>
+                    <MenuFlyoutSeparator/>
+                    <common1:DSAMenuFlyoutItem  Icon="ms-appx:///Assets/MenuIcons/about-btn-icon-report@2x.png" Text="Report a Problem" Command="{Binding ReportProblemCommand}" Style="{StaticResource DSAMenuFlyoutItemStyle}" />
+                    <common1:DSAMenuFlyoutItem  Icon="ms-appx:///Assets/MenuIcons/about-btn-about@2x.png" Text="About DSA" Command="{Binding ShowHideAboutCommand}" Style="{StaticResource DSAMenuFlyoutItemStyle}" />
+                </MenuFlyout>
+            </Button.Flyout>
+        </Button>
+        <controlBar:SearchControl Grid.Column="3" DataContext="{Binding SearchViewModel}" />
+        <synchronization:SynchronizationControl DataContext="{Binding SynchronizationViewModel}" />
+        <controlBar:SelectConfigurationControl />
+        <controlBar:AboutControl />
+    </Grid>
+</UserControl>

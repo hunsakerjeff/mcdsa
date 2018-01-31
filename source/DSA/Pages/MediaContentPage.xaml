@@ -1,0 +1,201 @@
+﻿<abstract:PageBase
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:util="using:DSA.Util"
+                 xmlns:ignore="http://www.galasoft.ch/ignore"
+                 xmlns:abstract="using:DSA.Shell.Pages.Abstract"
+                 xmlns:converters="using:DSA.Shell.Converters"
+                 xmlns:media="using:DSA.Shell.Controls.Media"
+                 x:Class="DSA.Shell.Pages.MediaContentPage"
+                 mc:Ignorable="d ignore"
+                 DataContext="{Binding MediaContent, Source={StaticResource Locator}}">
+
+    <abstract:PageBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <DataTemplate x:Key="PdfTemplate">
+                <media:PdfViewerControl PdfSource="{Binding Source, UpdateSourceTrigger=PropertyChanged}"/>
+            </DataTemplate>
+            <DataTemplate x:Key="MoviewTemplate">
+                <media:MovieControl />
+            </DataTemplate>
+            <DataTemplate x:Key="WebViewTemplate">
+                <media:WebViewControl  HtmlSource="{Binding Source}"/>
+            </DataTemplate>
+            <DataTemplate x:Key="UrlWebViewTemplate">
+                <media:UrlWebViewControl UrlSource="{Binding Source}" />
+            </DataTemplate>
+            <DataTemplate x:Key="ImageTemplate">
+                <media:ImageControl />
+            </DataTemplate>
+            <DataTemplate x:Key="OtherTemplate">
+                <media:OtherMediaControl OpenInExternalAppCommand="{Binding Path=DataContext.OpenInExternalAppCommand, ElementName=LayoutRoot, Mode=TwoWay}" />
+            </DataTemplate>
+            <util:MediaControlTemplateSelector x:Key="selector" 
+                                               PdfTemplate="{StaticResource PdfTemplate}" 
+                                               MoviewTemplate="{StaticResource MoviewTemplate}"
+                                               WebViewTemplate="{StaticResource WebViewTemplate}"
+                                               UrlWebViewTemplate="{StaticResource UrlWebViewTemplate}"
+                                               ImageTemplate="{StaticResource ImageTemplate}"
+                                               OtherTemplate="{StaticResource OtherTemplate}" />
+            <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <Style x:Key="NextPreviousButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{ThemeResource ButtonBackgroundThemeBrush}" />
+                <Setter Property="Foreground" Value="{ThemeResource ButtonForegroundThemeBrush}"/>
+                <Setter Property="BorderBrush" Value="{ThemeResource ButtonBorderThemeBrush}" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="12,4,12,4" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="PointerOver"/>
+                                        <VisualState x:Name="Pressed"/>
+                                        <VisualState x:Name="Disabled">
+                                            <Storyboard>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Border"
+                                                                       Storyboard.TargetProperty="Background">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledBackgroundThemeBrush}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Border"
+                                                                       Storyboard.TargetProperty="BorderBrush">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledBorderThemeBrush}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter"
+                                                                       Storyboard.TargetProperty="Foreground">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledForegroundThemeBrush}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                    <VisualStateGroup x:Name="FocusStates">
+                                        <VisualState x:Name="Focused"/>
+                                        <VisualState x:Name="Unfocused" />
+                                        <VisualState x:Name="PointerFocused" />
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Margin="3">
+                                    <ContentPresenter x:Name="ContentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTransitions="{TemplateBinding ContentTransitions}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                              AutomationProperties.AccessibilityView="Raw"/>
+                                </Border>
+                                <Rectangle x:Name="FocusVisualWhite"
+                                   IsHitTestVisible="False"
+                                   Stroke="{ThemeResource FocusVisualWhiteStrokeThemeBrush}"
+                                   StrokeEndLineCap="Square"
+                                   StrokeDashArray="1,1"
+                                   Opacity="0"
+                                   StrokeDashOffset="1.5" />
+                                <Rectangle x:Name="FocusVisualBlack"
+                                   IsHitTestVisible="False"
+                                   Stroke="{ThemeResource FocusVisualBlackStrokeThemeBrush}"
+                                   StrokeEndLineCap="Square"
+                                   StrokeDashArray="1,1"
+                                   Opacity="0"
+                                   StrokeDashOffset="0.5" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </abstract:PageBase.Resources>
+
+    <Grid x:Name="LayoutRoot" 
+          util:SwipeHelper.Parent="{Binding ElementName=LayoutRoot}"
+          Background="{StaticResource PageBackgroundBrush}" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="{StaticResource PageHeaderBackgroundBrush}">
+            <Button x:Name="backButton" Margin="20,20,0,0" 
+                        Style="{StaticResource NavigationBackButtonNormalStyle}"
+                        VerticalAlignment="Top"
+                        AutomationProperties.Name="Back"
+                        AutomationProperties.AutomationId="BackButton"
+                        AutomationProperties.ItemType="Navigation Button"
+                        Command="{Binding NavigateBackCommand}"/>
+            <Button Margin="160,0,0,0" Command="{Binding GoToPreviousCommand}" Visibility="{Binding IsPlaylistSelected, Converter={StaticResource BoolToVis}}" Style="{StaticResource NextPreviousButtonStyle}">
+                <SymbolIcon Symbol="Play" RenderTransformOrigin="0.5,0.5" >
+                    <SymbolIcon.RenderTransform>
+                        <CompositeTransform ScaleX="2" ScaleY="2" Rotation="180"/>
+                    </SymbolIcon.RenderTransform>
+                </SymbolIcon>
+            </Button>
+            <Button Margin="0,0,160,0" HorizontalAlignment="Right" Command="{Binding GoToNextCommand}" Visibility="{Binding IsPlaylistSelected, Converter={StaticResource BoolToVis}}" Style="{StaticResource NextPreviousButtonStyle}">
+                <SymbolIcon Symbol="Play" RenderTransformOrigin="0.5,0.5" >
+                    <SymbolIcon.RenderTransform>
+                        <CompositeTransform ScaleX="2" ScaleY="2"/>
+                    </SymbolIcon.RenderTransform>
+                </SymbolIcon>
+            </Button>
+            <TextBlock x:Name="pageTitle"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="{Binding Path=Name}"
+                       Style="{StaticResource SubheaderTextBlockStyle}" 
+                       IsHitTestVisible="false" 
+                       TextWrapping="NoWrap"/>
+            <StackPanel Margin="0,0,20,0" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal" >
+                <Button BorderThickness="0" Command="{Binding ShareMediaCommand}" Height="45">
+                    <Image Source="{Binding MailIcon}"/>
+                </Button>
+                <Button x:Name="addToPlaylistButton" BorderThickness="0">
+                    <SymbolIcon Symbol="OutlineStar" RenderTransformOrigin="0.5,0.5" >
+                        <SymbolIcon.RenderTransform>
+                            <CompositeTransform ScaleX="1.2" ScaleY="1.2"/>
+                        </SymbolIcon.RenderTransform>
+                    </SymbolIcon>
+                    <Button.Flyout>
+                        <Flyout util:FlyoutHelpers.Parent="{Binding ElementName=addToPlaylistButton}"
+                                util:FlyoutHelpers.IsOpen="{Binding AddNewPlaylistViewModel.IsFlyoutOpen, Mode=TwoWay}"
+                                FlyoutPresenterStyle ="{StaticResource PlaylistFlyoutPresenterStyle}">
+
+                            <StackPanel>
+                                <TextBlock Text="Add to Playlist" FontSize="{ThemeResource ControlContentThemeFontSize}" Margin="10,10,10,0"/>
+                                <ItemsControl ItemsSource="{Binding MediaPlaylists}" >
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <ToggleMenuFlyoutItem 
+                                                Text="{Binding Name}" 
+                                                IsChecked="{Binding Path=IsInPlaylist, Mode=TwoWay}" 
+                                                Command="{Binding AddRemoveFromPlaylist}"
+                                                Style="{StaticResource PlaylistFlyoutToggleMenuFlyoutItemStyle}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <media:AddNewPlaylistControl DataContext="{Binding AddNewPlaylistViewModel}" />
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+            </StackPanel>
+        </Grid>
+        <ContentControl Name="contentControl" Grid.Row="1" ContentTemplateSelector="{StaticResource selector}" Content="{Binding Path=Media}"  HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+    </Grid>
+</abstract:PageBase>
+
+
+
