@@ -494,10 +494,9 @@ namespace Salesforce.SDK.Net
 
             try
             {
-                message = await _webClient.SendRequestAsync(req).AsTask(token);
-                HandleMessageResponseForBinary(message);
+                message = await _webClient.SendRequestAsync(req, HttpCompletionOption.ResponseHeadersRead).AsTask(token);
                 await writer.PushToStreamAsync(message.Content.WriteToStreamAsync, message.Content);
-
+                HandleMessageResponseForBinary(message);
             }
             catch (OperationCanceledException oce)
             {
