@@ -40,11 +40,11 @@ namespace DSA.Sfdc.DataWriters
             var versionDataFolder = VersionDataFolder.Instance;
 
             var attFolder = await versionDataFolder.CreateOrGetFolderForVersionDataId(_meta.Id, _syncId);
+            var filename = Path.GetFileName(_meta.PathOnClient);
 
             try
             {
-                StorageFile newFile =
-                    await attFolder.CreateFileAsync(_meta.PathOnClient, CreationCollisionOption.ReplaceExisting);
+                StorageFile newFile = await attFolder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
 
                 using (var sfw = await newFile.OpenStreamForWriteAsync())
                 {
@@ -58,7 +58,7 @@ namespace DSA.Sfdc.DataWriters
             catch (UnauthorizedAccessException uae)
             {
                 PlatformAdapter.SendToCustomLogger(uae, LoggingLevel.Error);
-                Debug.WriteLine($"Exception Opening Content Version File For Write {_meta.PathOnClient} ");
+                Debug.WriteLine($"Exception Opening Content Version File For Write {filename} ");
             }
         }
     }
