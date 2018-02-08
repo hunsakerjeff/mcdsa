@@ -39,6 +39,12 @@ namespace DSA.Sfdc.Sync
 {
     public class ObjectSyncDispatcher
     {
+        #region Constants
+        
+        private const int kIdListLimit = 300;
+
+        #endregion
+
         #region Fields and Properties
 
         private readonly AsyncLock _mutex = new AsyncLock();
@@ -70,6 +76,1122 @@ namespace DSA.Sfdc.Sync
         #endregion
 
         #region Methods
+
+        #region Full Sync
+
+        public async Task<User> QueueingFullSyncAsync(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            HasInternetConnectionOrThrow();
+            await CheckAvailableSpace(0);
+            _backupSyncStates = SuccessfulSyncState.Instance.GetAllSuccessfulSyncsFromSoup();
+            SuccessfulSyncState.Instance.RecreateClearSoup();
+            return await SyncAndGetCurrentUserFromSfdc(callbackHandler, token);
+        }
+
+        public async Task ConfigurationFullSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            var syncUpTasks = new List<Task>
+            {
+                SyncUpDsaSyncLogs(callbackHandler, token),
+                SyncUpContentReview(callbackHandler,token),
+                SyncUpEvents(callbackHandler,token),
+                SyncUpPlaylistsAndContent(callbackHandler,token),
+                SyncUpSearchTerms(callbackHandler, token)
+            };
+
+            await Task.WhenAll(syncUpTasks);
+
+            // We have dependencies between the SyncDowns so they need to execute in a specifc order
+            var syncDownTasks = new List<Task>
+            {
+                SyncFeaturedPlaylists(callbackHandler, currentUser, token),
+                SyncContacts(callbackHandler, currentUser, token),
+                SyncMobileAppConfigs(callbackHandler, currentUser, token),
+                SyncCategoryMobileConfigs(callbackHandler, currentUser, token)
+            };
+
+            await Task.WhenAll(syncDownTasks);
+
+            // Execute these in order
+            (SyncCategories(callbackHandler, currentUser, token)).Wait();
+            (SyncCategoryContent(callbackHandler, currentUser, false, token)).Wait();
+        }
+
+        public async Task ContentFullSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            var mobileAppConfgsAttMeta = await SyncAndGetMobileAppConfigsAttMeta(callbackHandler, currentUser, token);
+            var categoryMobileConfigAttMeta = await SyncAndGetCategoryMobileConfigAttMeta(callbackHandler, currentUser, token);
+            var categoryAttMeta = await SyncAndGetCategoryAttMeta(callbackHandler, currentUser, token);
+            var syncResult = await SyncAndGetMetadataOfContentDocumentsInLibraries(callbackHandler, token);
+            var contentThumbnailAttMeta = await SyncAndGetContentThumbnailAttMeta(callbackHandler, token);
+
+            var sizeBytesToDownload = 0m;
+            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(mobileAppConfgsAttMeta);
+            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(categoryMobileConfigAttMeta);
+            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(categoryAttMeta, new AttMetaDropSameFilesForDeltaSieve(_store));
+            sizeBytesToDownload += GetSizeBytesToDownloadContentDocumentHelper(syncResult, new DocMetaByOwnershipAndUsageInCategoriesSieve(_store, currentUser));
+            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(contentThumbnailAttMeta);
+
+            await CheckAvailableSpace(sizeBytesToDownload);
+            Messenger.Default.Send(new SynchronizationProgressMessage(0m, sizeBytesToDownload));
+
+            List<Func<Task<bool>>> funcs = new List<Func<Task<bool>>>();
+            _funcsToRetry = new List<Func<Task<bool>>>();
+            funcs.AddRange(SyncAttachments(callbackHandler, mobileAppConfgsAttMeta, token));
+            funcs.AddRange(SyncAttachments(callbackHandler, categoryMobileConfigAttMeta, token));
+            funcs.AddRange(SyncAttachmentsDelta(callbackHandler, categoryAttMeta, token));
+            funcs.AddRange(SyncCurrentVersionOfContentDocumentsInLibraries(callbackHandler, syncResult, currentUser, token));
+            funcs.AddRange(SyncContentThumbnails(callbackHandler, contentThumbnailAttMeta, token));
+
+            await RunAsyncQueueInBatches(funcs);
+            await RunRetryFuncsIfAny();
+
+            await SyncIndexesForContentDocuments(callbackHandler, syncResult, token);
+            await SyncMetadataOfContentDistribution(callbackHandler, syncResult, true, token);
+        }
+
+        #endregion
+
+
+        #region Delta Sync
+
+        public async Task<User> QueueingDeltaSyncAsync(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            HasInternetConnectionOrThrow();
+            await CheckAvailableSpace(0);
+            return await SyncAndGetCurrentUserFromSfdc(callbackHandler, token);
+        }
+
+        public async Task ConfigurationDeltaSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            var syncUpTasks = new List<Task>
+            {
+                SyncUpDsaSyncLogs(callbackHandler, token),
+                SyncUpContentReview(callbackHandler,token),
+                SyncUpEvents(callbackHandler,token),
+                SyncUpPlaylistsAndContent(callbackHandler,token),
+                SyncUpSearchTerms(callbackHandler, token)
+            };
+
+            await Task.WhenAll(syncUpTasks);
+
+            // We have dependencies between the SyncDowns so they need to execute in a specifc order
+            var syncDownTasks = new List<Task>
+            {
+                SyncFeaturedPlaylists(callbackHandler, currentUser, token),
+                SyncContacts(callbackHandler, currentUser, token),
+                SyncMobileAppConfigs(callbackHandler, currentUser, token),
+                SyncCategoryMobileConfigs(callbackHandler, currentUser, token)
+            };
+
+            await Task.WhenAll(syncDownTasks);
+
+            // Execute these in order
+            (SyncCategories(callbackHandler, currentUser, token)).Wait();
+            (SyncCategoryContent(callbackHandler, currentUser, true, token)).Wait();
+        }
+
+        public async Task ContentDeltaSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            var mobileAppConfigsAttMeta = await SyncAndGetMobileAppConfigsAttMeta(callbackHandler, currentUser, token);
+            var categoryMobileConfigAttMeta = await SyncAndGetCategoryMobileConfigAttMeta(callbackHandler, currentUser, token);
+            var categoryAttMeta = await SyncAndGetCategoryAttMeta(callbackHandler, currentUser, token);
+            var syncResult = await SyncAndGetMetadataOfContentDocumentsInLibraries(callbackHandler, token);
+            var contentThumbnailAttMeta = await SyncAndGetContentThumbnailAttMeta(callbackHandler, token);
+
+            var sizeBytesToDownload = 0m;
+            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(mobileAppConfigsAttMeta, new AttMetaDropSameFilesForDeltaSieve(_store));
+            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(categoryMobileConfigAttMeta, new AttMetaDropSameFilesForDeltaSieve(_store));
+            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(categoryAttMeta, new AttMetaDropSameFilesForDeltaSieve(_store));
+            sizeBytesToDownload += GetSizeBytesToDownloadContentDocumentHelper(syncResult, new DocMetaDeltaSieve(_store, currentUser));
+            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(contentThumbnailAttMeta, new AttMetaDropUnchangedFilesForDeltaSieve(_store));
+
+            await CheckAvailableSpace(sizeBytesToDownload);
+            Messenger.Default.Send(new SynchronizationProgressMessage(0m, sizeBytesToDownload));
+
+            List<Func<Task<bool>>> funcs = new List<Func<Task<bool>>>();
+            _funcsToRetry = new List<Func<Task<bool>>>();
+            funcs.AddRange(SyncAttachmentsDelta(callbackHandler, mobileAppConfigsAttMeta, token));
+            funcs.AddRange(SyncAttachmentsDelta(callbackHandler, categoryMobileConfigAttMeta, token));
+            funcs.AddRange(SyncAttachmentsDelta(callbackHandler, categoryAttMeta, token));
+            funcs.AddRange(SyncCurrentVersionOfContentDocumentsInLibrariesDelta(callbackHandler, syncResult, currentUser, token));
+            funcs.AddRange(SyncContentThumbnailsDelta(callbackHandler, contentThumbnailAttMeta, token));
+
+            await RunAsyncQueueInBatches(funcs);
+            await RunRetryFuncsIfAny();
+
+            await SyncIndexesForContentDocumentsDelta(callbackHandler, syncResult, token);
+            await SyncMetadataOfContentDistribution(callbackHandler, syncResult, false, token);
+        }
+
+        #endregion
+
+
+        #region Sync Up Functions
+        public async Task SyncUpPlaylistsAndContent(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            await SyncUpFeaturedPlaylists(callbackHandler, token);
+            await SyncUpPlaylistContent(callbackHandler, token);
+        }
+
+        public async Task SyncUpFeaturedPlaylists(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync up Featured Playlists");
+            var configsState = await Playlist.SyncUpInstance.SyncUpRecords(callbackHandler, token, Playlist.SyncUpInstance.LocalIdChangeHandler);
+
+            await CheckAndHandleTokenExpiredSyncState(configsState);
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("Playlists not synced");
+            }
+        }
+
+        public async Task SyncUpPlaylistContent(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync up Playlist Content");
+            var configsState = await PlaylistContent.SyncUpInstance.SyncUpRecords(callbackHandler, token);
+
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("Playlist Content not synced");
+            }
+        }
+
+        public async Task SyncUpContentReview(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            await Task.Factory.StartNew(async () =>
+            {
+                if (!HasInternetConnection())
+                    return;
+
+                callbackHandler("Sync up for content Reviews");
+                var configsState = await ContentReview.Instance.SyncUpContentReview(token);
+                await CheckAndHandleTokenExpiredSyncState(configsState);
+            }, token);
+        }
+
+        public async Task SyncUpEvents(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync up Events");
+            var configsState = await Event.Instance.SyncUpRecords(callbackHandler, token);
+
+            await CheckAndHandleTokenExpiredSyncState(configsState);
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("Events not synced");
+            }
+        }
+
+        public async Task SyncUpDsaSyncLogs(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync up DSA SyncLogs");
+            var configsState = await DsaSyncLog.Instance.SyncUpRecords(callbackHandler, token);
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                //throw new SyncException("DSA SyncLogs not synced");
+                callbackHandler("DSA SyncLogs not synced");
+            }
+        }
+
+        public async Task SyncUpSearchTerms(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (!SfdcConfig.CollectSearchTerms)
+            {
+                return;
+            }
+
+            callbackHandler("Sync up SearchTerms");
+            var searchTerm = new SearchTerm(_store);
+            var configsState = await searchTerm.SyncUpRecords(callbackHandler, token);
+
+            await CheckAndHandleTokenExpiredSyncState(configsState);
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                callbackHandler("SearchTerms not synced");
+                //throw new SyncException("SearchTerms not synced");
+            }
+        }
+
+        #endregion
+
+
+        #region Sync Functions
+
+        private async Task SyncMobileAppConfigs(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync Mobile App Config");
+            var configs = new MobileAppConfig(_store, currentUser);
+
+            // Perform Sync
+            var configsState = await configs.SyncDownRecords(callbackHandler, token);
+
+            // Check Results
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("MobileAppConfigs not synced");
+            }
+        }
+
+        private async Task SyncCategoryMobileConfigs(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync Category Mobile Configs");
+            var configs = new CategoryMobileConfig(_store, currentUser);
+
+            // Perform Sync
+            var configsState = await configs.SyncDownRecords(callbackHandler, token);
+
+            // Check Results
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("MobileAppConfigs not synced");
+            }
+        }
+
+        private async Task SyncCategories(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            // Setup variables
+            var cmc = new CategoryMobileConfig(_store, currentUser);
+            var cmcList = cmc.GetAll().ToList();
+            HashSet<string> categoryIdSet = new HashSet<string>();
+
+            // Parse the CMC List down to an ID list of Categories (remove duplicates)
+            foreach (var cmcModel in cmcList)
+            {
+                categoryIdSet.Add(cmcModel.CategoryId);
+            }
+            var categoryIdList = categoryIdSet.ToList();
+
+            // Set up a loop to sync in blocks
+            callbackHandler("Sync Categories");
+            var category = new Category(_store, currentUser);
+            int index = 0;
+            int rem = categoryIdList.Count;
+
+            while (rem > 0)
+            {
+                int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                // Get range of Ids to sync
+                category.CategoryIdList = categoryIdList.GetRange(index, idCount);
+
+                // Perform Sync
+                var configsState = (index > 0) ? await category.SyncDownRecordsToSoup(callbackHandler, token) : await category.SyncDownRecords(callbackHandler, token);
+
+                // Check Results
+                if (configsState.Status != SyncState.SyncStatusTypes.Done)
+                {
+                    throw new SyncException("Categories not synced");
+                }
+
+                // Iterate to next sublist
+                index += idCount;
+                rem = categoryIdList.Count - index;
+            }
+        }
+
+        private async Task SyncCategoryContent(Action<string> callbackHandler, User currentUser, bool saveNew, CancellationToken token = default(CancellationToken))
+        {
+            // Setup variables
+            var cat = new Category(_store, currentUser);
+            var catList = cat.GetAll().ToList();
+            List<string> categoryIdList = new List<string>();
+
+            // Parse the Category List and grab the Ids
+            foreach (var catModel in catList)
+            {
+                categoryIdList.Add(catModel.Id);
+            }
+
+            callbackHandler("Sync Category Content");
+            var categoryContent = new CategoryContent(_store);
+            var categoryContentBeforeSync = categoryContent.GetAll().ToList();
+            int index = 0;
+            int rem = categoryIdList.Count;
+
+            while (rem > 0)
+            {
+                int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                // Get range of Ids to sync
+                categoryContent.CategoryIdList = categoryIdList.GetRange(index, idCount);
+
+                // Perform Sync
+                var configsState = (index > 0) ? await categoryContent.SyncDownRecordsToSoup(callbackHandler, token) : await categoryContent.SyncDownRecords(callbackHandler, token);
+
+                // Check Results
+                if (configsState.Status != SyncState.SyncStatusTypes.Done)
+                {
+                    throw new SyncException("Category Content not synced");
+                }
+
+                // Iterate to next sublist
+                index += idCount;
+                rem = categoryIdList.Count - index;
+            }
+
+            NewCategoryContent.Instance.RecreateClearSoup();
+            if (saveNew)
+            {
+                var categoryContentAfterSync = categoryContent.GetAll().ToList();
+                var newCategoryContents = categoryContentAfterSync.Except(categoryContentAfterSync.Join(categoryContentBeforeSync, cc1 => cc1.Id, cc2 => cc2.Id, (cc1, cc2) => cc1)).ToList();
+                NewCategoryContent.Instance.SaveToSoup(newCategoryContents);
+            }
+        }
+
+        private async Task SyncContacts(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync Contacts");
+            var category = new Contact(_store, currentUser);
+
+            // Perform Sync
+            var configsState = await category.SyncDownRecords(callbackHandler, token);
+
+            // Check Results
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("Contacts not synced");
+            }
+        }
+
+        private async Task SyncFeaturedPlaylists(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            //get playlist which I own or are marked as featured 
+            callbackHandler("Sync Featured Playlists");
+            var playlist = new Playlist(_store, currentUser);
+            var configsState = await playlist.SyncDownRecords(callbackHandler, token);
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("Playlists not synced");
+            }
+
+            //get entry subscription it is required to retrieve playlist which are follwed by the user
+            callbackHandler("Sync User Subscription");
+            var entity = new EntitySubscription(_store, currentUser);
+            configsState = await entity.SyncDownRecords(callbackHandler, token);
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("User Subscription not synced");
+            }
+
+            //get playlist which I follow
+            callbackHandler("Sync Followed Playlists");
+            playlist.GetPlaylistWhichIFollow = true;
+            playlist.DontClearSoup();
+            configsState = await playlist.SyncDownRecords(callbackHandler, token);
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("Playlists not synced");
+            }
+
+            //sync playlist Content
+            callbackHandler("Sync Playlist Content");
+            var playlistContent = new PlaylistContent(_store, currentUser);
+            configsState = await playlistContent.SyncDownRecords(callbackHandler, token);
+            if (configsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("Playlist Content not synced");
+            }
+        }
+
+        private List<Func<Task<bool>>> SyncContentThumbnails(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
+        {
+            var metaSyncState = attMetaTransactionResult.SyncState;
+            var funcs = new List<Func<Task<bool>>>();
+
+            foreach (var attMeta in attMetaTransactionResult.Result)
+            {
+                funcs.Add(async () => await SyncContentThumbnailsHelper(attMeta, metaSyncState, callbackHandler, metaSyncState, token));
+            }
+            return funcs;
+        }
+
+        #endregion
+
+
+        #region Sync Attachment/Content Full Functions
+        private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetMobileAppConfigsAttMeta(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            // Setup variables
+            var mac = new MobileAppConfig(_store, currentUser);
+            var macList = mac.GetAll().ToList();    // already unique
+            List<string> macIdList = new List<string>();
+
+            // Parse the Mac List and grab the Ids
+            foreach (var macModel in macList)
+            {
+                macIdList.Add(macModel.Id);
+            }
+
+            // Set up a loop to sync in blocks
+            callbackHandler("Sync Metadata Of Mobile App Config");
+            var macAtt = new MobileAppConfigAttachment(_store);
+            int index = 0;
+            int rem = macIdList.Count;
+
+            SyncState configsState = new SyncState();
+            while (rem > 0)
+            {
+                int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                // Get range of Ids to sync
+                macAtt.MacIdList = macIdList.GetRange(index, idCount);
+
+                // Perform Sync
+                var localConfigsState = await macAtt.SyncDownRecordsToSoup(callbackHandler, token);
+
+                // Check Results
+                if (localConfigsState.Status != SyncState.SyncStatusTypes.Done)
+                {
+                    throw new SyncException("MobileAppConfig Attachment Metadata not synced");
+                }
+
+                // Update SyncState
+                if (index == 0)
+                {
+                    configsState = localConfigsState;
+                }
+                else
+                {
+                    configsState.TotalSize += localConfigsState.TotalSize;
+                }
+
+                // Iterate to next sublist
+                index += idCount;
+                rem = macIdList.Count - index;
+            }
+
+            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.MobileAppConfigs);
+
+            return new SyncResult<IList<AttachmentMetadata>>(configsState, macAtt.GetMobileAppConfigAttachmentsFromSoup());
+        }
+
+        private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetCategoryMobileConfigAttMeta(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            // Setup variables
+            var cmc = new CategoryMobileConfig(_store, currentUser);
+            var cmcList = cmc.GetAll().ToList();    // already unique
+            List<string> cmcIdList = new List<string>();
+
+            // Parse the Mac List and grab the Ids
+            foreach (var cmcModel in cmcList)
+            {
+                cmcIdList.Add(cmcModel.Id);
+            }
+
+            // Set up a loop to sync in blocks
+            callbackHandler("Sync Categories Of Mobile App Config");
+            var cmcAtt = new CategoryMobileConfigAttachment(_store);
+            int index = 0;
+            int rem = cmcIdList.Count;
+
+            SyncState configsState = new SyncState();
+            while (rem > 0)
+            {
+                int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                // Get range of Ids to sync
+                cmcAtt.CmcIdList = cmcIdList.GetRange(index, idCount);
+
+                // Perform Sync
+                var localConfigsState = await cmcAtt.SyncDownRecordsToSoup(callbackHandler, token);
+
+                // Check Results
+                if (localConfigsState.Status != SyncState.SyncStatusTypes.Done)
+                {
+                    throw new SyncException("CategoryMobileConfig Attachment Metadata not synced");
+                }
+
+                // Update SyncState
+                if (index == 0)
+                {
+                    configsState = localConfigsState;
+                }
+                else
+                {
+                    configsState.TotalSize += localConfigsState.TotalSize;
+                }
+
+                // Iterate to next sublist
+                index += idCount;
+                rem = cmcIdList.Count - index;
+            }
+
+            // Saving metadata successful sync
+            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.CategoryMobileConfigs);
+
+            // Create task List
+            return new SyncResult<IList<AttachmentMetadata>>(configsState, cmcAtt.GetCategoryMobileAttachmentsFromSoup());
+        }
+
+        private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetCategoryAttMeta(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            // Setup variables
+            var category = new Category(_store, currentUser);
+            var categoryList = category.GetAll().ToList();    // already unique
+            List<string> categoryIdList = new List<string>();
+
+            // Parse the Mac List and grab the Ids
+            foreach (var categoryModel in categoryList)
+            {
+                categoryIdList.Add(categoryModel.Id);
+            }
+
+            // Set up a loop to sync in blocks
+            callbackHandler("Sync Metadata Of Category attachments");
+            var categoryAtt = new CategoryAttachment(_store);
+            int index = 0;
+            int rem = categoryIdList.Count;
+
+            SyncState configsState = new SyncState();
+            while (rem > 0)
+            {
+                int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                // Get range of Ids to sync
+                categoryAtt.CategoryIdList = categoryIdList.GetRange(index, idCount);
+
+                // Perform Sync
+                var localConfigsState = await categoryAtt.SyncDownRecordsToSoup(callbackHandler, token);
+
+                // Check Results
+                if (localConfigsState.Status != SyncState.SyncStatusTypes.Done)
+                {
+                    throw new SyncException("Category Attachment Metadata not synced");
+                }
+
+                // Update SyncState
+                if (index == 0)
+                {
+                    configsState = localConfigsState;
+                }
+                else
+                {
+                    configsState.TotalSize += localConfigsState.TotalSize;
+                }
+
+                // Iterate to next sublist
+                index += idCount;
+                rem = categoryIdList.Count - index;
+            }
+
+            // Saving metadata successful sync
+            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.MobileAppConfigs);
+
+            // Create task List
+            return new SyncResult<IList<AttachmentMetadata>>(configsState, categoryAtt.GetCategoryAttachmentsFromSoup());
+        }
+
+        private async Task<SyncResult<IList<Model.Models.ContentDocument>>> SyncAndGetMetadataOfContentDocumentsInLibraries(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            // Setup variables
+            var categoryContent = new CategoryContent(_store);
+            var categoryContentList = categoryContent.GetAll().ToList();    // already unique
+            HashSet<string> contentIdSet = new HashSet<string>();
+
+            // Parse the CategoryContent List down to an Content ID list (remove duplicates)
+            foreach (var categoryContentModel in categoryContentList)
+            {
+                contentIdSet.Add(categoryContentModel.ContentId);
+            }
+            var contentIdList = contentIdSet.ToList();
+
+            // Set up a loop to sync in blocks
+            callbackHandler("Sync Metadata Of Content Documents");
+            var contentDocument = new ContentDocument(_store);
+            int index = 0;
+            int rem = contentIdList.Count;
+
+            SyncState configsState = new SyncState();
+            while (rem > 0)
+            {
+                int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                // Get range of Ids to sync
+                contentDocument.ContentIdList = contentIdList.GetRange(index, idCount);
+
+                // Perform Sync
+                var localConfigsState = (index > 0) ? await contentDocument.SyncDownRecordsToSoup(callbackHandler, token) : await contentDocument.SyncDownRecords(callbackHandler, token);
+
+                // Check Results
+                if (localConfigsState.Status != SyncState.SyncStatusTypes.Done)
+                {
+                    throw new SyncException("Metadata for content documents not synced");
+                }
+
+                // Update SyncState
+                if (index == 0)
+                {
+                    configsState = localConfigsState;
+                }
+                else
+                {
+                    configsState.TotalSize += localConfigsState.TotalSize;
+                }
+
+                // Iterate to next sublist
+                index += idCount;
+                rem = contentIdList.Count - index;
+            }
+
+            // saving metadata successful sync
+            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.ContentDocuments);
+
+            // Create task List
+            return new SyncResult<IList<Model.Models.ContentDocument>>(configsState, contentDocument.GetContentDocumentsFromSoup());
+        }
+
+        private List<Func<Task<bool>>> SyncAttachments(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
+        {
+            var metaSyncState = attMetaTransactionResult.SyncState;
+            var funcs = new List<Func<Task<bool>>>();
+
+            foreach (var attMeta in attMetaTransactionResult.Result)
+            {
+                funcs.Add(async () => await SyncAttachmentsHelper(attMeta, metaSyncState, callbackHandler, token));
+            }
+
+            return funcs;
+        }
+
+        private List<Func<Task<bool>>> SyncCurrentVersionOfContentDocumentsInLibraries(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            var sieve = new DocMetaByOwnershipAndUsageInCategoriesSieve(_store, currentUser);
+            var filesUsedInCategoryOrPrivateFilesMeta = contentDocuments.ResultFiltered(sieve);
+
+            var contentSize = (long)filesUsedInCategoryOrPrivateFilesMeta.Sum(x => x.ContentSize);
+            DsaSyncLog.Instance.SetDownloadedFilesInfo(filesUsedInCategoryOrPrivateFilesMeta.Count, contentSize);
+
+            var funcs = new List<Func<Task<bool>>>();
+
+            foreach (var docMeta in filesUsedInCategoryOrPrivateFilesMeta)
+            {
+                funcs.Add(async () => await SyncCurrentVersionOfContentDocumentsInLibrariesHelper(callbackHandler, docMeta, contentDocuments.SyncState, currentUser, token));
+            }
+
+            return funcs;
+        }
+
+        private async Task SyncIndexesForContentDocuments(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync Indexes for content Documents");
+            var saveIndexesTasks = contentDocuments.Result.AsEnumerable().Select(doc => SaveSearchIndexesToSoup(doc, token));
+            await Task.WhenAll(saveIndexesTasks);
+        }
+
+        private async Task SyncMetadataOfContentDistribution(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, bool fullSync, CancellationToken token = default(CancellationToken))
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (SfdcConfig.EmailOnlyContentDistributionLinks)
+            {
+                callbackHandler("Sync Metadata Of Content Distribution");
+                var meta = new ContentDistribution(_store, fullSync);
+                var configsState = await meta.SyncDownRecords(callbackHandler, token);
+                if (configsState.Status != SyncState.SyncStatusTypes.Done)
+                {
+                    throw new SyncException("Metadata for content Distribution not synced");
+                }
+
+                SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.ContentDistribution);
+
+                await meta.ClearNotNeededContentDistribution(contentDocuments.Result);
+            }
+        }
+
+        private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetContentThumbnailAttMeta(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync Metadata Of Content Thumbnail attachments");
+            var contentThumbnailsAtt = new ContentThumbnailAttachment(_store);
+
+            // Sync the metadata
+            var contentThumbnailsState = await contentThumbnailsAtt.SyncDownRecordsToSoup(callbackHandler, token);
+
+            // Check the results
+            if (contentThumbnailsState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("ContentThumbnailAttMeta metadata not synced");
+            }
+
+            // FIXME: should Content Thumbnails have their own meta type?
+            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(contentThumbnailsState, SuccessfulSyncState.SyncedObjectMetaType.ContentThumbnails);
+
+            return new SyncResult<IList<AttachmentMetadata>>(contentThumbnailsState, contentThumbnailsAtt.GetContentThumbnailAttachmentsFromSoup());
+        }
+
+        #endregion
+
+
+        #region Sync Attachment/Content Delta Functions
+
+        private List<Func<Task<bool>>> SyncAttachmentsDelta(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
+        {
+            var metaSyncState = attMetaTransactionResult.SyncState;
+
+            // add sieve here
+            var deltaSieve = new AttMetaDropSameFilesForDeltaSieve(_store);
+            var attsNotOnDisk = attMetaTransactionResult.ResultFiltered(deltaSieve);
+
+            var funcs = new List<Func<Task<bool>>>();
+
+            foreach (var attMeta in attsNotOnDisk)
+            {
+                funcs.Add(async () => await SyncAttachmentsHelper(attMeta, metaSyncState, callbackHandler, token));
+            }
+
+            return funcs;
+        }
+
+        private List<Func<Task<bool>>> SyncCurrentVersionOfContentDocumentsInLibrariesDelta(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, User currentUser, CancellationToken token = default(CancellationToken))
+        {
+            var sieve = new DocMetaDeltaSieve(_store, currentUser);
+            var filesUsedInCategoryOrPrivateFilesMeta = contentDocuments.ResultFiltered(sieve);
+
+            var contentSize = (long)filesUsedInCategoryOrPrivateFilesMeta.Sum(x => x.ContentSize);
+
+            DsaSyncLog.Instance.SetDownloadedFilesInfo(filesUsedInCategoryOrPrivateFilesMeta.Count, contentSize);
+
+            var funcs = new List<Func<Task<bool>>>();
+
+            foreach (var docMeta in filesUsedInCategoryOrPrivateFilesMeta)
+            {
+                funcs.Add(async () => await SyncCurrentVersionOfContentDocumentsInLibrariesHelper(callbackHandler, docMeta, contentDocuments.SyncState, currentUser, token));
+            }
+
+            return funcs;
+        }
+
+        private async Task SyncIndexesForContentDocumentsDelta(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, CancellationToken token = default(CancellationToken))
+        {
+            callbackHandler("Sync Indexes for content Documents");
+            var sieve = new DocIndexDeltaSieve(_store);
+            var documentsWithNewIndexes = await contentDocuments.ResultFilteredAsync(sieve);
+            var saveIndexesTasks = documentsWithNewIndexes.Select(doc => SaveSearchIndexesToSoup(doc, token));
+            await Task.WhenAll(saveIndexesTasks);
+
+            //TODO: Remove from soup tags removed data from salesforce
+        }
+
+        private List<Func<Task<bool>>> SyncContentThumbnailsDelta(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
+        {
+            var metaSyncState = attMetaTransactionResult.SyncState;
+
+            // add sieve here
+            var deltaSieve = new AttMetaDropUnchangedFilesForDeltaSieve(_store);
+            var attsNotOnDisk = attMetaTransactionResult.ResultFiltered(deltaSieve);
+
+            var funcs = new List<Func<Task<bool>>>();
+
+            foreach (var attMeta in attsNotOnDisk)
+            {
+                funcs.Add(async () => await SyncContentThumbnailsHelper(attMeta, metaSyncState, callbackHandler, metaSyncState, token));
+            }
+            return funcs;
+        }
+
+        #endregion
+
+
+        #region Sync Attachment/Content Helper Functions
+
+        private async Task<bool> SyncAttachmentsHelper(AttachmentMetadata attMeta, SyncState syncState, Action<string> callbackHandler, CancellationToken token = default(CancellationToken), bool retry = true)
+        {
+            if (token.IsCancellationRequested)
+            {
+                token.ThrowIfCancellationRequested();
+            }
+
+            callbackHandler($"Getting attachment { attMeta.Name } ... on Thread " + Environment.CurrentManagedThreadId);
+            var outStream = new AttachmentFileWriter(attMeta, syncState.Id);
+            var att = new AttachmentBody(_store, attMeta);
+
+            var isDownlSucc = false;
+            var task = att.SyncDownAndSaveAttachment(callbackHandler, outStream, token);
+            var errorMessage = $"Attachment {attMeta.Name} not synced";
+            try
+            {
+                isDownlSucc = await task;
+            }
+            catch (ErrorResponseException ere)
+            {
+                if (retry)
+                {
+                    _funcsToRetry.Add(
+                        async () => await SyncAttachmentsHelper(attMeta, syncState, callbackHandler, token, false));
+                    return false;
+                }
+                else
+                {
+                    errorMessage = ere.Message;
+                }
+            }
+            catch (NetworkErrorException)
+            {
+                if (retry)
+                {
+                    _funcsToRetry.Add(
+                        async () => await SyncAttachmentsHelper(attMeta, syncState, callbackHandler, token, false));
+                    return false;
+                }
+                else
+                {
+                    errorMessage = NetworkErrorException.UserFriendlyMessage;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
+                Debug.WriteLine($"Exception Getting { attMeta.Name } ");
+            }
+
+            if (!isDownlSucc)
+            {
+                var e = new SyncException(errorMessage);
+                if (!token.IsCancellationRequested)
+                {
+                    _funcsToRetry?.Clear();
+                    Messenger.Default.Send(new SynchronizationCancelMessage(task, e));
+                }
+                throw e;
+            }
+            Messenger.Default.Send(new SynchronizationProgressMessage(attMeta.BodyLength, 0m));
+            SuccessfulSyncState.Instance.SaveStateToSoupForAttTransaction(syncState, attMeta.Id);
+            return isDownlSucc;
+        }
+
+        private async Task<bool> SyncCurrentVersionOfContentDocumentsInLibrariesHelper(Action<string> callbackHandler, Model.Models.ContentDocument docMeta, SyncState syncState, User currentUser, CancellationToken token = default(CancellationToken), bool retry = true)
+        {
+            if (token.IsCancellationRequested)
+            {
+                token.ThrowIfCancellationRequested();
+            }
+
+            var syncPass = false;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(docMeta.PathOnClient))
+                {
+                    callbackHandler($"Getting { docMeta.PathOnClient } ... on Thread " + Environment.CurrentManagedThreadId);
+
+                    var outStream = new VersionDataFileWriter(docMeta, syncState.Id);
+                    var vd = new VersionData(_store, docMeta);
+
+                    var vdState = false;
+                    var task = vd.SyncDownAndSaveVersionData(callbackHandler, outStream, token);
+                    var errorMessage = $"Content version { docMeta.Title } not synced";
+                    try
+                    {
+                        vdState = await task;
+                    }
+                    catch (ErrorResponseException ere)
+                    {
+                        if (retry)
+                        {
+                            _funcsToRetry.Add(
+                                async () =>
+                                    await
+                                        SyncCurrentVersionOfContentDocumentsInLibrariesHelper(callbackHandler, docMeta,
+                                            syncState, currentUser, token, false));
+                            return false;
+                        }
+                        else
+                        {
+                            errorMessage = ere.Message;
+                        }
+                    }
+                    catch (NetworkErrorException)
+                    {
+                        if (retry)
+                        {
+                            _funcsToRetry.Add(
+                                async () =>
+                                    await
+                                        SyncCurrentVersionOfContentDocumentsInLibrariesHelper(callbackHandler, docMeta,
+                                            syncState, currentUser, token, false));
+                            return false;
+                        }
+                        else
+                        {
+                            errorMessage = NetworkErrorException.UserFriendlyMessage;
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return false;
+                    }
+                    catch (Exception ex)
+                    {
+                        PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
+                        Debug.WriteLine($"Exception Getting { docMeta.PathOnClient } ");
+                    }
+
+                    if (!vdState)
+                    {
+                        var e = new SyncException(errorMessage);
+                        if (!token.IsCancellationRequested)
+                        {
+                            _funcsToRetry?.Clear();
+                            Messenger.Default.Send(new SynchronizationCancelMessage(task, e));
+                        }
+                        throw e;
+                    }
+                    Messenger.Default.Send(new SynchronizationProgressMessage(docMeta.ContentSize, 0m));
+                }
+                syncPass = true;
+                SuccessfulSyncState.Instance.SaveStateToSoupForDocTransaction(syncState, docMeta);
+            }
+            catch (Exception ex)
+            {
+                throw new SyncException($"CurrentVersion of content documents not synced: { ex.Message }", ex);
+            }
+            return syncPass;
+        }
+
+        private async Task<bool> SyncContentThumbnailsHelper(AttachmentMetadata attMeta, SyncState metaSyncState, Action<string> callbackHandler, SyncState syncState, CancellationToken token = default(CancellationToken), bool retry = true)
+        {
+            if (token.IsCancellationRequested)
+            {
+                token.ThrowIfCancellationRequested();
+            }
+
+            callbackHandler($"Getting content thumbnail { attMeta.Name } ... on Thread " + Environment.CurrentManagedThreadId);
+            var outStream = new ContentThumbnailFileWriter(attMeta, syncState.Id);
+            var att = new AttachmentBody(_store, attMeta);
+
+            var isDownlSucc = false;
+            var task = att.SyncDownAndSaveAttachment(callbackHandler, outStream, token);
+            var errorMessage = $"Content thumbnail {attMeta.Name} not synced";
+            try
+            {
+                isDownlSucc = await task;
+            }
+            catch (ErrorResponseException ere)
+            {
+                if (retry)
+                {
+                    _funcsToRetry.Add(
+                        async () => await SyncAttachmentsHelper(attMeta, syncState, callbackHandler, token, false));
+                    return false;
+                }
+                else
+                {
+                    errorMessage = ere.Message;
+                }
+            }
+            catch (NetworkErrorException)
+            {
+                if (retry)
+                {
+                    _funcsToRetry.Add(
+                        async () => await SyncAttachmentsHelper(attMeta, syncState, callbackHandler, token, false));
+                    return false;
+                }
+                else
+                {
+                    errorMessage = NetworkErrorException.UserFriendlyMessage;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
+                Debug.WriteLine($"Exception Getting { attMeta.Name } ");
+            }
+
+            if (!isDownlSucc)
+            {
+                var e = new SyncException(errorMessage);
+                if (!token.IsCancellationRequested)
+                {
+                    _funcsToRetry?.Clear();
+                    Messenger.Default.Send(new SynchronizationCancelMessage(task, e));
+                }
+                throw e;
+            }
+
+            Messenger.Default.Send(new SynchronizationProgressMessage(attMeta.BodyLength, 0m));
+            SuccessfulSyncState.Instance.SaveStateToSoupForAttTransaction(metaSyncState, attMeta.Id, attMeta.LastModifiedDate);
+            return isDownlSucc;
+        }
+
+        #endregion
+
+
+        #region Other Sync Methods
+
+        private async Task<User> SyncAndGetCurrentUserFromSfdc(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        {
+            SyncState currUserState;
+            var currUser = new CurrentUser(_store);
+            try
+            {
+                currUserState = await currUser.SyncDownRecords(callbackHandler, token);
+                await CheckAndHandleTokenExpiredSyncState(currUserState);
+            }
+            catch (Exception e)
+            {
+                if (e?.Message == "Token Expired")
+                {
+                    throw;
+                }
+                else
+                {
+                    CurrentUser.UseAlternativeFields = true;
+                    currUserState = await currUser.SyncDownRecords(callbackHandler, token);
+                }
+            }
+
+            if (currUserState.Status != SyncState.SyncStatusTypes.Done)
+            {
+                throw new SyncException("CurrentUser not synced");
+            }
+
+            var currUserInSoup = currUser.GetCurrentUserFromSoup();
+
+            if (currUserInSoup is NullUser)
+            {
+                throw new SyncException("CurrentUser not found in soup");
+            }
+
+            return currUserInSoup;
+        }
+
+        private async Task SaveSearchIndexesToSoup(Model.Models.ContentDocument docMeta, CancellationToken token = default(CancellationToken))
+        {
+            var documentTag = new ContentDocumentTag(_store);
+            var documentTitle = new ContentDocumentTitle(_store);
+            var documentAssetType = new ContentDocumentAssetType(_store);
+            var documentProductType = new ContentDocumentProductType(_store);
+
+            var indexesTasks = new List<Task>
+            {
+                documentTag.SaveTagsToSoup(docMeta.Tags, docMeta.Id, token),
+                documentTitle.SaveTitleToSoup(docMeta.Title, docMeta.Id, token),
+                documentAssetType.SaveAssetTypeToSoup(docMeta.AssetType, docMeta.Id, token),
+                documentProductType.SaveProductTypeToSoup(docMeta.ProductType, docMeta.Id, token),
+            };
+            await Task.WhenAll(indexesTasks);
+        }
+
+        private async Task CheckAndHandleTokenExpiredSyncState(SyncState syncState)
+        {
+            if (syncState.Status == SyncState.SyncStatusTypes.TokenExpired)
+            {
+                await HandleLogoutTask();
+                throw new SyncException("Token Expired");
+            }
+        }
+
+        #endregion
+
+
+        #region Other Methods
 
         /// <summary>
         /// Subscribe to network status chaged event
@@ -132,57 +1254,6 @@ namespace DSA.Sfdc.Sync
             await PlatformAdapter.Resolve<IAuthHelper>().StartLoginFlowAsync();
         }
 
-        public async Task<bool> RefreshToken()
-        {
-            // assign this to a var as ref requires it.
-            try
-            {
-                var account = GetCachedAccount();
-                await OAuth2.RefreshAuthToken(account);
-                OAuth2.RefreshCookies();
-                return true;
-            }
-            catch (Exception)
-            {
-                // log exception
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Logout current user
-        /// </summary>
-        public async Task<bool> HandleLogoutTask()
-        {
-            var logoutTaskResult = false;
-            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
-            {
-                logoutTaskResult = await SDKManager.GlobalClientManager.Logout();
-
-                if (logoutTaskResult)
-                {
-                    //await ClearLocalDataSynced();
-                }
-            });
-            return logoutTaskResult;
-        }
-
-        public Account GetCachedAccount()
-        {
-            return AccountManager.GetAccount();
-        }
-
-        /// <summary>
-        /// Get ID of current user
-        /// </summary>
-        public string GetCurrentUserId()
-        {
-            var account = GetCachedAccount();
-            return account != null
-                    ? account.UserId
-                    : string.Empty;
-        }
-
         /// <summary>
         /// Check internet connection status
         /// </summary>
@@ -205,6 +1276,24 @@ namespace DSA.Sfdc.Sync
                 throw new SyncException(NoInternetConnectionMessage);
             }
             return true;
+        }
+
+        /// <summary>
+        /// Logout current user
+        /// </summary>
+        public async Task<bool> HandleLogoutTask()
+        {
+            var logoutTaskResult = false;
+            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+            {
+                logoutTaskResult = await SDKManager.GlobalClientManager.Logout();
+
+                if (logoutTaskResult)
+                {
+                    //await ClearLocalDataSynced();
+                }
+            });
+            return logoutTaskResult;
         }
 
         /// <summary>
@@ -299,151 +1388,6 @@ namespace DSA.Sfdc.Sync
             }
         }
 
-        #region Delta Sync
-
-        public async Task<User> QueueingDeltaSyncAsync(Action<string> callbackHandler,
-          CancellationToken token = default(CancellationToken))
-        {
-            HasInternetConnectionOrThrow();
-            await CheckAvailableSpace(0);
-            return await SyncAndGetCurrentUserFromSfdc(callbackHandler, token);
-        }
-
-        public async Task ConfigurationDeltaSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            var syncUpTasks = new List<Task>
-            {
-                SyncUpDsaSyncLogs(callbackHandler, token),
-                SyncUpContentReview(callbackHandler,token),
-                SyncUpEvents(callbackHandler,token),
-                SyncUpPlaylistsAndContent(callbackHandler,token),
-                SyncUpSearchTerms(callbackHandler, token)
-            };
-
-            await Task.WhenAll(syncUpTasks);
-
-            var syncDownTasks = new List<Task>
-            {
-                SyncCategories(callbackHandler, currentUser, token),
-                SyncCategoryContent(callbackHandler, true, token),
-                SyncFeaturedPlaylists(callbackHandler, currentUser, token),
-                SyncMobileAppConfigs(callbackHandler, currentUser, token),
-                SyncCategoryMobileConfigs(callbackHandler, currentUser, token),
-                SyncContacts(callbackHandler, currentUser, token)
-            };
-            await Task.WhenAll(syncDownTasks);
-        }
-
-        public async Task ContentDeltaSyncAsync(Action<string> callbackHandler, User currentUser,
-            CancellationToken token = default(CancellationToken))
-        {
-            var mobileAppConfigsAttMeta = await SyncAndGetMobileAppConfigsAttMeta(callbackHandler, currentUser, token);
-            var categoryMobileConfigAttMeta = await SyncAndGetCategoryMobileConfigAttMeta(callbackHandler, currentUser, token);
-            var categoryAttMeta = await SyncAndGetCategoryAttMeta(callbackHandler, token);
-            var syncResult = await SyncAndGetMetadataOfContentDocumentsInLibraries(callbackHandler, token);
-            var contentThumbnailAttMeta = await SyncAndGetContentThumbnailAttMeta(callbackHandler, token);
-
-            var sizeBytesToDownload = 0m;
-            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(mobileAppConfigsAttMeta, new AttMetaDropSameFilesForDeltaSieve(_store));
-            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(categoryMobileConfigAttMeta, new AttMetaDropSameFilesForDeltaSieve(_store));
-            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(categoryAttMeta, new AttMetaDropSameFilesForDeltaSieve(_store));
-            sizeBytesToDownload += GetSizeBytesToDownloadContentDocumentHelper(syncResult, new DocMetaDeltaSieve(_store, currentUser));
-            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(contentThumbnailAttMeta, new AttMetaDropUnchangedFilesForDeltaSieve(_store));
-
-            await CheckAvailableSpace(sizeBytesToDownload);
-            Messenger.Default.Send(new SynchronizationProgressMessage(0m, sizeBytesToDownload));
-
-            List<Func<Task<bool>>> funcs = new List<Func<Task<bool>>>();
-            _funcsToRetry = new List<Func<Task<bool>>>();
-            funcs.AddRange(SyncAttachmentsDelta(callbackHandler, mobileAppConfigsAttMeta, token));
-            funcs.AddRange(SyncAttachmentsDelta(callbackHandler, categoryMobileConfigAttMeta, token));
-            funcs.AddRange(SyncAttachmentsDelta(callbackHandler, categoryAttMeta, token));
-            funcs.AddRange(SyncCurrentVersionOfContentDocumentsInLibrariesDelta(callbackHandler, syncResult, currentUser, token));
-            funcs.AddRange(SyncContentThumbnailsDelta(callbackHandler, contentThumbnailAttMeta, token));
-
-            await RunAsyncQueueInBatches(funcs);
-            await RunRetryFuncsIfAny();
-
-            await SyncIndexesForContentDocumentsDelta(callbackHandler, syncResult, token);
-            await SyncMetadataOfContentDistribution(callbackHandler, syncResult, false, token);
-        }
-
-        #endregion
-
-        #region Full Sync
-
-        public async Task<User> QueueingFullSyncAsync(Action<string> callbackHandler,
-           CancellationToken token = default(CancellationToken))
-        {
-            HasInternetConnectionOrThrow();
-            await CheckAvailableSpace(0);
-            _backupSyncStates = SuccessfulSyncState.Instance.GetAllSuccessfulSyncsFromSoup();
-            SuccessfulSyncState.Instance.RecreateClearSoup();
-            return await SyncAndGetCurrentUserFromSfdc(callbackHandler, token);
-        }
-
-        public async Task ConfigurationFullSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            var syncUpTasks = new List<Task>
-            {
-                SyncUpDsaSyncLogs(callbackHandler, token),
-                SyncUpContentReview(callbackHandler,token),
-                SyncUpEvents(callbackHandler,token),
-                SyncUpPlaylistsAndContent(callbackHandler,token),
-                SyncUpSearchTerms(callbackHandler, token)
-            };
-
-            await Task.WhenAll(syncUpTasks);
-
-            var syncDownTasks = new List<Task>
-            {
-                SyncCategories(callbackHandler, currentUser, token),
-                SyncCategoryContent(callbackHandler, false, token),
-                SyncFeaturedPlaylists(callbackHandler, currentUser, token),
-                SyncMobileAppConfigs(callbackHandler, currentUser, token),
-                SyncCategoryMobileConfigs(callbackHandler, currentUser, token),
-                SyncContacts(callbackHandler, currentUser, token)
-            };
-
-            await Task.WhenAll(syncDownTasks);
-        }
-
-        public async Task ContentFullSyncAsync(Action<string> callbackHandler, User currentUser,
-            CancellationToken token = default(CancellationToken))
-        {
-            var mobileAppConfgsAttMeta = await SyncAndGetMobileAppConfigsAttMeta(callbackHandler, currentUser, token);
-            var categoryMobileConfigAttMeta = await SyncAndGetCategoryMobileConfigAttMeta(callbackHandler, currentUser, token);
-            var categoryAttMeta = await SyncAndGetCategoryAttMeta(callbackHandler, token);
-            var syncResult = await SyncAndGetMetadataOfContentDocumentsInLibraries(callbackHandler, token);
-            var contentThumbnailAttMeta = await SyncAndGetContentThumbnailAttMeta(callbackHandler, token);
-
-            var sizeBytesToDownload = 0m;
-            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(mobileAppConfgsAttMeta);
-            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(categoryMobileConfigAttMeta);
-            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(categoryAttMeta, new AttMetaDropSameFilesForDeltaSieve(_store));
-            sizeBytesToDownload += GetSizeBytesToDownloadContentDocumentHelper(syncResult, new DocMetaByOwnershipAndUsageInCategoriesSieve(_store, currentUser));
-            sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(contentThumbnailAttMeta);
-
-            await CheckAvailableSpace(sizeBytesToDownload);
-            Messenger.Default.Send(new SynchronizationProgressMessage(0m, sizeBytesToDownload));
-
-            List<Func<Task<bool>>> funcs = new List<Func<Task<bool>>>();
-            _funcsToRetry = new List<Func<Task<bool>>>();
-            funcs.AddRange(SyncAttachments(callbackHandler, mobileAppConfgsAttMeta, token));
-            funcs.AddRange(SyncAttachments(callbackHandler, categoryMobileConfigAttMeta, token));
-            funcs.AddRange(SyncAttachmentsDelta(callbackHandler, categoryAttMeta, token));
-            funcs.AddRange(SyncCurrentVersionOfContentDocumentsInLibraries(callbackHandler, syncResult, currentUser, token));
-            funcs.AddRange(SyncContentThumbnails(callbackHandler, contentThumbnailAttMeta, token));
-
-            await RunAsyncQueueInBatches(funcs);
-            await RunRetryFuncsIfAny();
-
-            await SyncIndexesForContentDocuments(callbackHandler, syncResult, token);
-            await SyncMetadataOfContentDistribution(callbackHandler, syncResult, true, token);
-        } 
-
-        #endregion
-
         private async Task CheckAvailableSpace(decimal sizeBytesToDownload)
         {
             sizeBytesToDownload += SfdcConfig.RequiredStorageBufferBytes;
@@ -529,399 +1473,15 @@ namespace DSA.Sfdc.Sync
             return sizeBytesToDownload;
         }
 
-        private async Task SyncCategoryContent(Action<string> callbackHandler, bool saveNew, CancellationToken token = default(CancellationToken))
+        /// <summary>
+        /// Get ID of current user
+        /// </summary>
+        public string GetCurrentUserId()
         {
-            callbackHandler("Sync Category Content");
-            var category = new CategoryContent(_store);
-
-            var documentsInCategoriesBeforeSync = category.GetAll().ToList();
-            var configsState = await category.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("CategoryContent not synced");
-            }
-
-            NewCategoryContent.Instance.RecreateClearSoup();
-            if (saveNew)
-            {
-                var documentsInCategoriesAfterSync = category.GetAll().ToList();
-                var newCategoryContents = documentsInCategoriesAfterSync.Except(documentsInCategoriesAfterSync.Join(documentsInCategoriesBeforeSync, cc1 => cc1.Id, cc2 => cc2.Id, (cc1, cc2) => cc1)).ToList();
-                NewCategoryContent.Instance.SaveToSoup(newCategoryContents);
-            }
-        }
-
-        private async Task SyncFeaturedPlaylists(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            //get playlist which I own or are marked as featured 
-            callbackHandler("Sync Featured Playlists");
-            var playlist = new Playlist(_store, currentUser);
-            var configsState = await playlist.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Playlists not synced");
-            }
-
-            //get entry subscription it is required to retrieve playlist which are follwed by the user
-            callbackHandler("Sync User Subscription");
-            var entity = new EntitySubscription(_store, currentUser);
-            configsState = await entity.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("User Subscription not synced");
-            }
-
-            //get playlist which I follow
-            callbackHandler("Sync Followed Playlists");
-            playlist.GetPlaylistWhichIFollow = true;
-            playlist.DontClearSoup();
-            configsState = await playlist.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Playlists not synced");
-            }
-
-            //sync playlist Content
-            callbackHandler("Sync Playlist Content");
-            var playlistContent = new PlaylistContent(_store, currentUser);
-            configsState = await playlistContent.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Playlist Content not synced");
-            }
-        }
-
-        public async Task SyncUpPlaylistsAndContent(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            await SyncUpFeaturedPlaylists(callbackHandler, token);
-            await SyncUpPlaylistContent(callbackHandler, token);
-        }
-
-        public async Task SyncUpFeaturedPlaylists(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync up Featured Playlists");
-            var configsState = await Playlist.SyncUpInstance.SyncUpRecords(callbackHandler, token, Playlist.SyncUpInstance.LocalIdChangeHandler);
-
-            await CheckAndHandleTokenExpiredSyncState(configsState);
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Playlists not synced");
-            }
-        }
-
-        public async Task SyncUpPlaylistContent(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync up Playlist Content");
-            var configsState = await PlaylistContent.SyncUpInstance.SyncUpRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Playlist Content not synced");
-            }
-        }
-        private async Task SyncCategoryMobileConfigs(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Category Mobile Configs");
-            var configs = new CategoryMobileConfig(_store, currentUser);
-            var configsState = await configs.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("MobileAppConfigs not synced");
-            }
-        }
-
-        private List<Func<Task<bool>>> SyncAttachments(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
-        {
-            var metaSyncState = attMetaTransactionResult.SyncState;
-            var funcs = new List<Func<Task<bool>>>();
-
-            foreach (var attMeta in attMetaTransactionResult.Result)
-            {
-                funcs.Add(async () => await SyncAttachmentsHelper(attMeta, metaSyncState, callbackHandler, token));
-            }
-
-            return funcs;
-        }
-
-        private List<Func<Task<bool>>> SyncAttachmentsDelta(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
-        {
-            var metaSyncState = attMetaTransactionResult.SyncState;
-
-            // add sieve here
-            var deltaSieve = new AttMetaDropSameFilesForDeltaSieve(_store);
-            var attsNotOnDisk = attMetaTransactionResult.ResultFiltered(deltaSieve);
-
-            var funcs = new List<Func<Task<bool>>>();
-
-            foreach (var attMeta in attsNotOnDisk)
-            {
-                funcs.Add(async () => await SyncAttachmentsHelper(attMeta, metaSyncState, callbackHandler, token));
-            }
-
-            return funcs;
-        }
-
-        private async Task<bool> SyncAttachmentsHelper(AttachmentMetadata attMeta, SyncState syncState, Action<string> callbackHandler, CancellationToken token = default(CancellationToken), bool retry = true)
-        {
-            if (token.IsCancellationRequested)
-            {
-                token.ThrowIfCancellationRequested();
-            }
-
-            callbackHandler($"Getting attachment { attMeta.Name } ... on Thread " + Environment.CurrentManagedThreadId);
-            var outStream = new AttachmentFileWriter(attMeta, syncState.Id);
-            var att = new AttachmentBody(_store, attMeta);
-
-            var isDownlSucc = false;
-            var task = att.SyncDownAndSaveAttachment(callbackHandler, outStream, token);
-            var errorMessage = $"Attachment {attMeta.Name} not synced";
-            try
-            {
-                isDownlSucc = await task;
-            }
-            catch (ErrorResponseException ere)
-            {
-                if (retry)
-                {
-                    _funcsToRetry.Add(
-                        async () => await SyncAttachmentsHelper(attMeta, syncState, callbackHandler, token, false));
-                    return false;
-                }
-                else
-                {
-                    errorMessage = ere.Message;
-                }
-            }
-            catch (NetworkErrorException)
-            {
-                if (retry)
-                {
-                    _funcsToRetry.Add(
-                        async () => await SyncAttachmentsHelper(attMeta, syncState, callbackHandler, token, false));
-                    return false;
-                }
-                else
-                {
-                    errorMessage = NetworkErrorException.UserFriendlyMessage;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                return false;
-            }
-            catch (Exception ex)
-            {
-                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
-                Debug.WriteLine($"Exception Getting { attMeta.Name } ");
-            }
-
-            if (!isDownlSucc)
-            {
-                var e = new SyncException(errorMessage);
-                if (!token.IsCancellationRequested)
-                {
-                    _funcsToRetry?.Clear();
-                    Messenger.Default.Send(new SynchronizationCancelMessage(task, e));
-                }
-                throw e;
-            }
-            Messenger.Default.Send(new SynchronizationProgressMessage(attMeta.BodyLength, 0m));
-            SuccessfulSyncState.Instance.SaveStateToSoupForAttTransaction(syncState, attMeta.Id);
-            return isDownlSucc;
-        }
-
-        private List<Func<Task<bool>>> SyncContentThumbnails(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
-        {
-            var metaSyncState = attMetaTransactionResult.SyncState;
-
-            var funcs = new List<Func<Task<bool>>>();
-
-            foreach (var attMeta in attMetaTransactionResult.Result)
-            {
-                funcs.Add(async () => await SyncContentThumbnailsHelper(attMeta, metaSyncState, callbackHandler, metaSyncState, token));
-            }
-            return funcs;
-        }
-
-        private List<Func<Task<bool>>> SyncContentThumbnailsDelta(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
-        {
-            var metaSyncState = attMetaTransactionResult.SyncState;
-
-            // add sieve here
-            var deltaSieve = new AttMetaDropUnchangedFilesForDeltaSieve(_store);
-            var attsNotOnDisk = attMetaTransactionResult.ResultFiltered(deltaSieve);
-
-            var funcs = new List<Func<Task<bool>>>();
-
-            foreach (var attMeta in attsNotOnDisk)
-            {
-                funcs.Add(async () => await SyncContentThumbnailsHelper(attMeta, metaSyncState, callbackHandler, metaSyncState, token));
-            }
-            return funcs;
-        }
-
-        private async Task<bool> SyncContentThumbnailsHelper(AttachmentMetadata attMeta, SyncState metaSyncState, Action<string> callbackHandler, SyncState syncState, CancellationToken token = default(CancellationToken), bool retry = true)
-        {
-            if (token.IsCancellationRequested)
-            {
-                token.ThrowIfCancellationRequested();
-            }
-
-            callbackHandler($"Getting content thumbnail { attMeta.Name } ... on Thread " + Environment.CurrentManagedThreadId);
-            var outStream = new ContentThumbnailFileWriter(attMeta, syncState.Id);
-            var att = new AttachmentBody(_store, attMeta);
-
-            var isDownlSucc = false;
-            var task = att.SyncDownAndSaveAttachment(callbackHandler, outStream, token);
-            var errorMessage = $"Content thumbnail {attMeta.Name} not synced";
-            try
-            {
-                isDownlSucc = await task;
-            }
-            catch (ErrorResponseException ere)
-            {
-                if (retry)
-                {
-                    _funcsToRetry.Add(
-                        async () => await SyncAttachmentsHelper(attMeta, syncState, callbackHandler, token, false));
-                    return false;
-                }
-                else
-                {
-                    errorMessage = ere.Message;
-                }
-            }
-            catch (NetworkErrorException)
-            {
-                if (retry)
-                {
-                    _funcsToRetry.Add(
-                        async () => await SyncAttachmentsHelper(attMeta, syncState, callbackHandler, token, false));
-                    return false;
-                }
-                else
-                {
-                    errorMessage = NetworkErrorException.UserFriendlyMessage;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                return false;
-            }
-            catch (Exception ex)
-            {
-                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
-                Debug.WriteLine($"Exception Getting { attMeta.Name } ");
-            }
-
-            if (!isDownlSucc)
-            {
-                var e = new SyncException(errorMessage);
-                if (!token.IsCancellationRequested)
-                {
-                    _funcsToRetry?.Clear();
-                    Messenger.Default.Send(new SynchronizationCancelMessage(task, e));
-                }
-                throw e;
-            }
-
-            Messenger.Default.Send(new SynchronizationProgressMessage(attMeta.BodyLength, 0m));
-            SuccessfulSyncState.Instance.SaveStateToSoupForAttTransaction(metaSyncState, attMeta.Id, attMeta.LastModifiedDate);
-            return isDownlSucc;
-        }
-
-        private async Task SyncCategories(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Categories");
-            var category = new Category(_store, currentUser);
-            var configsState = await category.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("MobileAppConfigs not synced");
-            }
-        }
-
-        private async Task SyncContacts(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Contacts");
-            var category = new Contact(_store, currentUser);
-            var configsState = await category.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Contacts not synced");
-            }
-        }
-
-        private async Task SyncMobileAppConfigs(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Mobile App Config");
-            var configs = new MobileAppConfig(_store, currentUser);
-            var configsState = await configs.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("MobileAppConfigs not synced");
-            }
-        }
-
-        private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetMobileAppConfigsAttMeta(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Metadata Of Mobile App Config");
-            var configsAtt = new MobileAppConfigAttachment(_store, currentUser);
-            var configsState = await configsAtt.SyncDownRecordsToSoup(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("AttachmentMetadata metadata not synced");
-            }
-
-            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.MobileAppConfigs);
-
-            return new SyncResult<IList<AttachmentMetadata>>(configsState, configsAtt.GetMobileAppConfigAttachmentsFromSoup());
-        }
-
-        private async Task<User> SyncAndGetCurrentUserFromSfdc(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            SyncState currUserState;
-            var currUser = new CurrentUser(_store);
-            try
-            {
-                currUserState = await currUser.SyncDownRecords(callbackHandler, token);
-                await CheckAndHandleTokenExpiredSyncState(currUserState);
-            }
-            catch (Exception e)
-            {
-                if (e?.Message == "Token Expired")
-                {
-                    throw;
-                }
-                else
-                {
-                    CurrentUser.UseAlternativeFields = true;
-                    currUserState = await currUser.SyncDownRecords(callbackHandler, token);
-                }
-            }
-
-            if (currUserState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("CurrentUser not synced");
-            }
-
-            var currUserInSoup = currUser.GetCurrentUserFromSoup();
-
-            if (currUserInSoup is NullUser)
-            {
-                throw new SyncException("CurrentUser not found in soup");
-            }
-
-            return currUserInSoup;
+            var account = GetCachedAccount();
+            return account != null
+                    ? account.UserId
+                    : string.Empty;
         }
 
         public async Task<bool> IsUserFirstLogIn()
@@ -949,317 +1509,29 @@ namespace DSA.Sfdc.Sync
             return true;
         }
 
-        private async Task<SyncResult<IList<Model.Models.ContentDocument>>> SyncAndGetMetadataOfContentDocumentsInLibraries(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
+        public async Task<bool> RefreshToken()
         {
-            callbackHandler("Sync Metadata Of Content Documents");
-            var meta = new ContentDocument(_store);
-            var configsState = await meta.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Metadata for content documents not synced");
-            }
-
-            // saving metadata successful sync
-            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.ContentDocuments);
-
-            return new SyncResult<IList<Model.Models.ContentDocument>>(configsState, meta.GetContentDocumentsFromSoup());
-        }
-
-        private List<Func<Task<bool>>> SyncCurrentVersionOfContentDocumentsInLibraries(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            var sieve = new DocMetaByOwnershipAndUsageInCategoriesSieve(_store, currentUser);
-            var filesUsedInCategoryOrPrivateFilesMeta = contentDocuments.ResultFiltered(sieve);
-
-            var contentSize = (long)filesUsedInCategoryOrPrivateFilesMeta.Sum(x => x.ContentSize);
-            DsaSyncLog.Instance.SetDownloadedFilesInfo(filesUsedInCategoryOrPrivateFilesMeta.Count, contentSize);
-
-            var funcs = new List<Func<Task<bool>>>();
-
-            foreach (var docMeta in filesUsedInCategoryOrPrivateFilesMeta)
-            {
-                funcs.Add(async () => await SyncCurrentVersionOfContentDocumentsInLibrariesHelper(callbackHandler, docMeta, contentDocuments.SyncState, currentUser, token));
-            }
-
-            return funcs;
-        }
-
-        private List<Func<Task<bool>>> SyncCurrentVersionOfContentDocumentsInLibrariesDelta(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, User currentUser, CancellationToken token = default(CancellationToken))
-        {
-            var sieve = new DocMetaDeltaSieve(_store, currentUser);
-            var filesUsedInCategoryOrPrivateFilesMeta = contentDocuments.ResultFiltered(sieve);
-
-            var contentSize = (long)filesUsedInCategoryOrPrivateFilesMeta.Sum(x => x.ContentSize);
-
-            DsaSyncLog.Instance.SetDownloadedFilesInfo(filesUsedInCategoryOrPrivateFilesMeta.Count, contentSize);
-
-            var funcs = new List<Func<Task<bool>>>();
-
-            foreach (var docMeta in filesUsedInCategoryOrPrivateFilesMeta)
-            {
-                funcs.Add(async () => await SyncCurrentVersionOfContentDocumentsInLibrariesHelper(callbackHandler, docMeta, contentDocuments.SyncState, currentUser, token));
-            }
-
-            return funcs;
-        }
-
-        private async Task<bool> SyncCurrentVersionOfContentDocumentsInLibrariesHelper(Action<string> callbackHandler, Model.Models.ContentDocument docMeta, SyncState syncState, User currentUser, CancellationToken token = default(CancellationToken), bool retry = true)
-        {
-            if (token.IsCancellationRequested)
-            {
-                token.ThrowIfCancellationRequested();
-            }
-
-            var syncPass = false;
+            // assign this to a var as ref requires it.
             try
             {
-                if (!string.IsNullOrWhiteSpace(docMeta.PathOnClient))
-                {
-                    callbackHandler($"Getting { docMeta.PathOnClient } ... on Thread " + Environment.CurrentManagedThreadId);
-
-                    var outStream = new VersionDataFileWriter(docMeta, syncState.Id);
-                    var vd = new VersionData(_store, docMeta);
-
-                    var vdState = false;
-                    var task = vd.SyncDownAndSaveVersionData(callbackHandler, outStream, token);
-                    var errorMessage = $"Content version { docMeta.Title } not synced";
-                    try
-                    {
-                        vdState = await task;
-                    }
-                    catch (ErrorResponseException ere)
-                    {
-                        if (retry)
-                        {
-                            _funcsToRetry.Add(
-                                async () =>
-                                    await
-                                        SyncCurrentVersionOfContentDocumentsInLibrariesHelper(callbackHandler, docMeta,
-                                            syncState, currentUser, token, false));
-                            return false;
-                        }
-                        else
-                        {
-                            errorMessage = ere.Message;
-                        }
-                    }
-                    catch (NetworkErrorException)
-                    {
-                        if (retry)
-                        {
-                            _funcsToRetry.Add(
-                                async () =>
-                                    await
-                                        SyncCurrentVersionOfContentDocumentsInLibrariesHelper(callbackHandler, docMeta,
-                                            syncState, currentUser, token, false));
-                            return false;
-                        }
-                        else
-                        {
-                            errorMessage = NetworkErrorException.UserFriendlyMessage;
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        return false;
-                    }
-                    catch (Exception ex)
-                    {
-                        PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
-                        Debug.WriteLine($"Exception Getting { docMeta.PathOnClient } ");
-                    }
-
-                    if (!vdState)
-                    {
-                        var e = new SyncException(errorMessage);
-                        if (!token.IsCancellationRequested)
-                        {
-                            _funcsToRetry?.Clear();
-                            Messenger.Default.Send(new SynchronizationCancelMessage(task, e));
-                        }
-                        throw e;
-                    }
-                    Messenger.Default.Send(new SynchronizationProgressMessage(docMeta.ContentSize, 0m));
-                }
-                syncPass = true;
-                SuccessfulSyncState.Instance.SaveStateToSoupForDocTransaction(syncState, docMeta);
+                var account = GetCachedAccount();
+                await OAuth2.RefreshAuthToken(account);
+                OAuth2.RefreshCookies();
+                return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new SyncException($"CurrentVersion of content documents not synced: { ex.Message }", ex);
+                // log exception
             }
-            return syncPass;
+            return false;
         }
 
-        private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetCategoryMobileConfigAttMeta(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
+        public Account GetCachedAccount()
         {
-            callbackHandler("Sync Categories Of Mobile App Config");
-            var configsAtt = new CategoryMobileConfigAttachment(_store, currentUser);
-            var configsState = await configsAtt.SyncDownRecordsToSoup(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("CategoryMobileConfigAttMeta metadata not synced");
-            }
-
-            // saving metadata successful sync
-            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.CategoryMobileConfigs);
-
-            return new SyncResult<IList<AttachmentMetadata>>(configsState, configsAtt.GetCategoryMobileAttachmentsFromSoup());
+            return AccountManager.GetAccount();
         }
 
-        private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetCategoryAttMeta(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Metadata Of Category attachments");
-            var configsAtt = new CategoryAttachment(_store);
-            var configsState = await configsAtt.SyncDownRecordsToSoup(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("CategoryAttMeta metadata not synced");
-            }
-
-            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.MobileAppConfigs);
-
-            return new SyncResult<IList<AttachmentMetadata>>(configsState, configsAtt.GetCategoryAttachmentsFromSoup());
-        }
-
-        private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetContentThumbnailAttMeta(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Metadata Of Content Thumbnail attachments");
-            var contentThumbnailsAtt = new ContentThumbnailAttachment(_store);
-            var contentThumbnailsState = await contentThumbnailsAtt.SyncDownRecordsToSoup(callbackHandler, token);
-
-            if (contentThumbnailsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("ContentThumbnailAttMeta metadata not synced");
-            }
-
-            // FIXME: should Content Thumbnails have their own meta type?
-            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(contentThumbnailsState, SuccessfulSyncState.SyncedObjectMetaType.ContentThumbnails);
-
-            return new SyncResult<IList<AttachmentMetadata>>(contentThumbnailsState, contentThumbnailsAtt.GetContentThumbnailAttachmentsFromSoup());
-        }
-
-        private async Task SyncIndexesForContentDocuments(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Indexes for content Documents");
-            var saveIndexesTasks = contentDocuments.Result.AsEnumerable().Select(doc => SaveSearchIndexesToSoup(doc, token));
-            await Task.WhenAll(saveIndexesTasks);
-        }
-
-        private async Task SyncIndexesForContentDocumentsDelta(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync Indexes for content Documents");
-            var sieve = new DocIndexDeltaSieve(_store);
-            var documentsWithNewIndexes = await contentDocuments.ResultFilteredAsync(sieve);
-            var saveIndexesTasks = documentsWithNewIndexes.Select(doc => SaveSearchIndexesToSoup(doc, token));
-            await Task.WhenAll(saveIndexesTasks);
-
-            //TODO: Remove from soup tags removed data from salesforce
-        }
-
-        private async Task SaveSearchIndexesToSoup(Model.Models.ContentDocument docMeta, CancellationToken token = default(CancellationToken))
-        {
-            var documentTag = new ContentDocumentTag(_store);
-            var documentTitle = new ContentDocumentTitle(_store);
-            var documentAssetType = new ContentDocumentAssetType(_store);
-            var documentProductType = new ContentDocumentProductType(_store);
-
-            var indexesTasks = new List<Task>
-            {
-                documentTag.SaveTagsToSoup(docMeta.Tags, docMeta.Id, token),
-                documentTitle.SaveTitleToSoup(docMeta.Title, docMeta.Id, token),
-                documentAssetType.SaveAssetTypeToSoup(docMeta.AssetType, docMeta.Id, token),
-                documentProductType.SaveProductTypeToSoup(docMeta.ProductType, docMeta.Id, token),
-            };
-            await Task.WhenAll(indexesTasks);
-        }
-
-        private async Task SyncMetadataOfContentDistribution(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, bool fullSync, CancellationToken token = default(CancellationToken))
-        {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (!SfdcConfig.EmailOnlyContentDistributionLinks)
-            {
-                return;
-            }
-
-            callbackHandler("Sync Metadata Of Content Distribution");
-            var meta = new ContentDistribution(_store, fullSync);
-            var configsState = await meta.SyncDownRecords(callbackHandler, token);
-
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Metadata for content Distribution not synced");
-            }
-            SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.ContentDistribution);
-
-            await meta.ClearNotNeededContentDistribution(contentDocuments.Result);
-        }
-
-
-        public async Task SyncUpContentReview(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            await Task.Factory.StartNew(async () =>
-            {
-                if (!HasInternetConnection())
-                    return;
-
-                callbackHandler("Sync up for content Reviews");
-                var configsState = await ContentReview.Instance.SyncUpContentReview(token);
-                await CheckAndHandleTokenExpiredSyncState(configsState);
-            }, token);
-        }
-
-        public async Task SyncUpEvents(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync up Events");
-            var configsState = await Event.Instance.SyncUpRecords(callbackHandler, token);
-
-            await CheckAndHandleTokenExpiredSyncState(configsState);
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                throw new SyncException("Events not synced");
-            }
-        }
-
-        public async Task SyncUpDsaSyncLogs(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            callbackHandler("Sync up DSA SyncLogs");
-            var configsState = await DsaSyncLog.Instance.SyncUpRecords(callbackHandler, token);
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                //throw new SyncException("DSA SyncLogs not synced");
-                callbackHandler("DSA SyncLogs not synced");
-            }
-        }
-
-        public async Task SyncUpSearchTerms(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
-        {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (!SfdcConfig.CollectSearchTerms)
-                return;
-
-            callbackHandler("Sync up SearchTerms");
-            var searchTerm = new SearchTerm(_store);
-            var configsState = await searchTerm.SyncUpRecords(callbackHandler, token);
-
-            await CheckAndHandleTokenExpiredSyncState(configsState);
-            if (configsState.Status != SyncState.SyncStatusTypes.Done)
-            {
-                callbackHandler("SearchTerms not synced");
-                //throw new SyncException("SearchTerms not synced");
-            }
-        }
-
-        private async Task CheckAndHandleTokenExpiredSyncState(SyncState syncState)
-        {
-            if (syncState.Status == SyncState.SyncStatusTypes.TokenExpired)
-            {
-                await HandleLogoutTask();
-                throw new SyncException("Token Expired");
-            }
-        } 
+        #endregion
 
         #endregion
     }

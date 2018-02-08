@@ -7,6 +7,7 @@ using DSA.Sfdc.SObjects.Abstract;
 using Salesforce.SDK.SmartStore.Store;
 using Salesforce.SDK.SmartSync.Manager;
 using Salesforce.SDK.SmartSync.Model;
+using System.Text;
 
 namespace DSA.Sfdc.SObjects
 {
@@ -16,12 +17,16 @@ namespace DSA.Sfdc.SObjects
     /// </summary>
     internal class ContentDocument : SObject
     {
+        // Attributes
         internal IndexSpec[] IndexedFieldsForSObjects => new[]
         {
             new IndexSpec("Id", SmartStoreType.SmartString),
             new IndexSpec(Model.Models.ContentDocument.PublishStatusIndexKey, SmartStoreType.SmartString),
             new IndexSpec(Model.Models.ContentDocument.OwnerIdIndexKey, SmartStoreType.SmartString)
         };
+
+        // Properties
+        public List<string> ContentIdList { get; set; }
 
         internal override string SoqlQuery
         {
@@ -56,19 +61,24 @@ namespace DSA.Sfdc.SObjects
                             "LatestPublishedVersion.Description, " +
                             "PublishStatus, " +
                             "OwnerId " +
-                            "FROM ContentDocument " +
-                            "WHERE " +
-                            "LatestPublishedVersion.{0}__Available_Offline__c = true ";
+                            "FROM " +
+                            "ContentDocument " +
+                            "WHERE (PublishStatus='P' AND LatestPublishedVersion.{0}__Available_Offline__c = true{1}) OR (PublishStatus = 'R' AND LatestPublishedVersion.{0}__Available_Offline__c = true)";
 
-                return string.Format(query, Prefix);
+                return string.Format(query, Prefix, GenerateFilter());
             }
         }
 
+        // CTOR
         internal ContentDocument(SmartStore store) : base(store)
         {
-            if (IndexedFieldsForSObjects != null) AddIndexSpecItems(IndexedFieldsForSObjects);
+            if (IndexedFieldsForSObjects != null)
+            {
+                AddIndexSpecItems(IndexedFieldsForSObjects);
+            }
         }
 
+        // Methods
         /// <summary>
         /// Get content documents from local db
         /// </summary>
@@ -76,7 +86,6 @@ namespace DSA.Sfdc.SObjects
         {
             var querySpec = QuerySpec.BuildAllQuerySpec(SoupName, "Id", QuerySpec.SqlOrder.ASC, PageSize).RemoveLimit(Store);
             var results = Store.Query(querySpec, 0);
-
             IList<Model.Models.ContentDocument> macList = results.Select(item => CustomPrefixJsonConvert.DeserializeObject<Model.Models.ContentDocument>(item.ToString())).ToList();
 
             return macList;
@@ -90,12 +99,35 @@ namespace DSA.Sfdc.SObjects
             var target = new SoqlSyncDownTarget(SoqlQuery);
             var page = await target.StartFetch(syncManager, -1);
             var results = new List<Model.Models.ContentDocument>();
+
             while (page != null && page.Count > 0)
             {
                 results.AddRange(page.Select(x => x.ToObject<Model.Models.ContentDocument>()).ToList());
                 page = await target.ContinueFetch(syncManager);
             }
             return results;
+        }
+
+        private string GenerateFilter()
+        {
+            if (ContentIdList.Count == 0)
+            {
+                return string.Empty;
+            }
+            else  // Handle IN creation
+            {
+                StringBuilder idList = new StringBuilder();
+
+                idList.Append(string.Format(" AND (Id in (\'{0}\'", ContentIdList[0]));
+
+                for (var i = 1; i < ContentIdList.Count; i++)
+                {
+                    idList.Append(string.Format(",\'{0}\'", ContentIdList[i]));
+                }
+
+                idList.Append("))");
+                return idList.ToString();
+            }
         }
     }
 }
