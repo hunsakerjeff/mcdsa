@@ -125,18 +125,18 @@ namespace Salesforce.SDK.Net
         /// <param name="url"></param>
         /// <param name="requestBody"></param>
         /// <param name="contentType"></param>
-        public HttpCall(HttpMethod method, HttpCallHeaders headers, string url, string requestBody,
-            ContentTypeValues contentType)
+        public HttpCall(HttpClient client, HttpMethod method, HttpCallHeaders headers, string url, string requestBody, ContentTypeValues contentType)
         {
-            var httpBaseFilter = new HttpBaseProtocolFilter
-            {
-                AllowUI = false,
-                AllowAutoRedirect = true,
-                AutomaticDecompression = true
-            };
-            httpBaseFilter.CacheControl.ReadBehavior = HttpCacheReadBehavior.MostRecent;
-            httpBaseFilter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache;
-            _webClient = new HttpClient(httpBaseFilter);
+            //var httpBaseFilter = new HttpBaseProtocolFilter
+            //{
+            //    AllowUI = false,
+            //    AllowAutoRedirect = true,
+            //    AutomaticDecompression = true
+            //};
+            //httpBaseFilter.CacheControl.ReadBehavior = HttpCacheReadBehavior.MostRecent;
+            //httpBaseFilter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache;
+            //_webClient = new HttpClient(httpBaseFilter);
+            _webClient = client;
             _method = method;
             _headers = headers;
             _url = url;
@@ -227,9 +227,9 @@ namespace Salesforce.SDK.Net
         /// <param name="headers"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static HttpCall CreateGet(HttpCallHeaders headers, string url)
+        public static HttpCall CreateGet(HttpClient client, HttpCallHeaders headers, string url)
         {
-            return new HttpCall(HttpMethod.Get, headers, url, null, ContentTypeValues.None);
+            return new HttpCall(client, HttpMethod.Get, headers, url, null, ContentTypeValues.None);
         }
 
         /// <summary>
@@ -237,9 +237,9 @@ namespace Salesforce.SDK.Net
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static HttpCall CreateGet(string url)
+        public static HttpCall CreateGet(HttpClient client, string url)
         {
-            return CreateGet(null, url);
+            return CreateGet(client, null, url);
         }
 
         /// <summary>
@@ -250,10 +250,9 @@ namespace Salesforce.SDK.Net
         /// <param name="requestBody"></param>
         /// <param name="contentType"></param>
         /// <returns></returns>
-        public static HttpCall CreatePost(HttpCallHeaders headers, string url, string requestBody,
-            ContentTypeValues contentType)
+        public static HttpCall CreatePost(HttpClient client, HttpCallHeaders headers, string url, string requestBody, ContentTypeValues contentType)
         {
-            return new HttpCall(HttpMethod.Post, headers, url, requestBody, contentType);
+            return new HttpCall(client, HttpMethod.Post, headers, url, requestBody, contentType);
         }
 
         /// <summary>
@@ -262,9 +261,9 @@ namespace Salesforce.SDK.Net
         /// <param name="url"></param>
         /// <param name="requestBody"></param>
         /// <returns></returns>
-        public static HttpCall CreatePost(string url, string requestBody)
+        public static HttpCall CreatePost(HttpClient client, string url, string requestBody)
         {
-            return CreatePost(null, url, requestBody, ContentTypeValues.FormUrlEncoded);
+            return CreatePost(client, null, url, requestBody, ContentTypeValues.FormUrlEncoded);
         }
 
         /// <summary>
@@ -486,6 +485,7 @@ namespace Salesforce.SDK.Net
                 }
             }
 
+            // Performance adds
             HttpResponseMessage message;
             if (token.IsCancellationRequested)
             {
@@ -495,8 +495,8 @@ namespace Salesforce.SDK.Net
             try
             {
                 message = await _webClient.SendRequestAsync(req, HttpCompletionOption.ResponseHeadersRead).AsTask(token);
-                await writer.PushToStreamAsync(message.Content.WriteToStreamAsync, message.Content);
                 HandleMessageResponseForBinary(message);
+                await writer.PushToStreamAsync(message.Content.WriteToStreamAsync, message.Content);
             }
             catch (OperationCanceledException oce)
             {
@@ -612,17 +612,18 @@ namespace Salesforce.SDK.Net
 
         public void Dispose()
         {
-            if (_webClient != null)
-            {
-                try
-                {
-                    _webClient.Dispose();
-                }
-                catch (Exception)
-                {
-                    PlatformAdapter.SendToCustomLogger("HttpCall.Dispose - Error occurred while disposing", LoggingLevel.Warning);
-                }
-            }
+            // this does not work like people think.  HttpClient is reentrant and a session object, thus you do not dispose of it.  Its IDisposable does not work that way
+            //if (_webClient != null)
+            //{
+            //    try
+            //    {
+            //        _webClient.Dispose();
+            //    }
+            //    catch (Exception)
+            //    {
+            //        PlatformAdapter.SendToCustomLogger("HttpCall.Dispose - Error occurred while disposing", LoggingLevel.Warning);
+            //    }
+            //}
         }
     }
 }

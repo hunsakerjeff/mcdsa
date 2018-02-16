@@ -302,7 +302,7 @@ namespace Salesforce.SDK.Auth
         /// <param name="loginOptions"></param>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        public static async Task<AuthResponse> RefreshAuthTokenRequest(LoginOptions loginOptions, string refreshToken)
+        public static async Task<AuthResponse> RefreshAuthTokenRequest(HttpClient client, LoginOptions loginOptions, string refreshToken)
         {
             PlatformAdapter.SendToCustomLogger("OAuth2.RefreshAuthTokenRequest - attempting to refresh auth token", LoggingLevel.Verbose);
 
@@ -313,7 +313,7 @@ namespace Salesforce.SDK.Auth
             string refreshUrl = loginOptions.LoginUrl + OauthRefreshPath;
 
             // Post
-            HttpCall c = HttpCall.CreatePost(refreshUrl, argsStr);
+            HttpCall c = HttpCall.CreatePost(client, refreshUrl, argsStr);
 
             // Execute post
             return await c.ExecuteAndDeserialize<AuthResponse>();
@@ -326,14 +326,13 @@ namespace Salesforce.SDK.Auth
         /// </summary>
         /// <param name="account"></param>
         /// <returns>Boolean based on if the refresh auth token succeeded or not</returns>
-        public static async Task<Account> RefreshAuthToken(Account account)
+        public static async Task<Account> RefreshAuthToken(HttpClient client, Account account)
         {
             if (account != null)
             {
                 try
                 {
-                    AuthResponse response =
-                        await RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
+                    AuthResponse response = await RefreshAuthTokenRequest(client, account.GetLoginOptions(), account.RefreshToken);
                     account.AccessToken = response.AccessToken;
                     AuthStorageHelper.GetAuthStorageHelper().PersistCredentials(account);
                 }
@@ -364,7 +363,7 @@ namespace Salesforce.SDK.Auth
         /// <param name="loginOptions"></param>
         /// <param name="refreshToken"></param>
         /// <returns>true if successful</returns>
-        public static async Task<bool> RevokeAuthToken(LoginOptions loginOptions, string refreshToken)
+        public static async Task<bool> RevokeAuthToken(HttpClient client, LoginOptions loginOptions, string refreshToken)
         {
             // Args
             string argsStr = string.Format(OauthRevokeQueryString, new[] {WebUtility.UrlEncode(refreshToken)});
@@ -373,7 +372,7 @@ namespace Salesforce.SDK.Auth
             string revokeUrl = loginOptions.LoginUrl + OauthRevokePath;
 
             // Post
-            HttpCall c = HttpCall.CreatePost(revokeUrl, argsStr);
+            HttpCall c = HttpCall.CreatePost(client, revokeUrl, argsStr);
 
             // Execute post
             HttpCall result = await c.Execute().ConfigureAwait(false);
@@ -447,14 +446,14 @@ namespace Salesforce.SDK.Auth
         /// <param name="idUrl"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public static async Task<IdentityResponse> CallIdentityService(string idUrl, string accessToken)
+        public static async Task<IdentityResponse> CallIdentityService(HttpClient client, string idUrl, string accessToken)
         {
             PlatformAdapter.SendToCustomLogger("OAuth2.CallIdentityService - calling identity service", LoggingLevel.Verbose);
 
             // Auth header
             var headers = new HttpCallHeaders(accessToken, new Dictionary<string, string>());
             // Get
-            HttpCall c = HttpCall.CreateGet(headers, idUrl);
+            HttpCall c = HttpCall.CreateGet(client, headers, idUrl);
 
             // Execute get
             return await c.ExecuteAndDeserialize<IdentityResponse>();

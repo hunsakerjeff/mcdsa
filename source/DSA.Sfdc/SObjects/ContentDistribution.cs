@@ -38,7 +38,8 @@ namespace DSA.Sfdc.SObjects
                             "Name " +
                             "FROM ContentDistribution " +
                             "WHERE " +
-                            "ContentVersion.{0}__Available_Offline__c = true";
+                            "ContentVersion.{0}__Available_Offline__c = true " +
+                            "AND ContentVersion.IsLatest=true";
 
                 return string.Format(query, Prefix);
             }

@@ -90,6 +90,9 @@ namespace DSA.Sfdc.Sync
 
         public async Task ConfigurationFullSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            //Stopwatch swUp = new Stopwatch();
+            //swUp.Start();
+
             var syncUpTasks = new List<Task>
             {
                 SyncUpDsaSyncLogs(callbackHandler, token),
@@ -100,6 +103,10 @@ namespace DSA.Sfdc.Sync
             };
 
             await Task.WhenAll(syncUpTasks);
+            //swUp.Stop();
+
+            //Stopwatch swDown = new Stopwatch();
+            //swDown.Start();
 
             // We have dependencies between the SyncDowns so they need to execute in a specifc order
             var syncDownTasks = new List<Task>
@@ -115,15 +122,20 @@ namespace DSA.Sfdc.Sync
             // Execute these in order
             (SyncCategories(callbackHandler, currentUser, token)).Wait();
             (SyncCategoryContent(callbackHandler, currentUser, false, token)).Wait();
+            //swDown.Stop();
         }
 
         public async Task ContentFullSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            //Stopwatch swMeta = new Stopwatch();
+            //swMeta.Start();
+
             var mobileAppConfgsAttMeta = await SyncAndGetMobileAppConfigsAttMeta(callbackHandler, currentUser, token);
             var categoryMobileConfigAttMeta = await SyncAndGetCategoryMobileConfigAttMeta(callbackHandler, currentUser, token);
             var categoryAttMeta = await SyncAndGetCategoryAttMeta(callbackHandler, currentUser, token);
             var syncResult = await SyncAndGetMetadataOfContentDocumentsInLibraries(callbackHandler, token);
             var contentThumbnailAttMeta = await SyncAndGetContentThumbnailAttMeta(callbackHandler, token);
+            //swMeta.Stop();
 
             var sizeBytesToDownload = 0m;
             sizeBytesToDownload += GetSizeBytesToDownloadAttachmentMetadataHelper(mobileAppConfgsAttMeta);
@@ -135,6 +147,8 @@ namespace DSA.Sfdc.Sync
             await CheckAvailableSpace(sizeBytesToDownload);
             Messenger.Default.Send(new SynchronizationProgressMessage(0m, sizeBytesToDownload));
 
+            //Stopwatch swAtt = new Stopwatch();
+            //swAtt.Start();
             List<Func<Task<bool>>> funcs = new List<Func<Task<bool>>>();
             _funcsToRetry = new List<Func<Task<bool>>>();
             funcs.AddRange(SyncAttachments(callbackHandler, mobileAppConfgsAttMeta, token));
@@ -145,9 +159,19 @@ namespace DSA.Sfdc.Sync
 
             await RunAsyncQueueInBatches(funcs);
             await RunRetryFuncsIfAny();
+            //swAtt.Stop();
 
+            //Stopwatch swIndex = new Stopwatch();
+            //swIndex.Start();
             await SyncIndexesForContentDocuments(callbackHandler, syncResult, token);
+            //swIndex.Stop();
+
+            //Stopwatch swCD = new Stopwatch();
+            //swCD.Start();
             await SyncMetadataOfContentDistribution(callbackHandler, syncResult, true, token);
+            //swCD.Stop();
+
+
         }
 
         #endregion
@@ -758,8 +782,8 @@ namespace DSA.Sfdc.Sync
         {
             var sieve = new DocMetaByOwnershipAndUsageInCategoriesSieve(_store, currentUser);
             var filesUsedInCategoryOrPrivateFilesMeta = contentDocuments.ResultFiltered(sieve);
-
             var contentSize = (long)filesUsedInCategoryOrPrivateFilesMeta.Sum(x => x.ContentSize);
+
             DsaSyncLog.Instance.SetDownloadedFilesInfo(filesUsedInCategoryOrPrivateFilesMeta.Count, contentSize);
 
             var funcs = new List<Func<Task<bool>>>();
@@ -1413,6 +1437,9 @@ namespace DSA.Sfdc.Sync
             }
             while (funcs.Any())
             {
+                Stopwatch swTask = new Stopwatch();
+                swTask.Start();
+
                 Task<bool> task = await Task.WhenAny(tasks);
                 tasks.Remove(task);
                 if (task.IsCanceled || task.IsFaulted)
@@ -1420,6 +1447,7 @@ namespace DSA.Sfdc.Sync
                     break;
                 }
                 DequeueFuncAndRunTask(funcs, 0, tasks);
+                swTask.Stop();
             }
             if (tasks.Any())
             {
@@ -1515,7 +1543,7 @@ namespace DSA.Sfdc.Sync
             try
             {
                 var account = GetCachedAccount();
-                await OAuth2.RefreshAuthToken(account);
+                await OAuth2.RefreshAuthToken(SDKManager.GlobalClientManager.HttpClient, account);
                 OAuth2.RefreshCookies();
                 return true;
             }

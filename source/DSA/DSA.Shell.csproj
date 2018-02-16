@@ -22,7 +22,7 @@
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
     <PackageCertificateThumbprint>7C106D879EA9170C4A89DD214DBE292603615254</PackageCertificateThumbprint>
     <AppxBundle>Never</AppxBundle>
-    <AppxPackageDir>C:\Packages\</AppxPackageDir>
+    <AppxPackageDir>D:\Projects_Clients\SalesForce\Mastercard\packages\</AppxPackageDir>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
