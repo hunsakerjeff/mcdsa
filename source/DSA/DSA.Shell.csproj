@@ -315,15 +315,10 @@
     <Content Include="Assets\AppBar\star_off%402x.png" />
     <Content Include="Assets\AppBar\visual_browser_tab%402x.png" />
     <Content Include="Assets\AppBar\visual_browser_tab.png" />
-    <Content Include="Assets\DAS_Diamond_Logo_ColorTransparent.png" />
-    <Content Include="Assets\DAS_Diamond_Logo_color_whiteText.png" />
     <Content Include="Assets\Default-Landscape~ipad%402x.png" />
     <Content Include="Assets\Default-Portrait~ipad%402x.png" />
     <Content Include="Assets\ico_check-in%402x.png" />
     <Content Include="Assets\ico_check-out%402x.png" />
-    <Content Include="Assets\Logo.scale-140.png" />
-    <Content Include="Assets\Logo.scale-180.png" />
-    <Content Include="Assets\Logo.scale-80.png" />
     <Content Include="Assets\MailIcons\mail%402x.png" />
     <Content Include="Assets\MailIcons\mail_forbidden%402x.png" />
     <Content Include="Assets\MailIcons\mail_marked%402x.png" />
@@ -339,14 +334,13 @@
     <Content Include="Assets\settings.png" />
     <Content Include="Assets\SplashScreen.scale-140.png" />
     <Content Include="Assets\SplashScreen.scale-180.png" />
-    <Content Include="Assets\SplashScreen\SplashScreen.scale-100.png" />
-    <Content Include="Assets\SplashScreen\SplashScreen.scale-140.png" />
-    <Content Include="Assets\SplashScreen\SplashScreen.scale-180.png" />
     <Content Include="Assets\Square150x150Logo.scale-100.png" />
     <Content Include="Assets\Square150x150Logo.scale-140.png" />
     <Content Include="Assets\Square150x150Logo.scale-180.png" />
     <Content Include="Assets\Square150x150Logo.scale-80.png" />
     <Content Include="Assets\Square30x30Logo.scale-100.png" />
+    <Content Include="Assets\StoreLogo.scale-140.png" />
+    <Content Include="Assets\StoreLogo.scale-180.png" />
     <Content Include="Assets\Sync\sync_step_done.png" />
     <Content Include="Assets\Sync\sync_step_progress.png" />
     <Content Include="Assets\Sync\sync_step_waiting.png" />
@@ -646,7 +640,9 @@
       <Name>Salesforce.SDK.Store</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Assets\SplashScreen\" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

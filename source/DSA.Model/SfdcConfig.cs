@@ -12,6 +12,7 @@ namespace DSA.Model
     /// </summary>
     public class SfdcConfig : SalesforceConfig
     {
+        private const string MastercardDSACallbackUrl = @"dsa:///mastercard";
         private static readonly string AppCallbackUri = WebAuthenticationBroker.GetCurrentApplicationCallbackUri().ToString();
 
         private struct OAuthSetting
@@ -44,24 +45,36 @@ namespace DSA.Model
                     UseTwoParamAuthAsyncMethod = false
                 }
             },
+            //{
+            //    "https://das.my.salesforce.com",
+            //    new OAuthSetting
+            //    {
+            //        CallbackUrl = AppCallbackUri,
+            //        ClientId = "3MVG9uudbyLbNPZO8FaeCLakmLYZkB5zRMTilZfI3M_aqXoj6lXhzjCilUohl.GezX4W5C24.qbV50VpCCH_f",
+            //        Options = WebAuthenticationOptions.UseCorporateNetwork,
+            //        UseTwoParamAuthAsyncMethod = true
+            //    }
+            //},
+            //{
+            //    "https://dasus.my.salesforce.com",
+            //    new OAuthSetting
+            //    {
+            //        CallbackUrl = AppCallbackUri,
+            //        ClientId = "3MVG9uudbyLbNPZO8FaeCLakmLYZkB5zRMTilZfI3M_aqXoj6lXhzjCilUohl.GezX4W5C24.qbV50VpCCH_f",
+            //        Options = WebAuthenticationOptions.UseCorporateNetwork,
+            //        UseTwoParamAuthAsyncMethod = true
+            //    }
+            //},
+             // Mastercard settings
+             // production
             {
-                "https://das.my.salesforce.com",
+                "https://mastercard.my.salesforce.com",
                 new OAuthSetting
                 {
-                    CallbackUrl = AppCallbackUri,
-                    ClientId = "3MVG9uudbyLbNPZO8FaeCLakmLYZkB5zRMTilZfI3M_aqXoj6lXhzjCilUohl.GezX4W5C24.qbV50VpCCH_f",
-                    Options = WebAuthenticationOptions.UseCorporateNetwork,
-                    UseTwoParamAuthAsyncMethod = true
-                }
-            },
-            {
-                "https://dasus.my.salesforce.com",
-                new OAuthSetting
-                {
-                    CallbackUrl = AppCallbackUri,
-                    ClientId = "3MVG9uudbyLbNPZO8FaeCLakmLYZkB5zRMTilZfI3M_aqXoj6lXhzjCilUohl.GezX4W5C24.qbV50VpCCH_f",
-                    Options = WebAuthenticationOptions.UseCorporateNetwork,
-                    UseTwoParamAuthAsyncMethod = true
+                    CallbackUrl = MastercardDSACallbackUrl,
+                    ClientId = "3MVG9yZ.WNe6byQArrGXHfKC8Odebkz46h5_viRgVA6IUviZ4jOZZRWNQds0n_OH0m2y7.hUloTQ836aY9iHA",
+                    Options = WebAuthenticationOptions.None,
+                    UseTwoParamAuthAsyncMethod = false
                 }
             }
         };

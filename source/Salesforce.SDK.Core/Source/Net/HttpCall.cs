@@ -414,7 +414,7 @@ namespace Salesforce.SDK.Net
             }
         }
 
-        private async void HandleMessageResponseForBinary(HttpResponseMessage response)
+        private void HandleMessageResponseForBinary(HttpResponseMessage response)
         {
             // End the operation
             try

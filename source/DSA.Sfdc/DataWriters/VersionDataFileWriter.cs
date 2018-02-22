@@ -19,8 +19,8 @@ namespace DSA.Sfdc.DataWriters
     {
         private readonly ContentDocument _meta;
         private readonly long _syncId;
-        //private static byte[] buffer1 = new byte[100000];
-        //private static byte[] buffer2 = new byte[100000];
+        private static byte[] buffer1 = new byte[65536];
+        private static byte[] buffer2 = new byte[65536];
 
         public VersionDataFileWriter(ContentDocument docMeta, long syncId)
         {
@@ -53,42 +53,42 @@ namespace DSA.Sfdc.DataWriters
 
         //        using (var fileStream = await newFile.OpenStreamForWriteAsync())
         //        {
-        //            //    using (var outStream = fileStream.AsOutputStream())
-        //            //    {
-
-        //            using (Stream responseStream = (await content.ReadAsInputStreamAsync()).AsStreamForRead())
+        //            using (var outStream = fileStream.AsOutputStream())
         //            {
-        //                int currentRead = 0;
-        //                byte[] currentBuffer = buffer1;
-        //                byte[] backBuffer = buffer2;
-        //                byte[] tempBuffer = null;
-
-        //                // first read
-        //                currentRead = await responseStream.ReadAsync(currentBuffer, 0, currentBuffer.Length);
-
-        //                do
+        //                using (Stream responseStream = (await content.ReadAsInputStreamAsync()).AsStreamForRead())
         //                {
-        //                    //  Write Buffer 
-        //                    var writeTask = fileStream.WriteAsync(currentBuffer, 0, currentRead);
+        //                    int currentRead = 0;
+        //                    byte[] currentBuffer = buffer1;
+        //                    byte[] backBuffer = buffer2;
+        //                    byte[] tempBuffer = null;
 
-        //                    // Read Network
-        //                    var readTask = responseStream.ReadAsync(backBuffer, 0, backBuffer.Length);
+        //                    // first read
+        //                    currentRead = await responseStream.ReadAsync(currentBuffer, 0, currentBuffer.Length);
 
-        //                    // Wait for completion
-        //                    await Task.WhenAll(writeTask, readTask);
+        //                    do
+        //                    {
+        //                        //  Write Buffer 
+        //                        var writeTask = fileStream.WriteAsync(currentBuffer, 0, currentRead);
 
-        //                    // Swap Buffers
-        //                    tempBuffer = currentBuffer;
-        //                    currentBuffer = backBuffer;
-        //                    backBuffer = tempBuffer;
+        //                        // Read Network
+        //                        var readTask = responseStream.ReadAsync(backBuffer, 0, backBuffer.Length);
 
-        //                    // Update indices
-        //                    currentRead = readTask.Result;
+        //                        // Wait for completion
+        //                        await Task.WhenAll(writeTask, readTask);
+
+        //                        // Swap Buffers
+        //                        tempBuffer = currentBuffer;
+        //                        currentBuffer = backBuffer;
+        //                        backBuffer = tempBuffer;
+
+        //                        // Update indices
+        //                        currentRead = readTask.Result;
+        //                    }
+        //                    while (currentRead != 0);
+
+        //                    // Flush the rest of the data to disk
+        //                    await fileStream.FlushAsync();
         //                }
-        //                while (currentRead != 0);
-
-        //                // Flush the rest of the data to disk
-        //                await fileStream.FlushAsync();
         //            }
         //        }
 
@@ -137,6 +137,5 @@ namespace DSA.Sfdc.DataWriters
                 Debug.WriteLine($"Exception Opening Content Version File For Write {filename} ");
             }
         }
-
     }
 }
