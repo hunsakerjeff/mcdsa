@@ -73,7 +73,7 @@ namespace DSA.Model
                 {
                     CallbackUrl = MastercardDSACallbackUrl,
                     ClientId = "3MVG9yZ.WNe6byQArrGXHfKC8Odebkz46h5_viRgVA6IUviZ4jOZZRWNQds0n_OH0m2y7.hUloTQ836aY9iHA",
-                    Options = WebAuthenticationOptions.None,
+                    Options = WebAuthenticationOptions.UseCorporateNetwork,
                     UseTwoParamAuthAsyncMethod = false
                 }
             }

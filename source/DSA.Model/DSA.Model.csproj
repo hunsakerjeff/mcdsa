@@ -146,10 +146,14 @@
     <Compile Include="Messages\StartStoryboardMessage.cs" />
     <Compile Include="Messages\StopStoryboardMessage.cs" />
     <Compile Include="Messages\SwipeMessage.cs" />
+    <Compile Include="Messages\SynchronizationAutoStartMessage.cs" />
     <Compile Include="Messages\SynchronizationCancelMessage.cs" />
     <Compile Include="Messages\SynchronizationClosePopup.cs" />
     <Compile Include="Messages\SynchronizationCompleteMessage.cs" />
+    <Compile Include="Messages\SynchronizationDetailedProgressMessage.cs" />
+    <Compile Include="Messages\SynchronizationDetailMessage.cs" />
     <Compile Include="Messages\SynchronizationProgressMessage.cs" />
+    <Compile Include="Messages\SynchronizationToggleViewMessage.cs" />
     <Compile Include="Messages\UserLogInMessage.cs" />
     <Compile Include="Enums\SearchMode.cs" />
     <Compile Include="Models\ContentReview.cs" />

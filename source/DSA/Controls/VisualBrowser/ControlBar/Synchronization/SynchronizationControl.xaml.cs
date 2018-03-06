@@ -1,5 +1,8 @@
 ﻿using Windows.Foundation;
 using Windows.UI.Xaml;
+using DSA.Model.Messages;
+using GalaSoft.MvvmLight.Messaging;
+
 
 namespace DSA.Shell.Controls.VisualBrowser.ControlBar.Synchronization
 {
@@ -50,6 +53,12 @@ namespace DSA.Shell.Controls.VisualBrowser.ControlBar.Synchronization
                 this.OverlayPopup.HorizontalOffset = newHorizontalOffset;
                 this.OverlayPopup.VerticalOffset = newVerticalOffset;
             }
+        }
+
+        private void Grid_DoubleTapped(object sender, Windows.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+        {
+            // Send Toggle Message
+            Messenger.Default.Send(new SynchronizationToggleViewMessage());
         }
     }
 }

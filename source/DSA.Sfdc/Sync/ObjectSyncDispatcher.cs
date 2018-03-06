@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation.Diagnostics;
@@ -34,6 +35,7 @@ using MobileAppConfig = DSA.Sfdc.SObjects.MobileAppConfig;
 using NewCategoryContent = DSA.Sfdc.SObjects.NewCategoryContent;
 using Playlist = DSA.Sfdc.SObjects.Playlist;
 using PlaylistContent = DSA.Sfdc.SObjects.PlaylistContent;
+
 
 namespace DSA.Sfdc.Sync
 {
@@ -260,6 +262,7 @@ namespace DSA.Sfdc.Sync
 
         public async Task SyncUpFeaturedPlaylists(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Featured Playlists", false, true);
             callbackHandler("Sync up Featured Playlists");
             var configsState = await Playlist.SyncUpInstance.SyncUpRecords(callbackHandler, token, Playlist.SyncUpInstance.LocalIdChangeHandler);
 
@@ -268,10 +271,12 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("Playlists not synced");
             }
+            SendSyncDetailMessage("Featured Playlists", true, true);
         }
 
         public async Task SyncUpPlaylistContent(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Playlist Content", false, true);
             callbackHandler("Sync up Playlist Content");
             var configsState = await PlaylistContent.SyncUpInstance.SyncUpRecords(callbackHandler, token);
 
@@ -279,10 +284,12 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("Playlist Content not synced");
             }
+            SendSyncDetailMessage("Playlist Content", true, true);
         }
 
         public async Task SyncUpContentReview(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Content Reviews", false, true);
             await Task.Factory.StartNew(async () =>
             {
                 if (!HasInternetConnection())
@@ -292,10 +299,12 @@ namespace DSA.Sfdc.Sync
                 var configsState = await ContentReview.Instance.SyncUpContentReview(token);
                 await CheckAndHandleTokenExpiredSyncState(configsState);
             }, token);
+            SendSyncDetailMessage("Content Reviews", true, true);
         }
 
         public async Task SyncUpEvents(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Events", false, true);
             callbackHandler("Sync up Events");
             var configsState = await Event.Instance.SyncUpRecords(callbackHandler, token);
 
@@ -304,10 +313,12 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("Events not synced");
             }
+            SendSyncDetailMessage("Events", true, true);
         }
 
         public async Task SyncUpDsaSyncLogs(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("DSA SyncLogs", false, true);
             callbackHandler("Sync up DSA SyncLogs");
             var configsState = await DsaSyncLog.Instance.SyncUpRecords(callbackHandler, token);
             if (configsState.Status != SyncState.SyncStatusTypes.Done)
@@ -315,6 +326,7 @@ namespace DSA.Sfdc.Sync
                 //throw new SyncException("DSA SyncLogs not synced");
                 callbackHandler("DSA SyncLogs not synced");
             }
+            SendSyncDetailMessage("DSA SyncLogs", true, true);
         }
 
         public async Task SyncUpSearchTerms(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
@@ -325,6 +337,7 @@ namespace DSA.Sfdc.Sync
                 return;
             }
 
+            SendSyncDetailMessage("Search Terms", false, true);
             callbackHandler("Sync up SearchTerms");
             var searchTerm = new SearchTerm(_store);
             var configsState = await searchTerm.SyncUpRecords(callbackHandler, token);
@@ -335,6 +348,7 @@ namespace DSA.Sfdc.Sync
                 callbackHandler("SearchTerms not synced");
                 //throw new SyncException("SearchTerms not synced");
             }
+            SendSyncDetailMessage("Search Terms", true, true);
         }
 
         #endregion
@@ -344,6 +358,7 @@ namespace DSA.Sfdc.Sync
 
         private async Task SyncMobileAppConfigs(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Mobile App Config", false, false);
             callbackHandler("Sync Mobile App Config");
             var configs = new MobileAppConfig(_store, currentUser);
 
@@ -355,10 +370,12 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("MobileAppConfigs not synced");
             }
+            SendSyncDetailMessage("Mobile App Config", true, false);
         }
 
         private async Task SyncCategoryMobileConfigs(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Category Mobile Configs", false, false);
             callbackHandler("Sync Category Mobile Configs");
             var configs = new CategoryMobileConfig(_store, currentUser);
 
@@ -370,10 +387,13 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("MobileAppConfigs not synced");
             }
+            SendSyncDetailMessage("Category Mobile Configs", true, false);
         }
 
         private async Task SyncCategories(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Categories", false, false);
+
             // Setup variables
             var cmc = new CategoryMobileConfig(_store, currentUser);
             var cmcList = cmc.GetAll().ToList();
@@ -412,10 +432,13 @@ namespace DSA.Sfdc.Sync
                 index += idCount;
                 rem = categoryIdList.Count - index;
             }
+            SendSyncDetailMessage("Categories", true, false);
         }
 
         private async Task SyncCategoryContent(Action<string> callbackHandler, User currentUser, bool saveNew, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Category Content", false, false);
+
             // Setup variables
             var cat = new Category(_store, currentUser);
             var catList = cat.GetAll().ToList();
@@ -461,10 +484,13 @@ namespace DSA.Sfdc.Sync
                 var newCategoryContents = categoryContentAfterSync.Except(categoryContentAfterSync.Join(categoryContentBeforeSync, cc1 => cc1.Id, cc2 => cc2.Id, (cc1, cc2) => cc1)).ToList();
                 NewCategoryContent.Instance.SaveToSoup(newCategoryContents);
             }
+
+            SendSyncDetailMessage("Category Content", true, false);
         }
 
         private async Task SyncContacts(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Contacts", false, false);
             callbackHandler("Sync Contacts");
             var category = new Contact(_store, currentUser);
 
@@ -476,11 +502,13 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("Contacts not synced");
             }
+            SendSyncDetailMessage("Contacts", true, false);
         }
 
         private async Task SyncFeaturedPlaylists(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
             //get playlist which I own or are marked as featured 
+            SendSyncDetailMessage("Featured Playlists", false, false);
             callbackHandler("Sync Featured Playlists");
             var playlist = new Playlist(_store, currentUser);
             var configsState = await playlist.SyncDownRecords(callbackHandler, token);
@@ -488,8 +516,10 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("Playlists not synced");
             }
+            SendSyncDetailMessage("Featured Playlists", true, false);
 
             //get entry subscription it is required to retrieve playlist which are follwed by the user
+            SendSyncDetailMessage("User Subscription", false, false);
             callbackHandler("Sync User Subscription");
             var entity = new EntitySubscription(_store, currentUser);
             configsState = await entity.SyncDownRecords(callbackHandler, token);
@@ -497,8 +527,10 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("User Subscription not synced");
             }
+            SendSyncDetailMessage("User Subscription", true, false);
 
             //get playlist which I follow
+            SendSyncDetailMessage("Followed Playlists", false, false);
             callbackHandler("Sync Followed Playlists");
             playlist.GetPlaylistWhichIFollow = true;
             playlist.DontClearSoup();
@@ -507,8 +539,10 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("Playlists not synced");
             }
+            SendSyncDetailMessage("Followed Playlists", true, false);
 
             //sync playlist Content
+            SendSyncDetailMessage("Playlist Content", false, false);
             callbackHandler("Sync Playlist Content");
             var playlistContent = new PlaylistContent(_store, currentUser);
             configsState = await playlistContent.SyncDownRecords(callbackHandler, token);
@@ -516,18 +550,7 @@ namespace DSA.Sfdc.Sync
             {
                 throw new SyncException("Playlist Content not synced");
             }
-        }
-
-        private List<Func<Task<bool>>> SyncContentThumbnails(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
-        {
-            var metaSyncState = attMetaTransactionResult.SyncState;
-            var funcs = new List<Func<Task<bool>>>();
-
-            foreach (var attMeta in attMetaTransactionResult.Result)
-            {
-                funcs.Add(async () => await SyncContentThumbnailsHelper(attMeta, metaSyncState, callbackHandler, metaSyncState, token));
-            }
-            return funcs;
+            SendSyncDetailMessage("Playlist Content", true, false);
         }
 
         #endregion
@@ -536,6 +559,8 @@ namespace DSA.Sfdc.Sync
         #region Sync Attachment/Content Full Functions
         private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetMobileAppConfigsAttMeta(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Mobile App Configs Metadata", false, false);
+
             // Setup variables
             var mac = new MobileAppConfig(_store, currentUser);
             var macList = mac.GetAll().ToList();    // already unique
@@ -587,11 +612,15 @@ namespace DSA.Sfdc.Sync
 
             SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.MobileAppConfigs);
 
+            SendSyncDetailMessage("Mobile App Configs Metadata", true, false);
+
             return new SyncResult<IList<AttachmentMetadata>>(configsState, macAtt.GetMobileAppConfigAttachmentsFromSoup());
         }
 
         private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetCategoryMobileConfigAttMeta(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Category Mobile Config Metadata", false, false);
+
             // Setup variables
             var cmc = new CategoryMobileConfig(_store, currentUser);
             var cmcList = cmc.GetAll().ToList();    // already unique
@@ -644,12 +673,16 @@ namespace DSA.Sfdc.Sync
             // Saving metadata successful sync
             SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.CategoryMobileConfigs);
 
+            SendSyncDetailMessage("Category Mobile Config Metadata", true, false);
+
             // Create task List
             return new SyncResult<IList<AttachmentMetadata>>(configsState, cmcAtt.GetCategoryMobileAttachmentsFromSoup());
         }
 
         private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetCategoryAttMeta(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Category Metadata", false, false);
+
             // Setup variables
             var category = new Category(_store, currentUser);
             var categoryList = category.GetAll().ToList();    // already unique
@@ -702,12 +735,16 @@ namespace DSA.Sfdc.Sync
             // Saving metadata successful sync
             SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.MobileAppConfigs);
 
+            SendSyncDetailMessage("Category Metadata", true, false);
+
             // Create task List
             return new SyncResult<IList<AttachmentMetadata>>(configsState, categoryAtt.GetCategoryAttachmentsFromSoup());
         }
 
         private async Task<SyncResult<IList<Model.Models.ContentDocument>>> SyncAndGetMetadataOfContentDocumentsInLibraries(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Metadata of Content Documents", false, false);
+
             // Setup variables
             var categoryContent = new CategoryContent(_store);
             var categoryContentList = categoryContent.GetAll().ToList();    // already unique
@@ -761,6 +798,8 @@ namespace DSA.Sfdc.Sync
             // saving metadata successful sync
             SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.ContentDocuments);
 
+            SendSyncDetailMessage("Metadata of Content Documents", true, false);
+
             // Create task List
             return new SyncResult<IList<Model.Models.ContentDocument>>(configsState, contentDocument.GetContentDocumentsFromSoup());
         }
@@ -798,9 +837,13 @@ namespace DSA.Sfdc.Sync
 
         private async Task SyncIndexesForContentDocuments(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Indexes for Content Documents", false, false);
+
             callbackHandler("Sync Indexes for content Documents");
             var saveIndexesTasks = contentDocuments.Result.AsEnumerable().Select(doc => SaveSearchIndexesToSoup(doc, token));
             await Task.WhenAll(saveIndexesTasks);
+
+            SendSyncDetailMessage("Indexes for Content Documents", true, false);
         }
 
         private async Task SyncMetadataOfContentDistribution(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, bool fullSync, CancellationToken token = default(CancellationToken))
@@ -808,6 +851,7 @@ namespace DSA.Sfdc.Sync
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (SfdcConfig.EmailOnlyContentDistributionLinks)
             {
+                SendSyncDetailMessage("Metadata Of Content Distribution", false, false);
                 callbackHandler("Sync Metadata Of Content Distribution");
                 var meta = new ContentDistribution(_store, fullSync);
                 var configsState = await meta.SyncDownRecords(callbackHandler, token);
@@ -819,11 +863,14 @@ namespace DSA.Sfdc.Sync
                 SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(configsState, SuccessfulSyncState.SyncedObjectMetaType.ContentDistribution);
 
                 await meta.ClearNotNeededContentDistribution(contentDocuments.Result);
+
+                SendSyncDetailMessage("Metadata Of Content Distribution", true, false);
             }
         }
 
         private async Task<SyncResult<IList<AttachmentMetadata>>> SyncAndGetContentThumbnailAttMeta(Action<string> callbackHandler, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Metadata Of Content Thumbnail", false, false);
             callbackHandler("Sync Metadata Of Content Thumbnail attachments");
             var contentThumbnailsAtt = new ContentThumbnailAttachment(_store);
 
@@ -839,9 +886,22 @@ namespace DSA.Sfdc.Sync
             // FIXME: should Content Thumbnails have their own meta type?
             SuccessfulSyncState.Instance.SaveStateToSoupForMetaTransaction(contentThumbnailsState, SuccessfulSyncState.SyncedObjectMetaType.ContentThumbnails);
 
+            SendSyncDetailMessage("Metadata Of Content Thumbnail", true, false);
+
             return new SyncResult<IList<AttachmentMetadata>>(contentThumbnailsState, contentThumbnailsAtt.GetContentThumbnailAttachmentsFromSoup());
         }
 
+        private List<Func<Task<bool>>> SyncContentThumbnails(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
+        {
+            var metaSyncState = attMetaTransactionResult.SyncState;
+            var funcs = new List<Func<Task<bool>>>();
+
+            foreach (var attMeta in attMetaTransactionResult.Result)
+            {
+                funcs.Add(async () => await SyncContentThumbnailsHelper(attMeta, metaSyncState, callbackHandler, metaSyncState, token));
+            }
+            return funcs;
+        }
         #endregion
 
 
@@ -886,11 +946,15 @@ namespace DSA.Sfdc.Sync
 
         private async Task SyncIndexesForContentDocumentsDelta(Action<string> callbackHandler, SyncResult<IList<Model.Models.ContentDocument>> contentDocuments, CancellationToken token = default(CancellationToken))
         {
+            SendSyncDetailMessage("Indexes for Content Documents", false, false);
+
             callbackHandler("Sync Indexes for content Documents");
             var sieve = new DocIndexDeltaSieve(_store);
             var documentsWithNewIndexes = await contentDocuments.ResultFilteredAsync(sieve);
             var saveIndexesTasks = documentsWithNewIndexes.Select(doc => SaveSearchIndexesToSoup(doc, token));
             await Task.WhenAll(saveIndexesTasks);
+
+            SendSyncDetailMessage("Indexes for Content Documents", true, false);
 
             //TODO: Remove from soup tags removed data from salesforce
         }
@@ -927,6 +991,9 @@ namespace DSA.Sfdc.Sync
             callbackHandler($"Getting attachment { attMeta.Name } ... on Thread " + Environment.CurrentManagedThreadId);
             var outStream = new AttachmentFileWriter(attMeta, syncState.Id);
             var att = new AttachmentBody(_store, attMeta);
+
+            // Post Detailed Message
+            Messenger.Default.Send(new SynchronizationDetailedProgressMessage(attMeta.Name, attMeta.BodyLength));
 
             var isDownlSucc = false;
             var task = att.SyncDownAndSaveAttachment(callbackHandler, outStream, token);
@@ -1002,6 +1069,9 @@ namespace DSA.Sfdc.Sync
 
                     var outStream = new VersionDataFileWriter(docMeta, syncState.Id);
                     var vd = new VersionData(_store, docMeta);
+
+                    // Post Detailed Message
+                    Messenger.Default.Send(new SynchronizationDetailedProgressMessage(docMeta.Title, docMeta.ContentSize));
 
                     var vdState = false;
                     var task = vd.SyncDownAndSaveVersionData(callbackHandler, outStream, token);
@@ -1084,6 +1154,9 @@ namespace DSA.Sfdc.Sync
             callbackHandler($"Getting content thumbnail { attMeta.Name } ... on Thread " + Environment.CurrentManagedThreadId);
             var outStream = new ContentThumbnailFileWriter(attMeta, syncState.Id);
             var att = new AttachmentBody(_store, attMeta);
+
+            // Post Detailed Message
+            Messenger.Default.Send(new SynchronizationDetailedProgressMessage(attMeta.Name, attMeta.BodyLength));
 
             var isDownlSucc = false;
             var task = att.SyncDownAndSaveAttachment(callbackHandler, outStream, token);
@@ -1557,6 +1630,16 @@ namespace DSA.Sfdc.Sync
         public Account GetCachedAccount()
         {
             return AccountManager.GetAccount();
+        }
+
+        private void SendSyncDetailMessage(string input, bool finish, bool up)
+        {
+            // Senmds a detailed message to the UI
+            StringBuilder sb = new StringBuilder("Object Sync");
+            sb.Append((up) ? " up " : " ");
+            sb.Append((finish) ? "Complete for:  " : "Began for:  ");
+            sb.Append(input);
+            Messenger.Default.Send(new SynchronizationDetailMessage(sb.ToString()));
         }
 
         #endregion

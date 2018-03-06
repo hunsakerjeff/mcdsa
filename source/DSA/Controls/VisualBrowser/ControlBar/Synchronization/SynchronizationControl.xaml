@@ -88,17 +88,15 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <Popup x:Name="OverlayPopup" LayoutUpdated="OnGridLayoutUpdated"
-               IsOpen="{Binding IsPopupOpen}">
+        <Popup x:Name="OverlayPopup" LayoutUpdated="OnGridLayoutUpdated" IsOpen="{Binding IsPopupOpen}">
             <Grid x:Name="OverlayGrid" >
                 <Grid.Background>
                     <SolidColorBrush Color="Black" Opacity="0.3"/>
                 </Grid.Background>
             </Grid>
         </Popup>
-        <Popup x:Name="MCPopup" LayoutUpdated="OnLayoutUpdated"
-            IsOpen="{Binding IsPopupOpen}" >
-            <Grid x:Name="gdChild" Background="White" Width="725" Height="300">
+        <Popup x:Name="MCPopup" LayoutUpdated="OnLayoutUpdated" IsOpen="{Binding IsPopupOpen}" >
+            <Grid x:Name="gdChild" Background="White" Width="725" Height="300"  DoubleTapped="Grid_DoubleTapped">
                 <Grid Margin="60,15">
                     <Grid.RowDefinitions>
                         <RowDefinition />
@@ -110,7 +108,7 @@
                             <SolidColorBrush Color="#FF05678E" />
                         </TextBlock.Foreground>
                     </TextBlock>
-                    <Grid Grid.Row="1">
+                    <Grid Grid.Row="1" Visibility="{Binding IsStandardView, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
                             <ColumnDefinition />
@@ -130,8 +128,19 @@
                             <synchronization:SynchronizationStepControl DataContext="{Binding FinishingStep}" />
                         </Grid>
                     </Grid>
+                    <Grid Grid.Row="1" Visibility="{Binding IsDetailView, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding DetailMsgName}" Margin="0,10,0,0" Foreground="Black" />
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding DetailMsgProgress}" Margin="0,10,0,0" Foreground="Black" />
+                    </Grid>
+
+                    <!--<TextBlock Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding ResultsMessage}" Margin="0,10,0,0" Foreground="Black"/>
+                    <ProgressBar Grid.Row="2" Value="{Binding PercentageDownloaded}" Margin="0,10,0,15" Maximum="100" Height="15" IsIndeterminate="False" Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#FF60C2EA" BorderThickness="1" BorderBrush="#FF60C2EA" />-->
+                    <ProgressBar Grid.Row="2" Value="{Binding PercentageDownloaded}" Margin="0,10,0,15" Maximum="100" Height="15" IsIndeterminate="False" Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#FF00bfff" BorderThickness="1" BorderBrush="#FF00bfff" Background="#fff5f5f5" />
                     <TextBlock Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding ResultsMessage}" Margin="0,10,0,0" Foreground="Black"/>
-                    <ProgressBar Grid.Row="2" Value="{Binding PercentageDownloaded}" Margin="0,10,0,15" Maximum="100" Height="15" IsIndeterminate="False" Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#FF60C2EA" BorderThickness="1" BorderBrush="#FF60C2EA" />
                     <Button Grid.Row="2" Style="{StaticResource CloseCancelButton}" Content="{Binding CloseCancelButtonContent}" Command="{Binding CancelSynchronizationCommand}"/>
                 </Grid>
             </Grid>
