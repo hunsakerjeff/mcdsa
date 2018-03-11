@@ -78,7 +78,19 @@ namespace DSA.Model
                 }
             }
         };
-        
+
+        // Attributes
+        private bool _useAutoSync = true;
+
+        /// <summary>
+        /// bool sets whether we use autosync or not which does Delta syncs in the background in the event of new content
+        /// </summary>
+        public bool UseAutoAsync
+        {
+            get { return _useAutoSync; }
+            set { _useAutoSync = value; }
+        }
+
         public override string ClientId
         {
             get { return "3MVG9yZ.WNe6byQArrGXHfKC8Odebkz46h5_viRgVA6IUviZ4jOZZRWNQds0n_OH0m2y7.hUloTQ836aY9iHA"; }

@@ -320,7 +320,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser
                 });
         }
 
-        protected override void OnAfterSynchronizationFinished(SynchronizationMode mode)
+        protected override void OnAfterSynchronizationFinished(SynchronizationMode mode, bool AutoSync)
         {
             if (mode == SynchronizationMode.Initial)
             {
@@ -329,7 +329,10 @@ namespace DSA.Shell.ViewModels.VisualBrowser
             }
             else
             {
-                _dialogService.ShowMessage("Synchronization completed successfully", "Synchronization completed");
+                if (!AutoSync)
+                {
+                    _dialogService.ShowMessage("Synchronization completed successfully", "Synchronization completed");
+                }
             }
             Task.Factory.StartNew(AttachmentsFolder.Instance.DeleteOldVersionsWithContent);
             Task.Factory.StartNew(VersionDataFolder.Instance.DeleteOldVersionsWithContent);

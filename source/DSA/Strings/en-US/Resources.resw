@@ -250,4 +250,7 @@
   <data name="Section2UnderTitle.Text" xml:space="preserve">
     <value>Quisque in porta lorem dolor amet sed consectetuer ising elit, sed diam non my nibh uis mod wisi quip.</value>
   </data>
+  <data name="UseAutoSync" xml:space="preserve">
+    <value>Use Auto Sync</value>
+  </data>
 </root>

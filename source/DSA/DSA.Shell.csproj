@@ -255,8 +255,12 @@
     <Compile Include="Common\ThumbnailIconResolver.cs" />
     <Compile Include="Behaviors\MediaControlTemplateSelector.cs" />
     <Compile Include="Behaviors\PersonalLibraryTemplateSelector.cs" />
+    <Compile Include="Settings\MainSettingsFlyout.xaml.cs">
+      <DependentUpon>MainSettingsFlyout.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\Abstract\BaseMediaItemViewModel.cs" />
     <Compile Include="ViewModels\Common\NewContentBarViewModel.cs" />
+    <Compile Include="ViewModels\Settings\MainSettingsFlyoutViewModel.cs" />
     <Compile Include="ViewModels\Search\SearchItemViewModel.cs" />
     <Compile Include="ViewModels\Search\SearchPageViewModel.cs" />
     <Compile Include="ViewModels\Spotlight\SpotlightGroupList.cs" />
@@ -527,6 +531,10 @@
     <Page Include="Pages\MenuBrowserPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Settings\MainSettingsFlyout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Skins\MainSkin.xaml">
       <Generator>MSBuild:Compile</Generator>

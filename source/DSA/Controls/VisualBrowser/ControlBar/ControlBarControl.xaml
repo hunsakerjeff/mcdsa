@@ -81,6 +81,8 @@
                     <MenuFlyoutSeparator/>
                     <common1:DSAMenuFlyoutItem  Icon="ms-appx:///Assets/MenuIcons/about-btn-icon-report@2x.png" Text="Report a Problem" Command="{Binding ReportProblemCommand}" Style="{StaticResource DSAMenuFlyoutItemStyle}" />
                     <common1:DSAMenuFlyoutItem  Icon="ms-appx:///Assets/MenuIcons/about-btn-about@2x.png" Text="About DSA" Command="{Binding ShowHideAboutCommand}" Style="{StaticResource DSAMenuFlyoutItemStyle}" />
+                    <MenuFlyoutSeparator/>
+                    <common1:DSAMenuFlyoutItem  Icon="ms-appx:///Assets/MenuIcons/about-btn-about@2x.png" Text="DSA Settings" Command="{Binding ShowMainSettingsFlyoutCommand}" Style="{StaticResource DSAMenuFlyoutItemStyle}" />
                 </MenuFlyout>
             </Button.Flyout>
         </Button>

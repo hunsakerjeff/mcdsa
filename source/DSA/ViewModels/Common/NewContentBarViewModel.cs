@@ -1,8 +1,12 @@
 ﻿using DSA.Data.Interfaces;
+using DSA.Model;
 using DSA.Model.Messages;
 using DSA.Sfdc.Sync;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
+using Salesforce.SDK.Auth;
+using Salesforce.SDK.Source.Settings;
+using System;
 
 namespace DSA.Shell.ViewModels.Common
 {
@@ -27,10 +31,22 @@ namespace DSA.Shell.ViewModels.Common
                 }
 
                 var hasNewContent = await ObjectSyncDispatcher.Instance.NewContentAvaliable();
-                if(hasNewContent)
+                if (hasNewContent)
                 {
-                    Messenger.Default.Send(new StartStoryboardMessage { StoryboardName = "NewContentAnimation", LoopForever = false });
-                    Messenger.Default.Send(new NewContentAvaliableMessage());
+                    SfdcConfig config = (SfdcConfig)SDKManager.ServerConfiguration;
+                    if (config.UseAutoAsync)
+                    {
+                        // requested to not autosync on Fridays
+                        if ((DateTime.Now).DayOfWeek != DayOfWeek.Friday)
+                        {
+                            Messenger.Default.Send(new SynchronizationAutoStartMessage());
+                        }
+                    }
+                    else
+                    {
+                        Messenger.Default.Send(new StartStoryboardMessage { StoryboardName = "NewContentAnimation", LoopForever = false });
+                        Messenger.Default.Send(new NewContentAvaliableMessage());
+                    }
                 }
             });
         }

@@ -19,6 +19,7 @@ using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight.Threading;
 using GalaSoft.MvvmLight.Views;
 using WinRTXamlToolkit.Tools;
+using DSA.Shell.Settings;
 
 namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
 {
@@ -409,6 +410,21 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                         IsAboutPopupOpen = IsAboutPopupOpen == false;
 
                     }));
+            }
+        }
+
+        private RelayCommand _showMainSettingsFlyoutCommand;
+        public RelayCommand ShowMainSettingsFlyoutCommand
+        {
+            get
+            {
+                return _showMainSettingsFlyoutCommand ?? (_showMainSettingsFlyoutCommand = new RelayCommand(
+                    () =>
+                    {
+                        var flyout = new MainSettingsFlyout();
+                        flyout.ShowIndependent();
+                    }
+                    ));
             }
         }
 

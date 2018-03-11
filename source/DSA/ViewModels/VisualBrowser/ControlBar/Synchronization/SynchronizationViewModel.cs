@@ -156,7 +156,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
 
 
         // Implementation - Public Functions
-        public async Task StartSynchronization()
+        public async Task StartSynchronization(bool autoSync)
         {
             _settingsDataService.InSynchronizationInProgress = true;
 
@@ -170,9 +170,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
 
                 _syncLogService.StartSynchronization(Mode);
 
-                var syncTask = Mode == SynchronizationMode.Full || Mode == SynchronizationMode.Initial
-                    ? ProcessFullSynchronizationSteps(_tokenSource.Token)
-                    : ProcessDeltaSynchronizationSteps(_tokenSource.Token);
+                var syncTask = Mode == SynchronizationMode.Full || Mode == SynchronizationMode.Initial ? ProcessFullSynchronizationSteps(_tokenSource.Token) : ProcessDeltaSynchronizationSteps(_tokenSource.Token);
                 var isSuccess = await syncTask.ContinueWith(
                         (task) =>
                         {
@@ -194,7 +192,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
                         },
                         _tokenSource.Token);
 
-                FinishSync(isSuccess);
+                FinishSync(isSuccess, autoSync);
 
             }, _tokenSource.Token);
         }
@@ -212,7 +210,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
 
                 ResetSteps();
                 ResetProgress();
-                Task.Factory.StartNew(StartSynchronization);
+                Task.Factory.StartNew(() => StartSynchronization(false));
             }
         }
 
@@ -361,6 +359,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
                 DetailMsgName = m.Message;
+                DetailMsgProgress = "";
             }));
 
             // Handle Detail Content View
@@ -369,9 +368,6 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
             {
                 string msg = "Downloading " + m.ItemName;
                 decimal convertToMB = 1048576.0M;  // 1024 * 1024
-
-                // Format output message
-                DetailMsgName = msg;
 
                 // Handle the percentage
                 StringBuilder sb = new StringBuilder();
@@ -382,8 +378,21 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
                 //sb.AppendLine();
                 // add speed here
 
+                // Format output message
+                DetailMsgName = msg;
                 DetailMsgProgress = sb.ToString();
             }));
+
+            // Handle Auto Sync
+            Messenger.Default.Register<SynchronizationAutoStartMessage>(this, (m) =>
+            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            {
+                ResetSteps();
+                ResetProgress();
+                Mode = SynchronizationMode.Delta;
+                Task.Factory.StartNew(() => StartSynchronization(true));
+            }));
+
 
             // Handle general progress
             Messenger.Default.Register<SynchronizationProgressMessage>(this, (m) =>
@@ -429,7 +438,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
                         _syncLogService.SynchronizationFailed(aggregateException);
                         ShowErrorMessageBoxIfNeeded(aggregateException);
                     }
-                    FinishSync(false);
+                    FinishSync(false, false);
                 }
             }));
         }
@@ -453,7 +462,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
             PercentageDownloaded = 0d;
         }
 
-        private void FinishSync(bool isSuccess)
+        private void FinishSync(bool isSuccess, bool autoSync)
         {
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
@@ -466,7 +475,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar.Synchronization
 
             if (isSuccess)
             {
-                Messenger.Default.Send(new SynchronizationFinished() { Mode = Mode });
+                Messenger.Default.Send(new SynchronizationFinished() { Mode = Mode, AutoSync = autoSync });
                 Messenger.Default.Unregister(this);
             }
 

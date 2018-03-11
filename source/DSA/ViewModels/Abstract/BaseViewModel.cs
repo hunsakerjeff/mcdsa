@@ -28,7 +28,7 @@ namespace DSA.Shell.ViewModels.Abstract
            {
                await InitializeBase();
                await Initialize();
-               OnAfterSynchronizationFinished(m.Mode);
+               OnAfterSynchronizationFinished(m.Mode, m.AutoSync);
            }));
 
             Messenger.Default.Register<MobileConfigurationChangedMessage>(this, (m) => 
@@ -49,7 +49,7 @@ namespace DSA.Shell.ViewModels.Abstract
             Messenger.Default.Register<InternalModeMessage>(this, (m) => IsInternalModeEnable = m.IsEnable);
         }
 
-        protected virtual void OnAfterSynchronizationFinished(SynchronizationMode mode)
+        protected virtual void OnAfterSynchronizationFinished(SynchronizationMode mode, bool AutoSync)
         {
 
         }

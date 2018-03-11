@@ -1510,8 +1510,8 @@ namespace DSA.Sfdc.Sync
             }
             while (funcs.Any())
             {
-                Stopwatch swTask = new Stopwatch();
-                swTask.Start();
+                //Stopwatch swTask = new Stopwatch();
+                //swTask.Start();
 
                 Task<bool> task = await Task.WhenAny(tasks);
                 tasks.Remove(task);
@@ -1520,7 +1520,7 @@ namespace DSA.Sfdc.Sync
                     break;
                 }
                 DequeueFuncAndRunTask(funcs, 0, tasks);
-                swTask.Stop();
+                //swTask.Stop();
             }
             if (tasks.Any())
             {
@@ -1634,7 +1634,7 @@ namespace DSA.Sfdc.Sync
 
         private void SendSyncDetailMessage(string input, bool finish, bool up)
         {
-            // Senmds a detailed message to the UI
+            // Sends a detailed message to the UI
             StringBuilder sb = new StringBuilder("Object Sync");
             sb.Append((up) ? " up " : " ");
             sb.Append((finish) ? "Complete for:  " : "Began for:  ");
