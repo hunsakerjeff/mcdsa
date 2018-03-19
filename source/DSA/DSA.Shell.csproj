@@ -122,6 +122,12 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Logging\AsyncLock.cs" />
+    <Compile Include="Logging\LogEvent.cs" />
+    <Compile Include="Logging\LogFileTarget.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\LoggingConfig.cs" />
+    <Compile Include="Logging\LoggingServices.cs" />
     <Compile Include="Controls\Common\DSAMenuFlyoutItem.cs" />
     <Compile Include="Controls\Media\UrlWebViewControl.xaml.cs">
       <DependentUpon>UrlWebViewControl.xaml</DependentUpon>
@@ -152,6 +158,9 @@
     <Compile Include="Common\NavigationHelper.cs" />
     <Compile Include="Behaviors\OrientationStateControlBehavior.cs" />
     <Compile Include="Converters\DateTimeFormatConverter.cs" />
+    <Compile Include="Logging\LogTarget.cs" />
+    <Compile Include="Logging\RollingFileTarget.cs" />
+    <Compile Include="Logging\TargetBinding.cs" />
     <Compile Include="Pages\Abstract\PageBase.cs" />
     <Compile Include="Common\SuspensionManager.cs" />
     <Compile Include="Controls\Abstract\UserControlBase.cs" />
@@ -545,9 +554,6 @@
     <SDKReference Include="BehaviorsXamlSDKManaged, Version=12.0">
       <Name>Behaviors SDK %28XAML%29</Name>
     </SDKReference>
-    <SDKReference Include="Microsoft.VCLibs, Version=12.0">
-      <Name>Microsoft Visual C++ 2013 Runtime Package for Windows</Name>
-    </SDKReference>
     <SDKReference Include="SQLite.WinRT81, Version=3.22.0">
       <Name>SQLite for Windows Runtime %28Windows 8.1%29</Name>
     </SDKReference>
@@ -579,6 +585,14 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PCLStorage, Version=0.9.6.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
+      <HintPath>..\packages\PCLStorage.0.9.6\lib\portable-win8+wpa81\PCLStorage.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PCLStorage.Abstractions, Version=0.9.6.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
+      <HintPath>..\packages\PCLStorage.0.9.6\lib\portable-win8+wpa81\PCLStorage.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SQLitePCL, Version=3.8.7.2, Culture=neutral, PublicKeyToken=bddade01e9c850c5, processorArchitecture=MSIL">
@@ -663,6 +677,11 @@
     <Error Condition="!Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets'))" />
   </Target>
   <Import Project="..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets" Condition="Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets')" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
   <!-- 
   <PropertyGroup>
     <SDKReferenceDirectoryRoot>$(SolutionDir)Libs\ExtensionSDKs;$(SDKReferenceDirectoryRoot)</SDKReferenceDirectoryRoot>

@@ -127,15 +127,6 @@ namespace Salesforce.SDK.Net
         /// <param name="contentType"></param>
         public HttpCall(HttpClient client, HttpMethod method, HttpCallHeaders headers, string url, string requestBody, ContentTypeValues contentType)
         {
-            //var httpBaseFilter = new HttpBaseProtocolFilter
-            //{
-            //    AllowUI = false,
-            //    AllowAutoRedirect = true,
-            //    AutomaticDecompression = true
-            //};
-            //httpBaseFilter.CacheControl.ReadBehavior = HttpCacheReadBehavior.MostRecent;
-            //httpBaseFilter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache;
-            //_webClient = new HttpClient(httpBaseFilter);
             _webClient = client;
             _method = method;
             _headers = headers;

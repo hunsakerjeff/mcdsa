@@ -136,6 +136,11 @@ namespace DSA.Sfdc.DataWriters
                 PlatformAdapter.SendToCustomLogger(uae, LoggingLevel.Error);
                 Debug.WriteLine($"Exception Opening Content Version File For Write {filename} ");
             }
+            catch (Exception ex)
+            {
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
+                Debug.WriteLine($"Exception Opening Content Version File For Write {filename} ");
+            }
         }
     }
 }

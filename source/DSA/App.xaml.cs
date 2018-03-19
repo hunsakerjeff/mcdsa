@@ -17,6 +17,7 @@ using Salesforce.SDK.App;
 using Salesforce.SDK.Auth;
 using Salesforce.SDK.Exceptions;
 using Salesforce.SDK.Source.Security;
+using DSA.Shell.Logging;
 
 namespace DSA.Shell
 {
@@ -33,9 +34,17 @@ namespace DSA.Shell
 
             PlatformAdapter.Resolve<ISFApplicationHelper>().Initialize();
 
+            // Set the custom log action function
+            LoggingServices ls = LoggingServices.Instance;
+            ls.Initialize();
+            PlatformAdapter.SetCustomLoggerAction(LoggingServices.LogAction);
+
             InitializeComponent();
             Suspending += OnSuspending;
             Resuming += OnResuming;
+
+            // setup the global crash handler... (MetroLog)
+            //GlobalCrashHandler.Configure();
         }
 
         /// <summary>
