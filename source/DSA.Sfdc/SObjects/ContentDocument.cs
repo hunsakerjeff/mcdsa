@@ -72,6 +72,9 @@ namespace DSA.Sfdc.SObjects
         // CTOR
         internal ContentDocument(SmartStore store) : base(store)
         {
+            // Allocate new list
+            ContentIdList = new List<string>();
+
             if (IndexedFieldsForSObjects != null)
             {
                 AddIndexSpecItems(IndexedFieldsForSObjects);

@@ -32,7 +32,7 @@ namespace DSA.Sfdc.SObjects
                             "Id,LastModifiedDate,{0}__Category__c,{0}__ContentId__c " +
                             "FROM " +
                             "{0}__Cat_Content_Junction__c " +
-                            "WHERE ({0}__Category__c in {1}";  // WHERE/IN filter
+                            "{1}";  // WHERE/IN filter
 
                 return string.Format(query, Prefix, GenerateFilter());
             }
@@ -41,6 +41,9 @@ namespace DSA.Sfdc.SObjects
         // CTOR
         internal CategoryContent(SmartStore store) : base(store)
         {
+            // Allocate new list
+            CategoryIdList = new List<string>();
+
             if (IndexedFieldsForSObjects != null)
             {
                 AddIndexSpecItems(IndexedFieldsForSObjects);
@@ -78,6 +81,8 @@ namespace DSA.Sfdc.SObjects
             }
             else  // Handle IN creation
             {
+
+
                 StringBuilder idList = new StringBuilder();
                 idList.Append(string.Format("(\'{0}\'", CategoryIdList[0]));
 
@@ -87,7 +92,7 @@ namespace DSA.Sfdc.SObjects
                 }
 
                 idList.Append("))");
-                return idList.ToString();
+                return string.Format("WHERE ({0}__Category__c in {1}", Prefix, idList.ToString());
             }
         }
     }

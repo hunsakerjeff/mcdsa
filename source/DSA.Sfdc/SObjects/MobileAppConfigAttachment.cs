@@ -39,6 +39,9 @@ namespace DSA.Sfdc.SObjects
         // CTOR
         internal MobileAppConfigAttachment(SmartStore store) : base(store)
         {
+            // Allocate new list
+            MacIdList = new List<string>();
+
             if (IndexedFieldsForSObjects != null)
             {
                 AddIndexSpecItems(IndexedFieldsForSObjects);

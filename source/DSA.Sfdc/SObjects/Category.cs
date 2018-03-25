@@ -45,6 +45,9 @@ namespace DSA.Sfdc.SObjects
         // CTOR
         internal Category(SmartStore store, User currentUserPredicate) : base(store)
         {
+            // Allocate new list
+            CategoryIdList = new List<string>();
+
             if (currentUserPredicate == null || currentUserPredicate is NullUser)
             {
                 throw new ArgumentNullException(nameof(User), "Parameter currentUserPredicate must be concrete not null object");

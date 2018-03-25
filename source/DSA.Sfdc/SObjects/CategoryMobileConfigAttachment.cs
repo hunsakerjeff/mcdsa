@@ -39,6 +39,9 @@ namespace DSA.Sfdc.SObjects
         // CTOR
         internal CategoryMobileConfigAttachment(SmartStore store) : base(store)
         {
+            // Allocate new list
+            CmcIdList = new List<string>();
+
             if (IndexedFieldsForSObjects != null)
             {
                 AddIndexSpecItems(IndexedFieldsForSObjects);

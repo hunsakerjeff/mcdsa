@@ -39,6 +39,9 @@ namespace DSA.Sfdc.SObjects
         // CTOR
         internal CategoryAttachment(SmartStore store) : base(store)
         {
+            // Allocate new list
+            CategoryIdList = new List<string>();
+
             if (IndexedFieldsForSObjects != null)
             {
                 AddIndexSpecItems(IndexedFieldsForSObjects);
