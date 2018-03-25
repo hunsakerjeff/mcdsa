@@ -320,14 +320,28 @@ namespace DSA.Shell.ViewModels.VisualBrowser
                 });
         }
 
-        protected override void OnAfterSynchronizationFinished(SynchronizationMode mode, bool AutoSync)
+        protected override async void OnAfterSynchronizationFinished(SynchronizationMode mode, bool AutoSync)
         {
+            // Handle the initial sync
             if (mode == SynchronizationMode.Initial)
             {
+                // Clear out current MAC ID config
                 SettingsDataService.ClearCurrentMobileConfigurationID();
-                ControlBarViewModel.IsSelectConfigurationPopupOpen = true;
+
+                // Check count of MACs
+                var configurations = await _mobileAppConfigDataService.GetMobileAppConfigs();
+                if (configurations.Count >= 1)
+                {
+                    // Pop the control open to select an appropriate MAC
+                    ControlBarViewModel.IsSelectConfigurationPopupOpen = true;
+                }
+                else  // Auto set
+                {
+                    // Auto set he only Mac available 
+                    await SettingsDataService.SetCurrentMobileConfigurationID(configurations[0].Id);
+                }
             }
-            else
+            else  // If Full or Delta sync options
             {
                 if (!AutoSync)
                 {
