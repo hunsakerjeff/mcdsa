@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Windows.Foundation.Diagnostics;
 
 
 namespace DSA.Shell.Logging
 {
-    class LoggingConfig
+    public class LoggingConfig
     {
         // //////////////////////////////////////////////////////////
         // Attributes
         // //////////////////////////////////////////////////////////
-        readonly List<TargetBinding> _bindings;
-        readonly object _bindingsLock = new object();
-        bool _lockdown;
+        protected readonly List<TargetBinding> _bindings = null;
+        protected readonly object _bindingsLock = new object();
+        protected bool _lockdown = false;
+
 
         // //////////////////////////////////////////////////////////
         // Properties
@@ -30,6 +32,7 @@ namespace DSA.Shell.Logging
             _lockdown = false;
         }
 
+
         // //////////////////////////////////////////////////////////
         // Implementation - Public Methods
         // //////////////////////////////////////////////////////////
@@ -46,20 +49,15 @@ namespace DSA.Shell.Logging
             }
         }
 
+
         // //////////////////////////////////////////////////////////
         // Implementation - Internal Methods
         // //////////////////////////////////////////////////////////
-        internal IEnumerable<LogFileTarget> GetTargets()
+        internal IEnumerable<LogFileTarget> GetTargets(LoggingLevel level)
         {
-            lock (_bindings)
+            lock (_bindingsLock)
             {
-                var results = new List<LogFileTarget>();
-                foreach (var binding in _bindings)
-                {
-                    results.Add(binding.Target);
-                }
-
-                return results;
+                return _bindings.Where(v => v.SupportsLevel(level)).Select(_binding => _binding.Target).ToList();
             }
         }
 

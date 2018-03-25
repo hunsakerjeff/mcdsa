@@ -14,7 +14,6 @@ namespace DSA.Shell.Logging
         // Properties
         // //////////////////////////////////////////////////////////
         public LoggingLevel Level { get; set; }
-        public string Logger { get; set; }
         public string Message { get; set; }
         public DateTimeOffset TimeStamp { get; set; }
         public Exception Exception { get; set; }
@@ -23,14 +22,14 @@ namespace DSA.Shell.Logging
         // //////////////////////////////////////////////////////////
         // CTOR
         // //////////////////////////////////////////////////////////
-        public LogEvent(LoggingLevel level, string logger, string message, Exception ex)
+        public LogEvent(LoggingLevel level, string message, Exception ex)
         {
             Level = level;
-            Logger = logger;
             Message = message;
             Exception = ex;
             TimeStamp = DateTimeOffset.UtcNow;
         }
+
 
         // //////////////////////////////////////////////////////////
         // Implementation Public Methods
@@ -43,8 +42,6 @@ namespace DSA.Shell.Logging
             builder.Append(Level.ToString().ToUpper());
             builder.Append("|");
             builder.Append(Environment.CurrentManagedThreadId);
-            builder.Append("|");
-            builder.Append(Logger);
             if (!String.IsNullOrEmpty(Message))
             {
                 builder.Append("|");

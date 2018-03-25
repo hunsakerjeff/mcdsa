@@ -14,8 +14,9 @@ namespace DSA.Shell.Logging
         // //////////////////////////////////////////////////////////
         // Attributes
         // //////////////////////////////////////////////////////////
-        readonly SemaphoreSlim m_semaphore;
-        readonly Task<Releaser> m_releaser;
+        protected readonly SemaphoreSlim m_semaphore;
+        protected readonly Task<Releaser> m_releaser;
+
 
         // //////////////////////////////////////////////////////////
         // CTOR
@@ -25,6 +26,7 @@ namespace DSA.Shell.Logging
             m_semaphore = new SemaphoreSlim(1);
             m_releaser = Task.FromResult(new Releaser(this));
         }
+
 
         // //////////////////////////////////////////////////////////
         // Encapsulated Struct
@@ -43,6 +45,7 @@ namespace DSA.Shell.Logging
                 m_toRelease?.m_semaphore.Release();
             }
         }
+
 
         // //////////////////////////////////////////////////////////
         // Implementation - Public Methods

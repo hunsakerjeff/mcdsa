@@ -1310,6 +1310,7 @@ namespace DSA.Sfdc.Sync
                     catch (Exception)
                     {
                         Debug.WriteLine("Network Connection Sync Already In Progress");
+                        PlatformAdapter.SendToCustomLogger("Network Connection Sync Already In Progress", LoggingLevel.Error);
                     }
                     finally
                     {
@@ -1320,10 +1321,14 @@ namespace DSA.Sfdc.Sync
                         catch (Exception)
                         {
                             Debug.WriteLine("Network Connection Sync Cancellation Token Already Disposed");
+                            PlatformAdapter.SendToCustomLogger("Network Connection Sync Cancellation Token Already Disposed", LoggingLevel.Error);
                         }
                     }
                 }
-                else { Messenger.Default.Send(new SynchronizationCancelMessage(null, new SyncException(NoInternetConnectionMessage))); }
+                else
+                {
+                    Messenger.Default.Send(new SynchronizationCancelMessage(null, new SyncException(NoInternetConnectionMessage)));
+                }
             });
         }
 
@@ -1404,6 +1409,7 @@ namespace DSA.Sfdc.Sync
                 if (task.Exception != null)
                 {
                     Debug.WriteLine("Deleting VersionDataFolder end with error");
+                    PlatformAdapter.SendToCustomLogger("Deleting VersionDataFolder end with error", LoggingLevel.Error);
                 }
             });
             await AttachmentsFolder.Instance.DeleteWithContent().ContinueWith((task) =>
@@ -1411,6 +1417,7 @@ namespace DSA.Sfdc.Sync
                 if (task.Exception != null)
                 {
                     Debug.WriteLine("Deleting AttachmentsFolder end with error");
+                    PlatformAdapter.SendToCustomLogger("Deleting AttachmentsFolder end with error", LoggingLevel.Error);
                 }
             });
             await ContentThumbnailFolder.Instance.DeleteWithContent().ContinueWith((task) =>
@@ -1418,6 +1425,7 @@ namespace DSA.Sfdc.Sync
                 if (task.Exception != null)
                 {
                     Debug.WriteLine("Deleting ContentThumbnailFolder end with error");
+                    PlatformAdapter.SendToCustomLogger("Deleting ContentThumbnailFolder end with error", LoggingLevel.Error);
                 }
             });
         }
@@ -1427,19 +1435,25 @@ namespace DSA.Sfdc.Sync
             try
             {
                 if (!HasInternetConnection())
+                {
                     return false;
+                }
 
                 await PushPendingData();
 
                 var account = GetCachedAccount();
                 if (account == null)
+                {
                     return false;
+                }
 
                 var syncManager = SyncManager.GetInstance(account);
                 var currUser = new CurrentUser(_store);
                 var currentUser = await currUser.GetCurrentUserFromSoql(syncManager);
                 if (currentUser is NullUser)
+                {
                     return false;
+                }
 
                 var contentDocs = new ContentDocument(_store);
                 var contentDocumentsResult = await contentDocs.GetContentDocumentsFromSoql(syncManager);
@@ -1453,8 +1467,9 @@ namespace DSA.Sfdc.Sync
                 var newContentDocuments = sieve.GetFilteredResult(contentDocumentsResult, categoryContentsResult);
                 return newContentDocuments.Any() || newCategoryContents.Any();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
                 // TODO log exception
             }
             return false;
@@ -1479,9 +1494,9 @@ namespace DSA.Sfdc.Sync
                 await SyncUpContentReview(callBack);
                 await SyncUpPlaylistsAndContent(callBack);
             }
-            catch
+            catch (Exception ex)
             {
-                // TODO log exception
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
             }
         }
 
@@ -1620,9 +1635,10 @@ namespace DSA.Sfdc.Sync
                 OAuth2.RefreshCookies();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // log exception
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
             }
             return false;
         }

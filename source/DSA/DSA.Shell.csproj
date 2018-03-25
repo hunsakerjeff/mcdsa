@@ -123,6 +123,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Logging\AsyncLock.cs" />
+    <Compile Include="Logging\GlobalCrashHandler.cs" />
     <Compile Include="Logging\LogEvent.cs" />
     <Compile Include="Logging\LogFileTarget.cs" />
     <Compile Include="Logging\Logger.cs" />
@@ -158,8 +159,8 @@
     <Compile Include="Common\NavigationHelper.cs" />
     <Compile Include="Behaviors\OrientationStateControlBehavior.cs" />
     <Compile Include="Converters\DateTimeFormatConverter.cs" />
+    <Compile Include="Logging\LogManager.cs" />
     <Compile Include="Logging\LogTarget.cs" />
-    <Compile Include="Logging\RollingFileTarget.cs" />
     <Compile Include="Logging\TargetBinding.cs" />
     <Compile Include="Pages\Abstract\PageBase.cs" />
     <Compile Include="Common\SuspensionManager.cs" />

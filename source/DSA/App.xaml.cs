@@ -18,6 +18,7 @@ using Salesforce.SDK.Auth;
 using Salesforce.SDK.Exceptions;
 using Salesforce.SDK.Source.Security;
 using DSA.Shell.Logging;
+using Windows.Foundation.Diagnostics;
 
 namespace DSA.Shell
 {
@@ -34,17 +35,19 @@ namespace DSA.Shell
 
             PlatformAdapter.Resolve<ISFApplicationHelper>().Initialize();
 
-            // Set the custom log action function
-            LoggingServices ls = LoggingServices.Instance;
-            ls.Initialize();
+            // Set up the Logging Service and the custom log action function in the PlatformAdapter
+            var target = new LogFileTarget();
+            target.RetainDays = 10;
+            LoggingServices.DefaultConfiguration.AddTarget(LoggingLevel.Information, target);
             PlatformAdapter.SetCustomLoggerAction(LoggingServices.LogAction);
 
+            // Continue App setup
             InitializeComponent();
             Suspending += OnSuspending;
             Resuming += OnResuming;
 
-            // setup the global crash handler... (MetroLog)
-            //GlobalCrashHandler.Configure();
+            // Setup the global crash handler
+            GlobalCrashHandler.Configure();
         }
 
         /// <summary>

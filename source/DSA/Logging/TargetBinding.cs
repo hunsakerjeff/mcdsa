@@ -8,13 +8,14 @@ using Windows.Foundation.Diagnostics;
 
 namespace DSA.Shell.Logging
 {
-    class TargetBinding
+    public class TargetBinding
     {
         // //////////////////////////////////////////////////////////
         // Properties
         // //////////////////////////////////////////////////////////
-        LoggingLevel Level { get; }
+        internal LoggingLevel Level { get; }
         internal LogFileTarget Target { get; }
+
 
         // //////////////////////////////////////////////////////////
         // CTOR
@@ -24,6 +25,7 @@ namespace DSA.Shell.Logging
             Level = level;
             Target = target;
         }
+
 
         // //////////////////////////////////////////////////////////
         // Implementation - Internal Methods
