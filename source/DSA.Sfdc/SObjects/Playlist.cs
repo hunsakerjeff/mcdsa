@@ -27,8 +27,7 @@ namespace DSA.Sfdc.SObjects
             "Name"
         };
 
-        internal string SoqlWhereIOwn = "WHERE {0}__IsFeatured__c = true " +
-                            "OR ownerid = '{1}'";
+        internal string SoqlWhereIOwn = "WHERE {0}__IsFeatured__c = true OR {0}__Shared_Internally__c = true OR ownerid = '{1}'";
 
         internal string SoqlWhereIFollow
         {

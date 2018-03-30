@@ -507,7 +507,7 @@ namespace DSA.Sfdc.Sync
 
         private async Task SyncFeaturedPlaylists(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
-            //get playlist which I own or are marked as featured 
+            // Get playlist which I own, are shareable internally or are marked as featured 
             SendSyncDetailMessage("Featured Playlists", false, false);
             callbackHandler("Sync Featured Playlists");
             var playlist = new Playlist(_store, currentUser);
