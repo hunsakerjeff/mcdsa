@@ -33,6 +33,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser
         public string Description => Media.Description;
         public string ContentOwner => Media.ContentOwner;
         public string ContentLastUpdatedDate => Media.ContentLastUpdatedDate;
+        public string ContentLastReviewedDate => Media.ContentLastReviewedDate;
 
         #endregion
 

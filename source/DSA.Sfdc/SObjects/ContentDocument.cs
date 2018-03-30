@@ -54,6 +54,7 @@ namespace DSA.Sfdc.SObjects
                             "LatestPublishedVersion.ContentUrl, " +
                             "LatestPublishedVersion.TagCsv, " +
                             "LatestPublishedVersion.ContentSize, " +
+                            "LatestPublishedVersion.Last_Reviewed_Recertified_date__c," +
                             //productTypeQuery +
                             //contentThumbnailQuery +
                             "FileType, " +

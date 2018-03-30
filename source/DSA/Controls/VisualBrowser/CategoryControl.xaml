@@ -73,12 +73,16 @@
                                                 <TextBlock Text="{Binding Description}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="WrapWholeWords" FontSize="14.5"/>
                                                 <StackPanel Grid.Row="1">
                                                     <TextBlock >
-                                                        <Run Text="Contact: "/>
+                                                        <Run Text="Content Owner: "/>
                                                         <Run Text="{Binding ContentOwner}"/>
                                                     </TextBlock>
                                                     <TextBlock>
-                                                        <Run Text="Date: "/>
+                                                        <Run Text="Authored/Last Updated: "/>
                                                         <Run Text="{Binding ContentLastUpdatedDate}"/>
+                                                    </TextBlock>
+                                                    <TextBlock>
+                                                        <Run Text="Last Reviewed/Recertified: "/>
+                                                        <Run Text="{Binding ContentLastReviewedDate}"/>
                                                     </TextBlock>
                                                 </StackPanel>
                                             </Grid>

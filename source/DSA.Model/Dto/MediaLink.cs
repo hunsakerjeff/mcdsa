@@ -37,6 +37,7 @@ namespace DSA.Model.Dto
             JunctionID = null;
             ContentOwner = document.ContentOwner;
             ContentLastUpdatedDate = document.ContentLastUpdatedDate;
+            ContentLastReviewedDate = document.ContentLastReviewedDate;
         }
 
         public string ID { get; private set; }
@@ -125,6 +126,7 @@ namespace DSA.Model.Dto
         public ContentDistribution ContentDistribution { get; private set; }
         public string ContentOwner { get; private set; }
         public string ContentLastUpdatedDate { get; private set; }
+        public string ContentLastReviewedDate { get; private set; }
 
     }
 

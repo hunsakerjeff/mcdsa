@@ -266,6 +266,21 @@ namespace DSA.Model.Models
             }
         }
 
+        public string ContentLastReviewedDate
+        {
+            get
+            {
+                return (LatestPublishedVersion != null) ? LatestPublishedVersion.ContentLastReviewed : "";
+            }
+
+            set
+            {
+                var pv = LatestPublishedVersion ?? new PublishedVersion();
+                pv.ContentLastReviewed = value;
+            }
+        }
+
+
         public string ContentOwner
         {
             get
@@ -368,6 +383,9 @@ namespace DSA.Model.Models
 
         [JsonProperty("{0}__Content_Last_Updated__c")]
         public string ContentLastUpdated { get; set; }
+
+        [JsonProperty("Last_Reviewed_Recertified_date__c")]
+        public string ContentLastReviewed { get; set; }
 
         public DateTime? LastModifiedDate { get; set; }
     }
