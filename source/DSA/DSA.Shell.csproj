@@ -15,12 +15,12 @@
     <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PackageCertificateKeyFile>certificate.pfx</PackageCertificateKeyFile>
+    <PackageCertificateKeyFile>sfdc_key.pfx</PackageCertificateKeyFile>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>7C106D879EA9170C4A89DD214DBE292603615254</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>9C6583ED6EF694815C6C60BC86444ACABFFFE789</PackageCertificateThumbprint>
     <AppxBundle>Never</AppxBundle>
     <AppxPackageDir>D:\Projects_Clients\SalesForce\Mastercard\packages\</AppxPackageDir>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
