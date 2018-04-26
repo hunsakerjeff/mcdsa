@@ -384,7 +384,7 @@ namespace DSA.Model.Models
         [JsonProperty("{0}__Content_Last_Updated__c")]
         public string ContentLastUpdated { get; set; }
 
-        [JsonProperty("Last_Reviewed_Recertified_date__c")]
+        [JsonProperty("Last_Reviewed_Recertified_Date_View__c")]
         public string ContentLastReviewed { get; set; }
 
         public DateTime? LastModifiedDate { get; set; }

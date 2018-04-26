@@ -15,12 +15,12 @@
     <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PackageCertificateKeyFile>sfdc_key.pfx</PackageCertificateKeyFile>
+    <PackageCertificateKeyFile>MCDSA_test.pfx</PackageCertificateKeyFile>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>9C6583ED6EF694815C6C60BC86444ACABFFFE789</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>46F23CD79136E7D197EE3355C30FBA41904E22AF</PackageCertificateThumbprint>
     <AppxBundle>Never</AppxBundle>
     <AppxPackageDir>D:\Projects_Clients\SalesForce\Mastercard\packages\</AppxPackageDir>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
@@ -360,6 +360,7 @@
     <Content Include="Assets\Sync\sync_step_waiting.png" />
     <Content Include="Assets\sync_button%402x.png" />
     <None Include="certificate.pfx" />
+    <None Include="MCDSA_test.pfx" />
     <None Include="packages.config" />
     <None Include="sfdc_key.pfx" />
     <PRIResource Include="Strings\en-US\Resources.resw" />
