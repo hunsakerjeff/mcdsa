@@ -6,7 +6,9 @@ using DSA.Sfdc.SerializationUtil;
 using DSA.Sfdc.SObjects.Abstract;
 using DSA.Sfdc.QueryUtil;
 using Salesforce.SDK.SmartStore.Store;
-
+using System.Threading.Tasks;
+using Salesforce.SDK.SmartSync.Manager;
+using Salesforce.SDK.SmartSync.Model;
 
 namespace DSA.Sfdc.SObjects
 {
@@ -78,13 +80,56 @@ namespace DSA.Sfdc.SObjects
         }
 
         // Methods
-        internal IList<Model.Models.CategoryMobileConfig> GetAll()
+        internal IList<Model.Models.CategoryMobileConfig> GetFromSoup()
         {
             RegisterSoup();
             var querySpec = QuerySpec.BuildAllQuerySpec(SoupName, "Id", QuerySpec.SqlOrder.ASC, PageSize).RemoveLimit(Store);
             var results = Store.Query(querySpec, 0);
 
             return results.Select(item => CustomPrefixJsonConvert.DeserializeObject<Model.Models.CategoryMobileConfig>(item.ToString())).ToList();
+        }
+
+        internal async Task<IList<Model.Models.CategoryMobileConfig>> GetFromSoql(SyncManager syncManager)
+        {
+            List<Model.Models.CategoryMobileConfig> results = new List<Model.Models.CategoryMobileConfig>();
+            var target = new SoqlSyncDownTarget(SoqlQuery);
+
+            // Sync to JSON
+            var _results = await target.StartFetch(syncManager, -1);
+            while (_results != null && _results.Count > 0)
+            {
+                results.AddRange(_results.Select(x => x.ToObject<Model.Models.CategoryMobileConfig>()).ToList());
+                _results = await target.ContinueFetch(syncManager);
+            }
+            return results;
+        }
+
+        internal List<string> GetIds()
+        {
+            var cmcList = GetFromSoup().ToList();
+            List<string> cmcIdList = new List<string>();
+
+            // Parse the Category List and grab the Ids
+            foreach (var cmcModel in cmcList)
+            {
+                cmcIdList.Add(cmcModel.Id);
+            }
+
+            return cmcIdList;
+        }
+
+        internal List<string> GetCategoryIds()
+        {
+            var cmcList = GetFromSoup().ToList();
+            HashSet<string> categoryIdSet = new HashSet<string>();
+
+            // Parse the Category List and grab the Ids
+            foreach (var cmcModel in cmcList)
+            {
+                categoryIdSet.Add(cmcModel.CategoryId);
+            }
+
+            return categoryIdSet.ToList();
         }
     }
 }

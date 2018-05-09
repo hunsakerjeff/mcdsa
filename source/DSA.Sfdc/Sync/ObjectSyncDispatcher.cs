@@ -92,9 +92,6 @@ namespace DSA.Sfdc.Sync
 
         public async Task ConfigurationFullSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
-            //Stopwatch swUp = new Stopwatch();
-            //swUp.Start();
-
             var syncUpTasks = new List<Task>
             {
                 SyncUpDsaSyncLogs(callbackHandler, token),
@@ -103,12 +100,7 @@ namespace DSA.Sfdc.Sync
                 SyncUpPlaylistsAndContent(callbackHandler,token),
                 SyncUpSearchTerms(callbackHandler, token)
             };
-
             await Task.WhenAll(syncUpTasks);
-            //swUp.Stop();
-
-            //Stopwatch swDown = new Stopwatch();
-            //swDown.Start();
 
             // We have dependencies between the SyncDowns so they need to execute in a specifc order
             var syncDownTasks = new List<Task>
@@ -124,7 +116,6 @@ namespace DSA.Sfdc.Sync
             // Execute these in order
             (SyncCategories(callbackHandler, currentUser, token)).Wait();
             (SyncCategoryContent(callbackHandler, currentUser, false, token)).Wait();
-            //swDown.Stop();
         }
 
         public async Task ContentFullSyncAsync(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
@@ -198,7 +189,6 @@ namespace DSA.Sfdc.Sync
                 SyncUpPlaylistsAndContent(callbackHandler,token),
                 SyncUpSearchTerms(callbackHandler, token)
             };
-
             await Task.WhenAll(syncUpTasks);
 
             // We have dependencies between the SyncDowns so they need to execute in a specifc order
@@ -396,15 +386,7 @@ namespace DSA.Sfdc.Sync
 
             // Setup variables
             var cmc = new CategoryMobileConfig(_store, currentUser);
-            var cmcList = cmc.GetAll().ToList();
-            HashSet<string> categoryIdSet = new HashSet<string>();
-
-            // Parse the CMC List down to an ID list of Categories (remove duplicates)
-            foreach (var cmcModel in cmcList)
-            {
-                categoryIdSet.Add(cmcModel.CategoryId);
-            }
-            var categoryIdList = categoryIdSet.ToList();
+            var categoryIdList = cmc.GetCategoryIds();
 
             // Set up a loop to sync in blocks
             callbackHandler("Sync Categories");
@@ -441,18 +423,11 @@ namespace DSA.Sfdc.Sync
 
             // Setup variables
             var cat = new Category(_store, currentUser);
-            var catList = cat.GetAll().ToList();
-            List<string> categoryIdList = new List<string>();
-
-            // Parse the Category List and grab the Ids
-            foreach (var catModel in catList)
-            {
-                categoryIdList.Add(catModel.Id);
-            }
+            List<string> categoryIdList = cat.GetIds();
 
             callbackHandler("Sync Category Content");
             var categoryContent = new CategoryContent(_store);
-            var categoryContentBeforeSync = categoryContent.GetAll().ToList();
+            var categoryContentBeforeSync = categoryContent.GetFromSoup().ToList();
             int index = 0;
             int rem = categoryIdList.Count;
 
@@ -480,7 +455,7 @@ namespace DSA.Sfdc.Sync
             NewCategoryContent.Instance.RecreateClearSoup();
             if (saveNew)
             {
-                var categoryContentAfterSync = categoryContent.GetAll().ToList();
+                var categoryContentAfterSync = categoryContent.GetFromSoup().ToList();
                 var newCategoryContents = categoryContentAfterSync.Except(categoryContentAfterSync.Join(categoryContentBeforeSync, cc1 => cc1.Id, cc2 => cc2.Id, (cc1, cc2) => cc1)).ToList();
                 NewCategoryContent.Instance.SaveToSoup(newCategoryContents);
             }
@@ -563,7 +538,7 @@ namespace DSA.Sfdc.Sync
 
             // Setup variables
             var mac = new MobileAppConfig(_store, currentUser);
-            var macList = mac.GetAll().ToList();    // already unique
+            var macList = mac.GetFromSoup().ToList();    // already unique
             List<string> macIdList = new List<string>();
 
             // Parse the Mac List and grab the Ids
@@ -623,7 +598,7 @@ namespace DSA.Sfdc.Sync
 
             // Setup variables
             var cmc = new CategoryMobileConfig(_store, currentUser);
-            var cmcList = cmc.GetAll().ToList();    // already unique
+            var cmcList = cmc.GetFromSoup().ToList();    // already unique
             List<string> cmcIdList = new List<string>();
 
             // Parse the Mac List and grab the Ids
@@ -685,7 +660,7 @@ namespace DSA.Sfdc.Sync
 
             // Setup variables
             var category = new Category(_store, currentUser);
-            var categoryList = category.GetAll().ToList();    // already unique
+            var categoryList = category.GetFromSoup().ToList();    // already unique
             List<string> categoryIdList = new List<string>();
 
             // Parse the Mac List and grab the Ids
@@ -747,15 +722,7 @@ namespace DSA.Sfdc.Sync
 
             // Setup variables
             var categoryContent = new CategoryContent(_store);
-            var categoryContentList = categoryContent.GetAll().ToList();    // already unique
-            HashSet<string> contentIdSet = new HashSet<string>();
-
-            // Parse the CategoryContent List down to an Content ID list (remove duplicates)
-            foreach (var categoryContentModel in categoryContentList)
-            {
-                contentIdSet.Add(categoryContentModel.ContentId);
-            }
-            var contentIdList = contentIdSet.ToList();
+            var contentIdList = categoryContent.GetContentIds();
 
             // Set up a loop to sync in blocks
             callbackHandler("Sync Metadata Of Content Documents");
@@ -801,7 +768,7 @@ namespace DSA.Sfdc.Sync
             SendSyncDetailMessage("Metadata of Content Documents", true, false);
 
             // Create task List
-            return new SyncResult<IList<Model.Models.ContentDocument>>(configsState, contentDocument.GetContentDocumentsFromSoup());
+            return new SyncResult<IList<Model.Models.ContentDocument>>(configsState, contentDocument.GetFromSoup());
         }
 
         private List<Func<Task<bool>>> SyncAttachments(Action<string> callbackHandler, SyncResult<IList<AttachmentMetadata>> attMetaTransactionResult, CancellationToken token = default(CancellationToken))
@@ -1434,6 +1401,11 @@ namespace DSA.Sfdc.Sync
         {
             try
             {
+                // Local Variables
+                int index = 0;
+                int rem = 0;
+
+                // can we sync data
                 if (!HasInternetConnection())
                 {
                     return false;
@@ -1447,6 +1419,7 @@ namespace DSA.Sfdc.Sync
                     return false;
                 }
 
+                // Get the User info
                 var syncManager = SyncManager.GetInstance(account);
                 var currUser = new CurrentUser(_store);
                 var currentUser = await currUser.GetCurrentUserFromSoql(syncManager);
@@ -1455,17 +1428,117 @@ namespace DSA.Sfdc.Sync
                     return false;
                 }
 
-                var contentDocs = new ContentDocument(_store);
-                var contentDocumentsResult = await contentDocs.GetContentDocumentsFromSoql(syncManager);
+                // *** Handle CMC ***
+                // Get CMC List from Soup and SOQL
+                var cmc = new CategoryMobileConfig(_store, currentUser);
+                var cmcModelsFromSoup = cmc.GetFromSoup();
+                var cmcModelsFromSOQL = await cmc.GetFromSoql(syncManager);
 
-                var categoryContents = new CategoryContent(_store);
-                var categoryContentsResult = await categoryContents.GetCategoryContentsFromSoql(syncManager);
-                var documentsInCategories = categoryContents.GetAll().ToList();
-                var newCategoryContents = categoryContentsResult.Except(categoryContentsResult.Join(documentsInCategories, cc1 => cc1.Id, cc2 => cc2.Id, (cc1, cc2) => cc1)).ToList();
+                // Check CMC Differences
+                var newCmcs = cmcModelsFromSOQL.Except(cmcModelsFromSOQL.Join(cmcModelsFromSoup, cc1 => cc1.Id, cc2 => cc2.Id, (cc1, cc2) => cc1)).ToList();
+                if (newCmcs.Any())
+                {
+                    return true;
+                }
 
+                // *** Handle CAT ***
+                var catIdsFromCmc = cmc.GetCategoryIds();
+
+                // Get Categories List from Soup and SOQL
+                var cat = new Category(_store, currentUser);
+                var catModelsFromSoql = new List<Model.Models.Category>();
+                var catModelsFromSoup = cat.GetFromSoup().ToList();
+
+                // CAT LOOP:  Sync categories in blocks
+                index = 0;
+                rem = catIdsFromCmc.Count;
+                while (rem > 0)
+                {
+                    int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                    // Get range of Ids to sync
+                    cat.CategoryIdList = catIdsFromCmc.GetRange(index, idCount);
+
+                    // Perform Sync
+                    var tempResults = await cat.GetFromSoql(syncManager);
+                    catModelsFromSoql.AddRange(tempResults);
+
+                    // Iterate to next sublist
+                    index += idCount;
+                    rem = catIdsFromCmc.Count - index;
+                }
+
+                // Check CAT Differences
+                var newCats = catModelsFromSoql.Except(catModelsFromSoql.Join(catModelsFromSoup, cc1 => cc1.Id, cc2 => cc2.Id, (cc1, cc2) => cc1)).ToList();
+                if (newCats.Any())
+                {
+                    return true;
+                }
+
+                // *** Handle CATCON ***
+                var catIdsFromCat = cat.GetIds();
+
+                // Get Categories List from Soup and SOQL
+                var catCon = new CategoryContent(_store);
+                var catConModelsFromSoql = new List<Model.Models.CategoryContent>();
+                var catConModelsFromSoup = catCon.GetFromSoup().ToList();
+
+                // CATCON LOOP:  Sync categoryContent Junctions in blocks
+                index = 0;
+                rem = catIdsFromCat.Count;
+                while (rem > 0)
+                {
+                    int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                    // Get range of Ids to sync
+                    catCon.CategoryIdList = catIdsFromCat.GetRange(index, idCount);
+
+                    // Perform Sync
+                    var tempResults = await catCon.GetFromSoql(syncManager);
+                    catConModelsFromSoql.AddRange(tempResults);
+
+                    // Iterate to next sublist
+                    index += idCount;
+                    rem = catIdsFromCat.Count - index;
+                }
+
+                // Check CAT Differences
+                var newCatCons = catConModelsFromSoql.Except(catConModelsFromSoql.Join(catConModelsFromSoup, cc1 => cc1.Id, cc2 => cc2.Id, (cc1, cc2) => cc1)).ToList();
+                if (newCatCons.Any())
+                {
+                    return true;
+                }
+
+                // *** Handle Content Documents ***
+                var conDocIdsFromCatCon = catCon.GetContentIds();
+
+                // Get Categories List from Soup and SOQL
+                var conDoc = new ContentDocument(_store);
+                var conDocModelsFromSoql = new List<Model.Models.ContentDocument>();
+
+                // CONDOC LOOP:  Sync Content Documents in blocks
+                index = 0;
+                rem = conDocIdsFromCatCon.Count;
+                while (rem > 0)
+                {
+                    int idCount = (rem < kIdListLimit) ? rem : kIdListLimit;
+
+                    // Get range of Ids to sync
+                    conDoc.ContentIdList = conDocIdsFromCatCon.GetRange(index, idCount);
+
+                    // Perform Sync
+                    var tempResults = await conDoc.GetFromSoql(syncManager);
+                    conDocModelsFromSoql.AddRange(tempResults);
+
+                    // Iterate to next sublist
+                    index += idCount;
+                    rem = conDocIdsFromCatCon.Count - index;
+                }
+
+                // Create the Siewve to check for new content
                 var sieve = new DocMetaDeltaSieve(_store, currentUser);
-                var newContentDocuments = sieve.GetFilteredResult(contentDocumentsResult, categoryContentsResult);
-                return newContentDocuments.Any() || newCategoryContents.Any();
+                var newConDocs = sieve.GetFilteredResult(conDocModelsFromSoql, catConModelsFromSoql);
+                return newConDocs.Any();
             }
             catch (Exception ex)
             {

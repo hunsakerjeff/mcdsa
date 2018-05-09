@@ -86,24 +86,22 @@ namespace DSA.Sfdc.SObjects
         /// <summary>
         /// Get content documents from local db
         /// </summary>
-        internal IList<Model.Models.ContentDocument> GetContentDocumentsFromSoup()
+        internal IList<Model.Models.ContentDocument> GetFromSoup()
         {
             var querySpec = QuerySpec.BuildAllQuerySpec(SoupName, "Id", QuerySpec.SqlOrder.ASC, PageSize).RemoveLimit(Store);
             var results = Store.Query(querySpec, 0);
-            IList<Model.Models.ContentDocument> macList = results.Select(item => CustomPrefixJsonConvert.DeserializeObject<Model.Models.ContentDocument>(item.ToString())).ToList();
-
-            return macList;
+            return results.Select(item => CustomPrefixJsonConvert.DeserializeObject<Model.Models.ContentDocument>(item.ToString())).ToList();
         }
 
         /// <summary>
         /// Get content documents from sfdc
         /// </summary>
-        internal async Task<IList<Model.Models.ContentDocument>> GetContentDocumentsFromSoql(SyncManager syncManager)
+        internal async Task<IList<Model.Models.ContentDocument>> GetFromSoql(SyncManager syncManager)
         {
-            var target = new SoqlSyncDownTarget(SoqlQuery);
-            var page = await target.StartFetch(syncManager, -1);
             var results = new List<Model.Models.ContentDocument>();
+            var target = new SoqlSyncDownTarget(SoqlQuery);
 
+            var page = await target.StartFetch(syncManager, -1);
             while (page != null && page.Count > 0)
             {
                 results.AddRange(page.Select(x => x.ToObject<Model.Models.ContentDocument>()).ToList());

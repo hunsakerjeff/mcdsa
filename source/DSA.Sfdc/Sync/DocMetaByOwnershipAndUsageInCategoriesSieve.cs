@@ -30,9 +30,8 @@ namespace DSA.Sfdc.Sync
 
         private IList<ContentDocument> FilterUsedDocuments(IList<ContentDocument> docMetadata, User currentUser)
         {
-            var documentsInCategories = new CategoryContent(_store).GetAll().Select(cc => cc.ContentId15).ToList();
-            return docMetadata
-                .Where(cd => (cd.OwnerId == currentUser.Id && cd.PublishStatus == "R") || documentsInCategories.Contains(cd.Id15)).ToList();
+            var documentsInCategories = new CategoryContent(_store).GetFromSoup().Select(cc => cc.ContentId15).ToList();
+            return docMetadata.Where(cd => (cd.OwnerId == currentUser.Id && cd.PublishStatus == "R") || documentsInCategories.Contains(cd.Id15)).ToList();
         }
     }
 }

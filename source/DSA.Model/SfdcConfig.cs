@@ -70,16 +70,16 @@ namespace DSA.Model
             //},
              // Mastercard settings
              // production
-            {
-                "https://mastercard.my.salesforce.com",
-                new OAuthSetting
-                {
-                    CallbackUrl = MastercardDSACallbackUrl,
-                    ClientId = MastercardClientId,
-                    Options = WebAuthenticationOptions.None,
-                    UseTwoParamAuthAsyncMethod = false
-                }
-            }
+            //{
+            //    "https://mastercard.my.salesforce.com",
+            //    new OAuthSetting
+            //    {
+            //        CallbackUrl = MastercardDSACallbackUrl,
+            //        ClientId = MastercardClientId,
+            //        Options = WebAuthenticationOptions.None,
+            //        UseTwoParamAuthAsyncMethod = false
+            //    }
+            //}
         };
 
         // Attributes

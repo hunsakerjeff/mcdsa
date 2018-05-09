@@ -6,7 +6,9 @@ using DSA.Sfdc.QueryUtil;
 using DSA.Sfdc.SerializationUtil;
 using DSA.Sfdc.SObjects.Abstract;
 using Salesforce.SDK.SmartStore.Store;
-
+using System.Threading.Tasks;
+using Salesforce.SDK.SmartSync.Manager;
+using Salesforce.SDK.SmartSync.Model;
 
 namespace DSA.Sfdc.SObjects
 {
@@ -55,12 +57,27 @@ namespace DSA.Sfdc.SObjects
         }
 
         // Methods
-        internal IList<Model.Models.MobileAppConfig> GetAll()
+        internal IList<Model.Models.MobileAppConfig> GetFromSoup()
         {
             RegisterSoup();
             var querySpec = QuerySpec.BuildAllQuerySpec(SoupName, "Id", QuerySpec.SqlOrder.ASC, PageSize).RemoveLimit(Store);
             var results = Store.Query(querySpec, 0);
             return results.Select(item => CustomPrefixJsonConvert.DeserializeObject<Model.Models.MobileAppConfig>(item.ToString())).ToList();
+        }
+
+        internal async Task<IList<Model.Models.MobileAppConfig>> GetFromSoql(SyncManager syncManager)
+        {
+            List<Model.Models.MobileAppConfig> results = new List<Model.Models.MobileAppConfig>();
+            var target = new SoqlSyncDownTarget(SoqlQuery);
+
+            // Sync to JSON
+            var _results = await target.StartFetch(syncManager, -1);
+            while (_results != null && _results.Count > 0)
+            {
+                results.AddRange(_results.Select(x => x.ToObject<Model.Models.MobileAppConfig>()).ToList());
+                _results = await target.ContinueFetch(syncManager);
+            }
+            return results;
         }
     }
 }

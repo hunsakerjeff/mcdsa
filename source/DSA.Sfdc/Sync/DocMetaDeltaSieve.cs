@@ -36,7 +36,7 @@ namespace DSA.Sfdc.Sync
 
         private IList<ContentDocument> FilterUsedDocuments(IList<ContentDocument> docMetadata, User currentUser, IList<Model.Models.CategoryContent> categoryContents = null)
         {
-            categoryContents = categoryContents ?? new CategoryContent(_store).GetAll();
+            categoryContents = categoryContents ?? new CategoryContent(_store).GetFromSoup();
             List <string> documentsInCategories = categoryContents.Select(cc => cc.ContentId15).ToList();
             
             var docsUserOrPrivateLib =  docMetadata.Where(cd => (cd.OwnerId == currentUser.Id && cd.PublishStatus == "R") || documentsInCategories.Contains(cd.Id15)).ToList();

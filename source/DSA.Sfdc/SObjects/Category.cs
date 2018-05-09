@@ -7,7 +7,9 @@ using DSA.Sfdc.QueryUtil;
 using DSA.Sfdc.SerializationUtil;
 using DSA.Sfdc.SObjects.Abstract;
 using Salesforce.SDK.SmartStore.Store;
-
+using System.Threading.Tasks;
+using Salesforce.SDK.SmartSync.Manager;
+using Salesforce.SDK.SmartSync.Model;
 
 namespace DSA.Sfdc.SObjects
 {
@@ -62,13 +64,43 @@ namespace DSA.Sfdc.SObjects
         }
 
         // Methods
-        internal IList<Model.Models.Category> GetAll()
+        internal IList<Model.Models.Category> GetFromSoup()
         {
             RegisterSoup();
             var querySpec = QuerySpec.BuildAllQuerySpec(SoupName, "Id", QuerySpec.SqlOrder.ASC, PageSize).RemoveLimit(Store);
             var results = Store.Query(querySpec, 0);
 
             return results.Select(item => CustomPrefixJsonConvert.DeserializeObject<Model.Models.Category>(item.ToString())).ToList();
+        }
+
+        // Assumption is Category Id list (from CMC) is set before call is made for proper filtering
+        internal async Task<IList<Model.Models.Category>> GetFromSoql(SyncManager syncManager)
+        {
+            List<Model.Models.Category> results = new List<Model.Models.Category>();
+            var target = new SoqlSyncDownTarget(SoqlQuery);
+
+            // Sync to JSON
+            var _results = await target.StartFetch(syncManager, -1);
+            while (_results != null && _results.Count > 0)
+            {
+                results.AddRange(_results.Select(x => x.ToObject<Model.Models.Category>()).ToList());
+                _results = await target.ContinueFetch(syncManager);
+            }
+            return results;
+        }
+
+        internal List<string> GetIds()
+        {
+            var catList = GetFromSoup().ToList();
+            List<string> categoryIdList = new List<string>();
+
+            // Parse the Category List and grab the Ids
+            foreach (var catModel in catList)
+            {
+                categoryIdList.Add(catModel.Id);
+            }
+
+            return categoryIdList;
         }
 
         private string GenerateFilter()

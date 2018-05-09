@@ -25,27 +25,28 @@ namespace DSA.Shell.ViewModels.Common
         {
             Messenger.Default.Register<AppResumingMessage>(this,  async (m) =>
             {
-                if (_settingsDataService.InSynchronizationInProgress)
+                if (!_settingsDataService.InSynchronizationInProgress)
                 {
-                    return;
-                }
-
-                var hasNewContent = await ObjectSyncDispatcher.Instance.NewContentAvaliable();
-                if (hasNewContent)
-                {
-                    SfdcConfig config = (SfdcConfig)SDKManager.ServerConfiguration;
-                    if (config.UseAutoAsync)
+                    var hasNewContent = await ObjectSyncDispatcher.Instance.NewContentAvaliable();
+                    if (hasNewContent)
                     {
-                        // requested to not autosync on Fridays
-                        if ((DateTime.Now).DayOfWeek != DayOfWeek.Friday)
+                        SfdcConfig config = (SfdcConfig)SDKManager.ServerConfiguration;
+                        if (config.UseAutoAsync)
                         {
-                            Messenger.Default.Send(new SynchronizationAutoStartMessage());
+                            // requested to not autosync on Fridays
+                            if ((DateTime.Now).DayOfWeek != DayOfWeek.Friday)
+                            {
+                                if (!_settingsDataService.InSynchronizationInProgress)
+                                {
+                                    Messenger.Default.Send(new SynchronizationAutoStartMessage());
+                                }
+                            }
                         }
-                    }
-                    else
-                    {
-                        Messenger.Default.Send(new StartStoryboardMessage { StoryboardName = "NewContentAnimation", LoopForever = false });
-                        Messenger.Default.Send(new NewContentAvaliableMessage());
+                        else
+                        {
+                            Messenger.Default.Send(new StartStoryboardMessage { StoryboardName = "NewContentAnimation", LoopForever = false });
+                            Messenger.Default.Send(new NewContentAvaliableMessage());
+                        }
                     }
                 }
             });

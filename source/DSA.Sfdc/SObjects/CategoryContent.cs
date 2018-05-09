@@ -51,7 +51,7 @@ namespace DSA.Sfdc.SObjects
         }
 
         // Methods
-        internal IList<Model.Models.CategoryContent> GetAll()
+        internal IList<Model.Models.CategoryContent> GetFromSoup()
         {
             RegisterSoup();
             var querySpec = QuerySpec.BuildAllQuerySpec(SoupName, "Id", QuerySpec.SqlOrder.ASC, PageSize).RemoveLimit(Store);
@@ -60,17 +60,47 @@ namespace DSA.Sfdc.SObjects
             return results.Select(item => CustomPrefixJsonConvert.DeserializeObject<Model.Models.CategoryContent>(item.ToString())).ToList();
         }
 
-        internal async Task<IList<Model.Models.CategoryContent>> GetCategoryContentsFromSoql(SyncManager syncManager)
+        // Assumption is Category Id list (from CAT) is set before call is made for proper filtering
+        internal async Task<IList<Model.Models.CategoryContent>> GetFromSoql(SyncManager syncManager)
         {
-            var target = new SoqlSyncDownTarget(SoqlQuery);
-            var _results = await target.StartFetch(syncManager, -1);
             List<Model.Models.CategoryContent> results = new List<Model.Models.CategoryContent>();
+            var target = new SoqlSyncDownTarget(SoqlQuery);
+
+            var _results = await target.StartFetch(syncManager, -1);
             while (_results != null && _results.Count > 0)
             {
                 results.AddRange(_results.Select(x => x.ToObject<Model.Models.CategoryContent>()).ToList());
                 _results = await target.ContinueFetch(syncManager);
             }
             return results;
+        }
+
+        internal List<string> GetIds()
+        {
+            var catConList = GetFromSoup().ToList();
+            List<string> catConIdList = new List<string>();
+
+            // Parse the Cat Con List and grab the Ids
+            foreach (var catConModel in catConList)
+            {
+                catConIdList.Add(catConModel.Id);
+            }
+
+            return catConIdList;
+        }
+
+        internal List<string> GetContentIds()
+        {
+            // Local Variables
+            var categoryContentList = GetFromSoup().ToList();
+            HashSet<string> contentIdSet = new HashSet<string>();
+
+            // Parse the CategoryContent List down to an Content ID list (remove duplicates)
+            foreach (var categoryContentModel in categoryContentList)
+            {
+                contentIdSet.Add(categoryContentModel.ContentId);
+            }
+            return contentIdSet.ToList();
         }
 
         private string GenerateFilter()
@@ -81,8 +111,6 @@ namespace DSA.Sfdc.SObjects
             }
             else  // Handle IN creation
             {
-
-
                 StringBuilder idList = new StringBuilder();
                 idList.Append(string.Format("(\'{0}\'", CategoryIdList[0]));
 

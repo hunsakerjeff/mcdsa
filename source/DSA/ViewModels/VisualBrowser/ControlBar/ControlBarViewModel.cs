@@ -181,7 +181,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                     },
                     () =>
                     {
-                        return _userSessionService.IsUserLogIn();
+                        return (_userSessionService.IsUserLogIn() && !SettingsDataService.InSynchronizationInProgress);
                     }));
             }
         }
@@ -198,7 +198,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                     },
                     () =>
                     {
-                        return _userSessionService.IsUserLogIn();
+                        return (_userSessionService.IsUserLogIn() && !SettingsDataService.InSynchronizationInProgress);
                     }));
             }
         }
@@ -215,8 +215,8 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                     },
                     () =>
                     {
-                        return _userSessionService.IsUserLogIn();
-                    }));
+                        return (_userSessionService.IsUserLogIn() && !SettingsDataService.InSynchronizationInProgress);
+            }));
             }
         }
 
