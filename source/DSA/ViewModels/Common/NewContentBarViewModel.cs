@@ -13,10 +13,13 @@ namespace DSA.Shell.ViewModels.Common
     public class NewContentBarViewModel : ViewModelBase
     {
         private readonly ISettingsDataService _settingsDataService;
+        private readonly IUserSessionService _userSessionService;
 
         public NewContentBarViewModel(
+            IUserSessionService userSessionService,
             ISettingsDataService settingsDataService)
         {
+            _userSessionService = userSessionService;
             _settingsDataService = settingsDataService;
             AttachMessages();
         }
@@ -25,7 +28,7 @@ namespace DSA.Shell.ViewModels.Common
         {
             Messenger.Default.Register<AppResumingMessage>(this,  async (m) =>
             {
-                if (!_settingsDataService.InSynchronizationInProgress)
+                if (!_settingsDataService.InSynchronizationInProgress && _userSessionService.IsUserLogIn())
                 {
                     var hasNewContent = await ObjectSyncDispatcher.Instance.NewContentAvaliable();
                     if (hasNewContent)

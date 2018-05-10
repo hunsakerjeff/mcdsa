@@ -24,7 +24,7 @@ namespace DSA.Data.Services.API
         private const string TageKey = "Tag";
         private const string TitleKey = "Title";
         private const string AssetTypeKey = "AssetType";
-      
+
         public SearchContentDataService(
             ISearchTermDataService searchTermDataService)
         {
@@ -38,13 +38,13 @@ namespace DSA.Data.Services.API
 
             var searchTask = new List<Task<IList<string>>>
             {
-               SearchForDocumentIdByProductType(query),
+               //SearchForDocumentIdByProductType(query),
+               //SearchForDocumentIdByAssetType(query),
                SearchForDocumentIdByTag(query),
-               SearchForDocumentIdByAssetType(query),
                SearchForDocumentIdByTitle(query)
             };
-
             var searchResults = await Task.WhenAll(searchTask);
+
             IEnumerable<string> result = new List<string>();
             result = searchResults.Aggregate(result, (current, searchResult) => current.Union(searchResult));
             return sourceLinks.Where(media => result.Contains(media.ID));
@@ -84,13 +84,17 @@ namespace DSA.Data.Services.API
         {
             var store = SmartStore.GetGlobalSmartStore();
             if (!store.HasSoup(TagSoupName))
+            {
                 return new List<string>();
+            }
 
-            var querySpec = QuerySpec.BuildContainQuerySpec(TagSoupName, TageKey, query, QuerySpec.SqlOrder.ASC, SfdcConfig.PageSize).RemoveLimit(store);
-            var results =
-                store.Query(querySpec, 0)
-                    .Select(item => CustomPrefixJsonConvert.DeserializeObject<DocumentsTag>(item.ToString()))
-                    .SelectMany(x => x.DocumentIds).Distinct().ToList();
+            string localQuery = query + "%";
+            var querySpec = QuerySpec.BuildLikeQuerySpec(TagSoupName, TageKey, localQuery, QuerySpec.SqlOrder.ASC, SfdcConfig.PageSize).RemoveLimit(store);
+
+            var results = store.Query(querySpec, 0)
+                                .Select(item => CustomPrefixJsonConvert.DeserializeObject<DocumentsTag>(item.ToString()))
+                                .SelectMany(x => x.DocumentIds).Distinct().ToList();
+            
             return results;
         }
 
@@ -106,13 +110,14 @@ namespace DSA.Data.Services.API
         {
             var store = SmartStore.GetGlobalSmartStore();
             if (!store.HasSoup(AssetTypeSoupName))
+            {
                 return new List<string>();
+            }
 
             var querySpec = QuerySpec.BuildContainQuerySpec(AssetTypeSoupName, AssetTypeKey, query, QuerySpec.SqlOrder.ASC, SfdcConfig.PageSize).RemoveLimit(store);
-            var results =
-                store.Query(querySpec, 0)
-                    .Select(item => CustomPrefixJsonConvert.DeserializeObject<DocumentAssetType>(item.ToString()))
-                    .SelectMany(x => x.DocumentIds).Distinct().ToList();
+            var results = store.Query(querySpec, 0)
+                                .Select(item => CustomPrefixJsonConvert.DeserializeObject<DocumentAssetType>(item.ToString()))
+                                .SelectMany(x => x.DocumentIds).Distinct().ToList();
             return results;
         }
 
@@ -128,13 +133,15 @@ namespace DSA.Data.Services.API
         {
             var store = SmartStore.GetGlobalSmartStore();
             if (!store.HasSoup(TitleSoupName))
+            {
                 return new List<string>();
+            }
 
-            var querySpec = QuerySpec.BuildContainQuerySpec(TitleSoupName, TitleKey, query, QuerySpec.SqlOrder.ASC, SfdcConfig.PageSize).RemoveLimit(store);
-            var results =
-                store.Query(querySpec, 0)
-                    .Select(item => CustomPrefixJsonConvert.DeserializeObject<DocumentTitle>(item.ToString()))
-                    .SelectMany(x => x.DocumentIds).Distinct().ToList();
+            string localQuery = query + "%";
+            var querySpec = QuerySpec.BuildLikeQuerySpec(TitleSoupName, TitleKey, localQuery, QuerySpec.SqlOrder.ASC, SfdcConfig.PageSize).RemoveLimit(store);
+            var results = store.Query(querySpec, 0)
+                                .Select(item => CustomPrefixJsonConvert.DeserializeObject<DocumentTitle>(item.ToString()))
+                                .SelectMany(x => x.DocumentIds).Distinct().ToList();
             return results;
         }
     }

@@ -12,10 +12,10 @@ namespace DSA.Model
     /// </summary>
     public class SfdcConfig : SalesforceConfig
     {
-        //private const string MastercardDSACallbackUrl = @"dsa:///mastercard";
-        //        private const string MastercardClientId = @"3MVG9yZ.WNe6byQArrGXHfKC8Odebkz46h5_viRgVA6IUviZ4jOZZRWNQds0n_OH0m2y7.hUloTQ836aY9iHA";
-        private const string MastercardDSACallbackUrl = @"MCDSA://mastercard-surface";
-        private const string MastercardClientId = @"3MVG9yZ.WNe6byQCKnRn66BJtnSiqoM268UaNKfajqo43g22DzCrByXa2mvjLbD.C2LNIbfzmm1i0ypkyD1Y5";
+        private const string MastercardDSACallbackUrl = @"dsa:///mastercard";
+        private const string MastercardClientId = @"3MVG9yZ.WNe6byQArrGXHfKC8Odebkz46h5_viRgVA6IUviZ4jOZZRWNQds0n_OH0m2y7.hUloTQ836aY9iHA";
+        //private const string MastercardDSACallbackUrl = @"MCDSA://mastercard-surface";
+        //private const string MastercardClientId = @"3MVG9yZ.WNe6byQCKnRn66BJtnSiqoM268UaNKfajqo43g22DzCrByXa2mvjLbD.C2LNIbfzmm1i0ypkyD1Y5";
         //private static readonly string AppCallbackUri = WebAuthenticationBroker.GetCurrentApplicationCallbackUri().ToString();
 
         private struct OAuthSetting

@@ -330,14 +330,14 @@ namespace DSA.Shell.ViewModels.VisualBrowser
 
                 // Check count of MACs
                 var configurations = await _mobileAppConfigDataService.GetMobileAppConfigs();
-                if (configurations.Count >= 1)
+                if (configurations.Count > 1)
                 {
                     // Pop the control open to select an appropriate MAC
                     ControlBarViewModel.IsSelectConfigurationPopupOpen = true;
                 }
                 else  // Auto set
                 {
-                    // Auto set he only Mac available 
+                    // Auto set the only Mac available 
                     await SettingsDataService.SetCurrentMobileConfigurationID(configurations[0].Id);
                 }
             }
@@ -345,7 +345,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser
             {
                 if (!AutoSync)
                 {
-                    _dialogService.ShowMessage("Synchronization completed successfully", "Synchronization completed");
+                    await _dialogService.ShowMessage("Synchronization completed successfully", "Synchronization completed");
                 }
             }
             Task.Factory.StartNew(AttachmentsFolder.Instance.DeleteOldVersionsWithContent);
