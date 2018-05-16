@@ -9,6 +9,7 @@
                  xmlns:common1="using:DSA.Shell.Controls.Common"
                  xmlns:menuBrowser="using:DSA.Shell.Controls.MenuBrowser"
                  xmlns:behaviors="using:DSA.Shell.Behaviors"
+                 xmlns:controlBar="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
                  x:Class="DSA.Shell.Pages.MenuBrowserPage"
                  mc:Ignorable="d ignore"
                  DataContext="{Binding MenuBrowser, Source={StaticResource Locator}}">
@@ -43,7 +44,10 @@
         </Grid>
         <Grid Grid.Row="1">
             <menuBrowser:MenuBrowser Margin="0,0,0,90"/>
-            <common1:MainAppBar VerticalAlignment="Bottom" />
+            <Grid Height="88" VerticalAlignment="Bottom">
+                <common1:MainAppBar />
+                <controlBar:SearchControl Width="435" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right"  Margin="0,0,40,0"/>
+            </Grid>
         </Grid>
         <Border Grid.Row="0" Grid.RowSpan="2" Style="{StaticResource InternalModeBorder}" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}" />
     </Grid>

@@ -11,6 +11,7 @@ using DSA.Shell.ViewModels.Builders;
 using GalaSoft.MvvmLight.Views;
 using Salesforce.SDK.Adaptation;
 using WinRTXamlToolkit.Tools;
+using DSA.Shell.ViewModels.VisualBrowser.ControlBar;
 
 namespace DSA.Shell.ViewModels.Spotlight
 {
@@ -24,6 +25,9 @@ namespace DSA.Shell.ViewModels.Spotlight
 
         private readonly INavigationService _navigationService;
         private readonly ISpotlightDataService _spotlightDataService;
+        private readonly IDocumentInfoDataService _documentInfoDataService;
+        private readonly ISearchContentDataService _searchContentDataService;
+        private SearchControlViewModel _searchViewModel;
 
         private List<SpotlightItem> _spotLightItems;
         private List<SpotlightGroupList> _source;
@@ -98,6 +102,12 @@ namespace DSA.Shell.ViewModels.Spotlight
             }
         }
 
+        public SearchControlViewModel SearchViewModel
+        {
+            get { return _searchViewModel; }
+            set { Set(ref _searchViewModel, value); }
+        }
+
         #endregion
 
         #region Constructor
@@ -105,10 +115,15 @@ namespace DSA.Shell.ViewModels.Spotlight
         public SpotlightViewModel(
                 INavigationService navigationService,
                 ISpotlightDataService spotlightDataService,
+                ISearchContentDataService searchContentDataService,
+                IDocumentInfoDataService documentInfoDataService,
                 ISettingsDataService settingsDataService) : base(settingsDataService)
         {
             _navigationService = navigationService;
             _spotlightDataService = spotlightDataService;
+            _documentInfoDataService = documentInfoDataService;
+            _searchContentDataService = searchContentDataService;
+
             Initialize();
         }
 
@@ -137,6 +152,9 @@ namespace DSA.Shell.ViewModels.Spotlight
         {
             try
             {
+                // Setup the Search model
+                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, NavigateToMediaCommand);
+
                 _spotLightItems = await _spotlightDataService.GetSpotlightData();
                 SetSource();
             }

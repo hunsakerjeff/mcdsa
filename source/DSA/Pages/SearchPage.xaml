@@ -342,7 +342,6 @@
                 </core:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
         </ListBox>
-        <common1:MainAppBar Grid.Row="2" VerticalAlignment="Bottom" />
         <Border Style="{StaticResource InternalModeBorder}" Grid.RowSpan="3" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}" />
     </Grid>
 </abstract:PageBase>

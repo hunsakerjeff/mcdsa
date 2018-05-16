@@ -29,7 +29,7 @@ namespace DSA.Shell.ViewModels
         public const string VisualBrowserPageKey = "VisualBrowserPage";
         public const string MenuBrowserPageKey = "MenuBrowserPage";
         public const string HistoryPageKey = "HistoryPage";
-        public const string PlaylistPageKey = "PlaylistPage";
+        public const string PlaylistPageKey = "PlaylistsPage";
         public const string SpotlightPageKey = "SpotlightPage";
         public const string MediaContentPageKey = "MediaContentPage";
         public const string SearchPageKey = "SearchPageKey";

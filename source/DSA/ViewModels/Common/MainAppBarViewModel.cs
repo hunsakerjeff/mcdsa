@@ -9,6 +9,8 @@ using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight.Threading;
 using GalaSoft.MvvmLight.Views;
+using DSA.Shell.ViewModels.VisualBrowser.ControlBar;
+using DSA.Shell.Commands;
 
 namespace DSA.Shell.ViewModels.Common
 {
@@ -18,6 +20,7 @@ namespace DSA.Shell.ViewModels.Common
         private readonly INavigationService _navigationService;
 
         private ImageSource _logoImage;
+        private ImageSource _homeImage;
         private ImageSource _visualBrowserImage;
         private ImageSource _menuBrowserImage;
         private ImageSource _historyImage;
@@ -25,13 +28,13 @@ namespace DSA.Shell.ViewModels.Common
         private ImageSource _spotlightImage;
 
         private bool _visualBrowserCheck;
-        private bool _spotlightCheck;
-        private bool _playlistCheck;
-        private bool _historyCheck;
         private bool _menuBrowserCheck;
-
+        private bool _historyCheck;
+        private bool _playlistCheck;
+        private bool _spotlightCheck;
         private bool _isConfigurationSelected;
-       
+
+
         public MainAppBarViewModel(
            IMobileConfigurationDataService dataService,
            INavigationService navigationService,
@@ -39,6 +42,7 @@ namespace DSA.Shell.ViewModels.Common
         {
             _dataService = dataService;
             _navigationService = navigationService;
+
             Initialize();
         }
 
@@ -75,10 +79,8 @@ namespace DSA.Shell.ViewModels.Common
         {
             System.Diagnostics.Debug.WriteLine("Refreshing CheckState");
             System.Diagnostics.Debug.WriteLine(_navigationService.CurrentPageKey);
-            VisualBrowserCheck = _navigationService.CurrentPageKey == ViewModelLocator.VisualBrowserPageKey
-                    || _navigationService.CurrentPageKey == ViewModelLocator.SearchPageKey
-                    || _navigationService.CurrentPageKey == "-- ROOT --";
 
+            VisualBrowserCheck = _navigationService.CurrentPageKey == ViewModelLocator.VisualBrowserPageKey || _navigationService.CurrentPageKey == ViewModelLocator.SearchPageKey || _navigationService.CurrentPageKey == "-- ROOT --";
             MenuBrowserCheck = _navigationService.CurrentPageKey == ViewModelLocator.MenuBrowserPageKey;
             HistoryCheck =  _navigationService.CurrentPageKey == ViewModelLocator.HistoryPageKey;
             PlaylistCheck = _navigationService.CurrentPageKey == ViewModelLocator.PlaylistPageKey;
@@ -104,14 +106,7 @@ namespace DSA.Shell.ViewModels.Common
             {
                 return _navigateVisualBrowserCommand ?? (_navigateVisualBrowserCommand = new RelayCommand(() =>
                 {
-                    if(SettingsDataService.IsSearchPageVisible)
-                    {
-                        _navigationService.NavigateTo(ViewModelLocator.SearchPageKey);
-                    }
-                    else
-                    {
-                        _navigationService.NavigateTo(ViewModelLocator.VisualBrowserPageKey);
-                    }
+                    _navigationService.NavigateTo(ViewModelLocator.VisualBrowserPageKey);
 
                     RefreshCheckState();
                 }));
@@ -220,6 +215,14 @@ namespace DSA.Shell.ViewModels.Common
         {
             get { return _spotlightCheck; }
             set { Set(ref _spotlightCheck, value); }
+        }
+
+        public ImageSource HomeImage
+        {
+            get
+            {
+                return _homeImage ?? (_homeImage = ImageUtil.GetImageSouce("ms-appx:///Assets/AppBar/home@2x.png"));
+            }
         }
 
         public ImageSource VisualBrowserImage

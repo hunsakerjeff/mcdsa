@@ -22,6 +22,7 @@ using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight.Views;
 using Salesforce.SDK.Adaptation;
 using WinRTXamlToolkit.Tools;
+using DSA.Shell.ViewModels.Common;
 
 namespace DSA.Shell.ViewModels.VisualBrowser
 {
@@ -67,6 +68,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser
 
         private double _topCategoriesMargin;
         private ObservableCollection<CategoryViewModel> _expandedCategories;
+        private SearchControlViewModel _searchViewModel;
 
         public IEnumerable<CategoryViewModel> TopCategories
         {
@@ -203,12 +205,9 @@ namespace DSA.Shell.ViewModels.VisualBrowser
 
                 Buttons = VisualBrowserViewModelBuilder.CreateButtonsViewModel(_currentMobileConfiguration, ShowCategory).ToList();
                 TopCategories = VisualBrowserViewModelBuilder.CreateCategoriesViewModel(_currentMobileConfiguration.TopCategories, _navigateToMediaCommand, IsInternalModeEnable, SubCategorySelectionAction);
-
-                ControlBarViewModel = new ControlBarViewModel(_navigationService, _navigateToMediaCommand, _dialogService, SettingsDataService,
-                    _mobileAppConfigDataService, _currentMobileConfiguration, _userSessionService, _contactsService,
-                    _presentationDataService, _searchContentDataService, _syncLogService, _documentInfoDataService);
-
+                ControlBarViewModel = new ControlBarViewModel(_dialogService, SettingsDataService, _mobileAppConfigDataService, _currentMobileConfiguration, _userSessionService, _contactsService, _presentationDataService, _syncLogService);
                 ExpandedCategories = new ObservableCollection<CategoryViewModel>();
+                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, _navigateToMediaCommand);
 
                 if (_orientation.HasValue)
                 {
@@ -229,6 +228,12 @@ namespace DSA.Shell.ViewModels.VisualBrowser
                 PlatformAdapter.SendToCustomLogger(e, LoggingLevel.Error);
                 // Report error here
             }
+        }
+
+        public SearchControlViewModel SearchViewModel
+        {
+            get { return _searchViewModel; }
+            set { Set(ref _searchViewModel, value); }
         }
 
         private async Task LoadBackgroundImage()

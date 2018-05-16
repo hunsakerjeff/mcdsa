@@ -11,6 +11,7 @@ using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight.Views;
 using Salesforce.SDK.Adaptation;
 using WinRTXamlToolkit.Tools;
+using DSA.Shell.ViewModels.VisualBrowser.ControlBar;
 
 namespace DSA.Shell.ViewModels.Playlist
 {
@@ -24,7 +25,10 @@ namespace DSA.Shell.ViewModels.Playlist
         private readonly INavigationService _navigationService;
         private readonly IHistoryDataService _historyDataService;
         private readonly IDialogService _dialogService;
+        private readonly IDocumentInfoDataService _documentInfoDataService;
+        private readonly ISearchContentDataService _searchContentDataService;
         private NewPlaylistViewModel _newPlaylistViewModel;
+        private SearchControlViewModel _searchViewModel;
 
         private bool _isEdited;
         private string _editButtonText;
@@ -38,12 +42,17 @@ namespace DSA.Shell.ViewModels.Playlist
             INavigationService navigationService,
             IHistoryDataService historyDataService,
             IDialogService dialogService,
+            ISearchContentDataService searchContentDataService,
+            IDocumentInfoDataService documentInfoDataService,
             ISettingsDataService settingsDataService) : base(settingsDataService)
         {
             _playlistsDataService = playlistsDataService;
             _navigationService = navigationService;
             _historyDataService = historyDataService;
             _dialogService = dialogService;
+            _documentInfoDataService = documentInfoDataService;
+            _searchContentDataService = searchContentDataService;
+
             Initialize();
         }
 
@@ -65,6 +74,8 @@ namespace DSA.Shell.ViewModels.Playlist
             {
                 EditButtonDisabled = false;
                 var navigationCommand = new NavigateToMediaCommand(_navigationService, _historyDataService);
+                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, navigationCommand);
+
                 var data = await _playlistsDataService.GetPlayListsData();
                 _allPlaylists = PlaylistViewModelBuilder.Create(data, navigationCommand, _dialogService);
                 PopulateRemoveCommand(_allPlaylists);
@@ -81,6 +92,12 @@ namespace DSA.Shell.ViewModels.Playlist
             {
                 PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
             }
+        }
+
+        public SearchControlViewModel SearchViewModel
+        {
+            get { return _searchViewModel; }
+            set { Set(ref _searchViewModel, value); }
         }
 
         private void SetInternalMode(ObservableCollection<PlaylistViewModel> _allPlaylists, bool isInternalModeEnable)

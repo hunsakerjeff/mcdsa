@@ -10,6 +10,7 @@ using DSA.Shell.ViewModels.Abstract;
 using DSA.Shell.ViewModels.Builders;
 using GalaSoft.MvvmLight.Views;
 using WinRTXamlToolkit.Tools;
+using DSA.Shell.ViewModels.VisualBrowser.ControlBar;
 
 namespace DSA.Shell.ViewModels.MenuBrowser
 {
@@ -18,19 +19,28 @@ namespace DSA.Shell.ViewModels.MenuBrowser
         private readonly IBrowserDataService _browserDataService;
         private readonly INavigationService _navigationService;
         private readonly IHistoryDataService _historyDataService;
+        private readonly IDocumentInfoDataService _documentInfoDataService;
+        private readonly ISearchContentDataService _searchContentDataService;
 
         private CategoryItem _mainCategory;
         private ObservableCollection<CategoryItem> _categories;
+
+        private SearchControlViewModel _searchViewModel;
 
         public MenuBrowserViewModel(
             IBrowserDataService browserDataService,
             INavigationService navigationService,
             IHistoryDataService historyDataService,
+            ISearchContentDataService searchContentDataService,
+            IDocumentInfoDataService documentInfoDataService,
             ISettingsDataService settingsDataService) : base(settingsDataService)
         {
             _browserDataService = browserDataService;
             _navigationService = navigationService;
             _historyDataService = historyDataService;
+            _documentInfoDataService = documentInfoDataService;
+            _searchContentDataService = searchContentDataService;
+
             Initialize();
         }
 
@@ -42,11 +52,20 @@ namespace DSA.Shell.ViewModels.MenuBrowser
                 var data = await _browserDataService.GetBrowserData();
                 MainCategory = MenuBrowserCategoryContentViewModelBuilder.Create(data, navigationCommand, IsInternalModeEnable, SelectCategory);
                 Categories = new ObservableCollection<CategoryItem> { MainCategory };
+
+                // Setup the Search model
+                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, navigationCommand);
             }
             catch (Exception ex)
             {
                 // Report error here
             }
+        }
+
+        public SearchControlViewModel SearchViewModel
+        {
+            get { return _searchViewModel; }
+            set { Set(ref _searchViewModel, value); }
         }
 
         private void SelectCategory(CategoryItem item)

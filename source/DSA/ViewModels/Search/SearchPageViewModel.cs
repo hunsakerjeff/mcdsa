@@ -38,6 +38,7 @@ namespace DSA.Shell.ViewModels.Search
         private string _searchBoxQueryText;
         private string _noResultsText;
         private bool _focusOnKeyboardInput = true;
+        private string _callingPage;
 
         public SearchPageViewModel(
             IDocumentInfoDataService documentInfoDataService,
@@ -79,6 +80,7 @@ namespace DSA.Shell.ViewModels.Search
             {
                 SettingsDataService.IsSearchPageVisible = true;
                 SearchBoxQueryText = m.Query;
+                _callingPage = m.CallingPage;
                 await ProcessSearch(m.Query);
             });
         }
@@ -107,7 +109,7 @@ namespace DSA.Shell.ViewModels.Search
                 {
                     FocusOnKeyboardInput = true;
                     SettingsDataService.IsSearchPageVisible = false;
-                    _navigationService.NavigateTo(ViewModelLocator.VisualBrowserPageKey);
+                    _navigationService.NavigateTo((string.IsNullOrEmpty(_callingPage)) ? ViewModelLocator.VisualBrowserPageKey : _callingPage);
                 }));
             }
         }
@@ -159,7 +161,6 @@ namespace DSA.Shell.ViewModels.Search
                     }));
             }
         }
-
         public string SearchBoxQueryText
         {
             get { return _searchBoxQueryText; }

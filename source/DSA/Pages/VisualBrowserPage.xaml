@@ -11,6 +11,7 @@
                  xmlns:controlBar1="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
                  xmlns:visualBrowser="using:DSA.Shell.Controls.VisualBrowser"
                  xmlns:behaviors="using:DSA.Shell.Behaviors"
+                 xmlns:controlBar="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
                  x:Class="DSA.Shell.Pages.VisualBrowserPage"
                  mc:Ignorable="d ignore"
                  DataContext="{Binding VisualBrowser, Source={StaticResource Locator}}">
@@ -44,15 +45,16 @@
 
         <common1:NewContentBarControl  VerticalAlignment="Top"/>
 
-        <Grid Height="40" Width="600" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,15,0">
+        <Grid Height="40" Width="165" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,40,0">
             <controlBar1:ControlBarControl DataContext="{Binding ControlBarViewModel}"/>
         </Grid>
 
         <visualBrowser:MainButtonsControl Visibility="{Binding IsCategorySelected, Converter={StaticResource BoolToVisRev}}"/>
         <visualBrowser:BrowserControl Visibility="{Binding IsCategorySelected, Converter={StaticResource BoolToVis}}"/>
-
-        <common1:MainAppBar VerticalAlignment="Bottom" />
-
+        <Grid Height="88" VerticalAlignment="Bottom">
+            <common1:MainAppBar />
+            <controlBar:SearchControl Width="435" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right"  Margin="0,0,40,0"/>
+        </Grid>
         <Border Style="{StaticResource InternalModeBorder}" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}" />
     </Grid>
 </abstract:PageBase>

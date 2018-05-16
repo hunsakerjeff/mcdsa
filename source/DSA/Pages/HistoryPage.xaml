@@ -9,6 +9,7 @@
                  xmlns:converters="using:DSA.Shell.Converters"
                  xmlns:common1="using:DSA.Shell.Controls.Common"
                  xmlns:behaviors="using:DSA.Shell.Behaviors"
+                 xmlns:controlBar="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
                  x:Class="DSA.Shell.Pages.HistoryPage"
                  mc:Ignorable="d ignore"
                  DataContext="{Binding History, Source={StaticResource Locator}}">
@@ -307,7 +308,10 @@
                 </core:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
         </ListBox>
-        <common1:MainAppBar Grid.Row="1" VerticalAlignment="Bottom" />
+        <Grid Grid.Row="1" Height="88" VerticalAlignment="Bottom">
+            <common1:MainAppBar />
+            <controlBar:SearchControl Width="435" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right"  Margin="0,0,40,0"/>
+        </Grid>
         <Border Style="{StaticResource InternalModeBorder}" Grid.RowSpan="2" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}" />
     </Grid>
 </abstract:PageBase>

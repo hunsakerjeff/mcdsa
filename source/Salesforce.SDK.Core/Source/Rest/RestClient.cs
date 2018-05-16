@@ -36,6 +36,7 @@ using Salesforce.SDK.Utilities;
 using Salesforce.SDK.Exceptions;
 using Salesforce.SDK.Adaptation;
 using Windows.Foundation.Diagnostics;
+using System;
 
 namespace Salesforce.SDK.Rest
 {
@@ -152,6 +153,8 @@ namespace Salesforce.SDK.Rest
             if (!call.HasResponse)
             {
                 System.Diagnostics.Debug.WriteLine("***HttpCall !call.HasResponse ");
+                PlatformAdapter.SendToCustomLogger("HttpCall: no valid response", LoggingLevel.Error);
+
                 throw new NetworkErrorException();
             }
 

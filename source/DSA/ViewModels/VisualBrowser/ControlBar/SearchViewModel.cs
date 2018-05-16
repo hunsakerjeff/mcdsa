@@ -17,6 +17,7 @@ using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight.Threading;
 using GalaSoft.MvvmLight.Views;
 using Salesforce.SDK.Adaptation;
+using Windows.UI.Xaml;
 
 namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
 {
@@ -36,7 +37,6 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
         private IEnumerable<MediaLink> _mediaLinks;
         private string _searchBoxQueryText;
         private string _firstSuggestionID;
-        private IEnumerable<MediaLink> mediaLinks;
         private bool _focusOnKeyboardInput = true;
         private bool _overrideFocusOnKeyboardInput = false;
 
@@ -50,6 +50,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
             _searchContentDataService = searchContentDataService;
             _navigationService = navigationService;
             _navigateToMediaCommand = navigateToMediaCommand;
+
             Initialize();
             AttachMessages();
         }
@@ -79,15 +80,6 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                  _overrideFocusOnKeyboardInput = m.IsOpen;
                  FocusOnKeyboardInput = m.IsOpen == false;
              }));
-        }
-
-        public SearchControlViewModel(NavigateToMediaCommand _navigateToMediaCommand, IEnumerable<MediaLink> mediaLinks, ISearchContentDataService _searchContentDataService, INavigationService _navigationService, IDocumentInfoDataService _documentInfoDataService)
-        {
-            this._navigateToMediaCommand = _navigateToMediaCommand;
-            this.mediaLinks = mediaLinks;
-            this._searchContentDataService = _searchContentDataService;
-            this._navigationService = _navigationService;
-            this._documentInfoDataService = _documentInfoDataService;
         }
 
         public RelayCommand<SearchBoxResultSuggestionChosenEventArgs> ResultSuggestionChosenCommand
@@ -127,7 +119,13 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                             {
                                 FocusOnKeyboardInput = true;
                             }
-                            Messenger.Default.Send(new SearchQuerySubmitted { Query = arg.QueryText });
+
+                            // Capture current page name so we no what to go back to via the back buttun
+                            var frame = Window.Current.Content as Frame;
+                            string currentPage = (frame != null) ? frame.SourcePageType.Name: ViewModelLocator.VisualBrowserPageKey;
+
+                            // Send the Submit Query message and navigate to the page
+                            Messenger.Default.Send(new SearchQuerySubmitted { Query = arg.QueryText, CallingPage = currentPage });
                             _navigationService.NavigateTo(ViewModelLocator.SearchPageKey);
                             return;
                         }
@@ -224,7 +222,6 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                     }));
             }
         }
-
 
         public RelayCommand PrepareForFocusOnKeyboardInput
         {

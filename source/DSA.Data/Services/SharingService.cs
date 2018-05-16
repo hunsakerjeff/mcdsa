@@ -117,16 +117,19 @@ namespace DSA.Data.Services
         private void OnDataRequested(DataTransferManager sender, DataRequestedEventArgs args)
         {
             DataPackage requestData = args.Request.Data;
-            requestData.Properties.Title = _title;
-            if (_urlToShare != null && _urlToShare.Any())
+            if (null != _title)
             {
-                requestData.SetHtmlFormat(HtmlFormatHelper.CreateHtmlFormat(string.Join("<br/>", _urlToShare)));
+                requestData.Properties.Title = _title;
+                if (_urlToShare != null && _urlToShare.Any())
+                {
+                    requestData.SetHtmlFormat(HtmlFormatHelper.CreateHtmlFormat(string.Join("<br/>", _urlToShare)));
+                }
+                if (_filesToShare != null && _filesToShare.Any())
+                {
+                    requestData.SetStorageItems(_filesToShare.ToArray());
+                }
+                ResetTranferData();
             }
-            if (_filesToShare != null && _filesToShare.Any())
-            {
-                requestData.SetStorageItems(_filesToShare.ToArray());
-            }
-            ResetTranferData();
         }
 
         private void ResetTranferData()

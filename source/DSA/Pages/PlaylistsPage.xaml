@@ -10,6 +10,7 @@
                  xmlns:common1="using:DSA.Shell.Controls.Common"
                  xmlns:playlist="using:DSA.Shell.Controls.Playlist"
                  xmlns:behaviors="using:DSA.Shell.Behaviors"
+                 xmlns:controlBar="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
                  x:Class="DSA.Shell.Pages.PlaylistsPage"
                  mc:Ignorable="d ignore"
                  DataContext="{Binding Playlists, Source={StaticResource Locator}}">
@@ -115,8 +116,9 @@
                 </ItemsControl>
             </StackPanel>
         </ScrollViewer>
-        <Grid Height="88" VerticalAlignment="Bottom" Grid.Row="1" Visibility="{Binding IsPlaylistEditMode, Converter={StaticResource BoolToVisRev}}">
+        <Grid Grid.Row="1" Height="88" VerticalAlignment="Bottom" Visibility="{Binding IsPlaylistEditMode, Converter={StaticResource BoolToVisRev}}">
             <common1:MainAppBar />
+            <controlBar:SearchControl Width="435" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right"  Margin="0,0,40,0"/>
         </Grid>
         <Border Style="{StaticResource InternalModeBorder}" Grid.Row="0" Grid.RowSpan="2" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}"/>
     </Grid>

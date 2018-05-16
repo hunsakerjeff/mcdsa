@@ -47,7 +47,7 @@ namespace DSA.Data.Services.API
 
             IEnumerable<string> result = new List<string>();
             result = searchResults.Aggregate(result, (current, searchResult) => current.Union(searchResult));
-            return sourceLinks.Where(media => result.Contains(media.ID));
+            return sourceLinks.Where(media => result.Contains(media.ID)).OrderBy(media => media.Name);
         }
 
         public async Task<IList<string>> SearchForDocumentIdByProductType(string query)

@@ -10,6 +10,7 @@
                  xmlns:converters="using:DSA.Shell.Converters"
                  xmlns:common1="using:DSA.Shell.Controls.Common"
                  xmlns:behaviors="using:DSA.Shell.Behaviors"
+                 xmlns:controlBar="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
                  x:Class="DSA.Shell.Pages.SpotlightPage"
                  mc:Ignorable="d ignore"
                  DataContext="{Binding Spotlight, Source={StaticResource Locator}}">
@@ -141,7 +142,10 @@
                 </interactivity:Interaction.Behaviors>
             </ListView>
         </Grid>
-        <common1:MainAppBar Grid.Row="2" VerticalAlignment="Bottom"  Background="Red"/>
+        <Grid Grid.Row="2" Height="88" VerticalAlignment="Bottom">
+            <common1:MainAppBar />
+            <controlBar:SearchControl Width="435" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right"  Margin="0,0,40,0"/>
+        </Grid>
         <Border Style="{StaticResource InternalModeBorder}" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}"/>
     </Grid>
 </abstract:PageBase>

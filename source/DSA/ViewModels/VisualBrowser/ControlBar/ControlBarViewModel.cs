@@ -30,12 +30,12 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
         private readonly IUserSessionService _userSessionService;
         private readonly IPresentationDataService _presentationDataService;
         private readonly IContactsService _contactsService;
-        private readonly ISearchContentDataService _searchContentDataService;
+        //private readonly ISearchContentDataService _searchContentDataService;
         private readonly ISyncLogService _syncLogService;
-        private readonly IDocumentInfoDataService _documentInfoDataService;
-        private readonly INavigationService _navigationService;
+//        private readonly IDocumentInfoDataService _documentInfoDataService;
+//        private readonly INavigationService _navigationService;
 
-        private readonly NavigateToMediaCommand _navigateToMediaCommand;
+        //private readonly NavigateToMediaCommand _navigateToMediaCommand;
         private RelayCommand _logInLogOutCommand;
         private RelayCommand _showSynchronizationPopup;
         private RelayCommand _showDeltaSynchronizationPopup;
@@ -60,7 +60,6 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
         private ImageSource _checkInOutIcon;
 
         private CheckInOutViewModel _checkInOutViewModel;
-        private SearchControlViewModel _searchViewModel;
 
         private const string LogInText = "Sign In";
         private const string LogOutText = "Sign Out";
@@ -73,8 +72,6 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
         private bool _isInternalModeEnableChecked;
 
         public ControlBarViewModel(
-            INavigationService navigationService,
-            NavigateToMediaCommand navigateToMediaCommand,
             IDialogService dialogService,
             ISettingsDataService settingsDataService,
             IMobileAppConfigDataService mobileAppConfigDataService,
@@ -82,20 +79,15 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
             IUserSessionService userSessionService,
             IContactsService contactsService,
             IPresentationDataService presentationDataService,
-            ISearchContentDataService searchContentDataService,
-            ISyncLogService syncLogService,
-            IDocumentInfoDataService documentInfoDataService) : base(settingsDataService)
+            ISyncLogService syncLogService
+            ) : base(settingsDataService)
         {
-            _navigationService = navigationService;
-            _documentInfoDataService = documentInfoDataService;
             _presentationDataService = presentationDataService;
             _userSessionService = userSessionService;
             _dialogService = dialogService;
-            _navigateToMediaCommand = navigateToMediaCommand;
             _mobileAppConfigDataService = mobileAppConfigDataService;
             _currentMobileConfiguration = currentMobileConfiguration;
             _contactsService = contactsService;
-            _searchContentDataService = searchContentDataService;
             _syncLogService = syncLogService;
             Initialize();
         }
@@ -109,8 +101,6 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
 
                 var mcSelectViewModels = VisualBrowserViewModelBuilder.CreateMobileConfigurationsSelectionViewModel(configurations, SettingsDataService, currentID, () => { MobileConfigurations.ForEach(mc => mc.IsSelected = false); }, () => { IsSelectConfigurationPopupOpen = false; });
                 MobileConfigurations = new ObservableCollection<MobileConfigurationsSelectionViewModel>(mcSelectViewModels);
-
-                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, _navigateToMediaCommand);
 
                 SetLogInOutStatus();
 
@@ -444,12 +434,6 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
         {
             get { return _checkInOutViewModel; }
             set { Set(ref _checkInOutViewModel, value); }
-        }
-
-        public SearchControlViewModel SearchViewModel
-        {
-            get { return _searchViewModel; }
-            set { Set(ref _searchViewModel, value); }
         }
 
         public string VersionText => $"Version {Package.Current.Id.Version.Major}.{Package.Current.Id.Version.Minor}.{Package.Current.Id.Version.Build}.{Package.Current.Id.Version.Revision}";

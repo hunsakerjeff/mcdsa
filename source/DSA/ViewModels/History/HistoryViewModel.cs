@@ -13,6 +13,7 @@ using GalaSoft.MvvmLight.Threading;
 using GalaSoft.MvvmLight.Views;
 using Salesforce.SDK.Adaptation;
 using WinRTXamlToolkit.Tools;
+using DSA.Shell.ViewModels.VisualBrowser.ControlBar;
 
 namespace DSA.Shell.ViewModels.History
 {
@@ -20,15 +21,46 @@ namespace DSA.Shell.ViewModels.History
     {
         private readonly INavigationService _navigationService;
         private readonly IHistoryDataService _historyDataService;
+        private readonly IDocumentInfoDataService _documentInfoDataService;
+        private readonly ISearchContentDataService _searchContentDataService;
+        private SearchControlViewModel _searchViewModel;
 
         public HistoryViewModel(
             IHistoryDataService historyDataService,
             INavigationService navigationService,
+            ISearchContentDataService searchContentDataService,
+            IDocumentInfoDataService documentInfoDataService,
             ISettingsDataService settingsDataService) : base(settingsDataService)
         {
             _navigationService = navigationService;
             _historyDataService = historyDataService;
+            _documentInfoDataService = documentInfoDataService;
+            _searchContentDataService = searchContentDataService;
+
             Initialize();
+        }
+
+        protected override async Task Initialize()
+        {
+            try
+            {
+                // Setup the Search model
+                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, NavigateToMediaCommand);
+
+                var data = await _historyDataService.GetHistoryData();
+                _allHistoryItems = HistoryItemViewModelBuilder.Create(data);
+                OnInternalModeChanged(IsInternalModeEnable);
+            }
+            catch (Exception ex)
+            {
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
+            }
+        }
+
+        public SearchControlViewModel SearchViewModel
+        {
+            get { return _searchViewModel; }
+            set { Set(ref _searchViewModel, value); }
         }
 
         protected override void AttachMessages()
@@ -41,19 +73,6 @@ namespace DSA.Shell.ViewModels.History
                     await Initialize();
                 });
             });
-        }
-        protected override async Task Initialize()
-        {
-            try
-            {
-                var data = await _historyDataService.GetHistoryData();
-                _allHistoryItems = HistoryItemViewModelBuilder.Create(data);
-                OnInternalModeChanged(IsInternalModeEnable);
-            }
-            catch (Exception ex)
-            {
-                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
-            }
         }
 
         protected override void OnInternalModeChanged(bool value)

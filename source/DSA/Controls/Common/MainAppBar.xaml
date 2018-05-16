@@ -7,8 +7,10 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:common="using:DSA.Shell.Controls.Common"
+    xmlns:controlBar="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
     mc:Ignorable="d"
-    d:DesignWidth="400" Height="87.712"
+    d:DesignWidth="500
+    " Height="87.712"
     DataContext="{Binding AppBar, Source={StaticResource Locator}}">
 
     <Grid>
@@ -23,7 +25,8 @@
             </interactivity:Interaction.Behaviors>
         </Image>
         <StackPanel x:Name="CenterPanel" Orientation="Horizontal" Grid.Column="0" HorizontalAlignment="Center">
-            <common:AppBarButton Text="Visual Browser" Source="{Binding VisualBrowserImage}" IsChecked="{Binding VisualBrowserCheck, Mode=TwoWay}"  Command="{Binding NavigateVisualBrowserCommand}" />
+            <common:AppBarButton Text="Home" Width="80" Source="{Binding HomeImage}" Command="{Binding NavigateVisualBrowserTopLevelCommand}"/>
+            <common:AppBarButton Text="Visual Browser" Width="96" Source="{Binding VisualBrowserImage}" IsChecked="{Binding VisualBrowserCheck, Mode=TwoWay}"  Command="{Binding NavigateVisualBrowserCommand}" />
             <common:AppBarButton Text="Menu Browser" Width="96" Source="{Binding MenuBrowserImage}" IsChecked="{Binding MenuBrowserCheck, Mode=TwoWay}"  Command="{Binding NavigateMenuBrowserCommand}" IsEnabled="{Binding IsConfigurationSelected}" />
             <common:AppBarButton Text="History" Width="80" Source="{Binding HistoryImage}" IsChecked="{Binding HistoryCheck, Mode=TwoWay}"  Command="{Binding NavigateHistoryCommand}" IsEnabled="{Binding IsConfigurationSelected}" />
             <common:AppBarButton Text="PlayList" Width="80" Source="{Binding PlaylistImage}" IsChecked="{Binding PlaylistCheck, Mode=TwoWay}"  Command="{Binding NavigatePlaylistCommand}" IsEnabled="{Binding IsConfigurationSelected}" />
