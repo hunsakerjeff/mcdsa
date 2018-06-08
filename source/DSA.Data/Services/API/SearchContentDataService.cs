@@ -88,13 +88,12 @@ namespace DSA.Data.Services.API
                 return new List<string>();
             }
 
-            string localQuery = query + "%";
-            var querySpec = QuerySpec.BuildLikeQuerySpec(TagSoupName, TageKey, localQuery, QuerySpec.SqlOrder.ASC, SfdcConfig.PageSize).RemoveLimit(store);
+            var querySpec = QuerySpec.BuildContainQuerySpec(TagSoupName, TageKey, query, QuerySpec.SqlOrder.ASC, SfdcConfig.PageSize).RemoveLimit(store);
 
             var results = store.Query(querySpec, 0)
                                 .Select(item => CustomPrefixJsonConvert.DeserializeObject<DocumentsTag>(item.ToString()))
                                 .SelectMany(x => x.DocumentIds).Distinct().ToList();
-            
+
             return results;
         }
 
@@ -142,6 +141,7 @@ namespace DSA.Data.Services.API
             var results = store.Query(querySpec, 0)
                                 .Select(item => CustomPrefixJsonConvert.DeserializeObject<DocumentTitle>(item.ToString()))
                                 .SelectMany(x => x.DocumentIds).Distinct().ToList();
+
             return results;
         }
     }

@@ -1704,7 +1704,7 @@ namespace DSA.Sfdc.Sync
             try
             {
                 var account = GetCachedAccount();
-                await OAuth2.RefreshAuthToken(SDKManager.GlobalClientManager.HttpClient, account);
+                await OAuth2.RefreshAuthToken(account);
                 OAuth2.RefreshCookies();
                 return true;
             }

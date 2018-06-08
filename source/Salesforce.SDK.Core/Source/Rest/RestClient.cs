@@ -50,15 +50,13 @@ namespace Salesforce.SDK.Rest
         private readonly AccessTokenProvider _accessTokenProvider;
         private readonly string _instanceUrl;
         private string _accessToken;
-        private readonly HttpClient _httpClient;        // Note:  this is added here as it is a session object and should be reused as opposed to instantiated over and over
 
         // CTOR
-        public RestClient(HttpClient client, string instanceUrl, string accessToken, AccessTokenProvider accessTokenProvider)
+        public RestClient(string instanceUrl, string accessToken, AccessTokenProvider accessTokenProvider)
         {
             _instanceUrl = instanceUrl;
             _accessToken = accessToken;
             _accessTokenProvider = accessTokenProvider;
-            _httpClient = client;
         }
 
         public RestClient(string instanceUrl)
@@ -101,7 +99,7 @@ namespace Salesforce.SDK.Rest
             string url = _instanceUrl + request.Path;
             var headers = request.AdditionalHeaders != null ? new HttpCallHeaders(_accessToken, request.AdditionalHeaders) : new HttpCallHeaders(_accessToken, new Dictionary<string, string>());
 
-            HttpCall call = await new HttpCall(_httpClient, request.Method, headers, url, request.RequestBody, request.ContentType).Execute(token).ConfigureAwait(false);
+            HttpCall call = await new HttpCall(request.Method, headers, url, request.RequestBody, request.ContentType).Execute(token).ConfigureAwait(false);
             if (!call.HasResponse)
             {
                 throw call.Error;
@@ -149,7 +147,7 @@ namespace Salesforce.SDK.Rest
             string url = _instanceUrl + request.Path;
             var headers = request.AdditionalHeaders != null ? new HttpCallHeaders(_accessToken, request.AdditionalHeaders) : new HttpCallHeaders(_accessToken, new Dictionary<string, string>());
 
-            HttpCall call = await new HttpCall(_httpClient, request.Method, headers, url, request.RequestBody, request.ContentType).ExecuteAndSaveAsync(outStream, token).ConfigureAwait(false);
+            HttpCall call = await new HttpCall(request.Method, headers, url, request.RequestBody, request.ContentType).ExecuteAndSaveAsync(outStream, token).ConfigureAwait(false);
             if (!call.HasResponse)
             {
                 System.Diagnostics.Debug.WriteLine("***HttpCall !call.HasResponse ");

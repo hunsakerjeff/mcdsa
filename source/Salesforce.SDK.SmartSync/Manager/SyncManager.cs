@@ -108,7 +108,7 @@ namespace Salesforce.SDK.SmartSync.Manager
             string uniqueId = Constants.GenerateUniqueId(account, smartStore);
             lock (Synclock)
             {
-                var client = SDKManager.GlobalClientManager.PeekRestClient(account);
+                var client = new ClientManager().PeekRestClient(account);
                 SyncManager instance = null;
                 if (_instances != null)
                 {

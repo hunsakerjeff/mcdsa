@@ -120,7 +120,7 @@ namespace Salesforce.SDK.Auth
             {
                 var cm = new ClientManager();
                 cm.PeekRestClient();
-                identity = await OAuth2.CallIdentityService(cm.HttpClient, authResponse.IdentityUrl, authResponse.AccessToken);
+                identity = await OAuth2.CallIdentityService(authResponse.IdentityUrl, authResponse.AccessToken);
             }
             catch (JsonException ex)
             {

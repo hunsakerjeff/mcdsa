@@ -44,19 +44,6 @@ namespace Salesforce.SDK.Rest
     /// </summary>
     public class ClientManager
     {
-        public ClientManager()
-        {
-            // Create the lcient based http client that will be used by all rest calls
-            CreateHttpClient();
-        }
-
-        // Attributes
-//        private readonly HttpClient _httpClient;        // Note:  this is added here as it is a session object and should be reused as opposed to instantiated over and over
-        private static HttpClient _httpClient = null;
-
-        // Properties
-        public HttpClient HttpClient { get { return _httpClient; }  }
-
         /// <summary>
         ///     Logs currently authenticated user out by deleting locally persisted credentials and invoking the server to revoke
         ///     the user auth tokens
@@ -70,7 +57,7 @@ namespace Salesforce.SDK.Rest
                 LoginOptions options = account.GetLoginOptions();
                 AccountManager.DeleteAccount();
                 OAuth2.ClearCookies(options);
-                bool loggedOut = await OAuth2.RevokeAuthToken(_httpClient, options, account.RefreshToken);
+                bool loggedOut = await OAuth2.RevokeAuthToken(options, account.RefreshToken);
                 if (loggedOut)
                 {
                     GetRestClient();
@@ -93,11 +80,11 @@ namespace Salesforce.SDK.Rest
             }
             if (account != null)
             {
-                return new RestClient(_httpClient, account.InstanceUrl, account.AccessToken,
+                return new RestClient(account.InstanceUrl, account.AccessToken,
                     async () =>
                     {
                         account = AccountManager.GetAccount();
-                        AuthResponse authResponse = await OAuth2.RefreshAuthTokenRequest(_httpClient, account.GetLoginOptions(), account.RefreshToken);
+                        AuthResponse authResponse = await OAuth2.RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
                         account.AccessToken = authResponse.AccessToken;
                         AuthStorageHelper.GetAuthStorageHelper().PersistCredentials(account);
                         return account.AccessToken;
@@ -125,40 +112,6 @@ namespace Salesforce.SDK.Rest
         public RestClient GetUnAuthenticatedRestClient(string instanceUrl)
         {
             return new RestClient(instanceUrl);
-        }
-
-        public void Dispose()
-        {
-            // this does not work like people think.  HttpClient is reentrant and a session object, thus you do not dispose of it.  Its IDisposable does not work that way
-            if (_httpClient != null)
-            {
-                try
-                {
-                    _httpClient.Dispose();
-                    _httpClient = null;
-                }
-                catch (Exception)
-                {
-                    PlatformAdapter.SendToCustomLogger("HttpCall.Dispose - Error occurred while disposing", LoggingLevel.Warning);
-                }
-            }
-        }
-
-        private void CreateHttpClient()
-        {
-            if (_httpClient == null)
-            {
-                // Create the lcient based http client that will be used by all rest calls
-                var httpBaseFilter = new HttpBaseProtocolFilter
-                {
-                    AllowUI = false,
-                    AllowAutoRedirect = true,
-                    AutomaticDecompression = true,
-                };
-                httpBaseFilter.CacheControl.ReadBehavior = HttpCacheReadBehavior.MostRecent;
-                httpBaseFilter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache;
-                _httpClient = new HttpClient(httpBaseFilter);
-            }
         }
     }
 }
