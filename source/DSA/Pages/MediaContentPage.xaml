@@ -159,6 +159,9 @@
                        IsHitTestVisible="false" 
                        TextWrapping="NoWrap"/>
             <StackPanel Margin="0,0,20,0" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal" >
+                <Button x:Name="RelatedContentButton" BorderThickness="0" Command="{Binding ShowRelatedContentFlyoutCommand}" Visibility="{Binding RelatedContentPresent, Converter={StaticResource BoolToVis}}" Height="45">
+                    <Image Source="{Binding RelatedContentIcon}"/>
+                </Button>
                 <Button BorderThickness="0" Command="{Binding ShareMediaCommand}" Height="45">
                     <Image Source="{Binding MailIcon}"/>
                 </Button>

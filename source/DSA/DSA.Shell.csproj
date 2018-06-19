@@ -122,6 +122,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Commands\RelatedItemSelectedCommand.cs" />
+    <Compile Include="Controls\Media\RelatedContentFlyout.xaml.cs">
+      <DependentUpon>RelatedContentFlyout.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Logging\AsyncLock.cs" />
     <Compile Include="Logging\GlobalCrashHandler.cs" />
     <Compile Include="Logging\LogEvent.cs" />
@@ -270,6 +274,8 @@
     </Compile>
     <Compile Include="ViewModels\Abstract\BaseMediaItemViewModel.cs" />
     <Compile Include="ViewModels\Common\NewContentBarViewModel.cs" />
+    <Compile Include="ViewModels\Media\RelatedContentFlyoutViewModel.cs" />
+    <Compile Include="ViewModels\Media\RelatedContentViewModel.cs" />
     <Compile Include="ViewModels\Settings\MainSettingsFlyoutViewModel.cs" />
     <Compile Include="ViewModels\Search\SearchItemViewModel.cs" />
     <Compile Include="ViewModels\Search\SearchPageViewModel.cs" />
@@ -346,6 +352,7 @@
     <Content Include="Assets\MenuIcons\about-btn-iconhelp%402x.png" />
     <Content Include="Assets\MenuIcons\about-btn-iconrate%402x.png" />
     <Content Include="Assets\MenuIcons\applications-icon%402x.png" />
+    <Content Include="Assets\related_content.png" />
     <Content Include="Assets\SalesforceServices%402x.png" />
     <Content Include="Assets\settings.png" />
     <Content Include="Assets\SplashScreen.scale-140.png" />
@@ -424,6 +431,10 @@
     <Page Include="Controls\Media\OtherMediaControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Media\RelatedContentFlyout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Media\UrlWebViewControl.xaml">
       <Generator>MSBuild:Compile</Generator>

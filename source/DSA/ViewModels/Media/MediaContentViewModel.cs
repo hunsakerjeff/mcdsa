@@ -17,16 +17,22 @@ using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight.Threading;
 using GalaSoft.MvvmLight.Views;
 using WinRTXamlToolkit.Tools;
+using DSA.Shell.Controls.Media;
+using System.Collections.Generic;
+
 
 namespace DSA.Shell.ViewModels.Media
 {
     public class MediaContentViewModel : DSAViewModelBase
     {
+        // Attributes
         private readonly INavigationService _navigationService;
         private readonly IPlaylistDataService _playlistDataService;
         private readonly ISharingService _sharingService;
         private readonly IPresentationDataService _presentationDataService;
         private readonly IContentReviewDataService _contentReviewDataService;
+        private readonly ICategoryContentDataService _categoryContentDataService;
+        private readonly IDocumentInfoDataService _documentInfoDataService;
 
         private readonly PlayListCollection _playList = new PlayListCollection();
         private ObservableCollection<MediaPlaylistViewModel> _mediaPlaylists;
@@ -46,19 +52,27 @@ namespace DSA.Shell.ViewModels.Media
         private RelayCommand _navigateBackCommand;
         private RelayCommand _shareMediaCommand;
         private RelayCommand _openInExternalAppCommand;
-
         private RelayCommand _goToPreviousCommand;
         private RelayCommand _goToNextCommand;
 
         private bool _isPlaylistSelected;
-       
 
+        // *** Related Content ***
+        private RelayCommand _showRelatedContentFlyoutCommand;
+        private List<MediaLink> _relatedContent;
+        private bool _relatedContentPresent;
+        private RelatedContentFlyout _relatedContentFlyout;
+
+
+        // CTOR
         public MediaContentViewModel(
              INavigationService navigationService,
              IPlaylistDataService playlistDataService,
              ISharingService sharingService,
              ISettingsDataService settingsDataService,
              IPresentationDataService presentationDataService,
+             ICategoryContentDataService categoryContentDataService,
+             IDocumentInfoDataService documentInfoDataService,
              IContentReviewDataService contentReviewDataService) : base(settingsDataService)
         {
             _presentationDataService = presentationDataService;
@@ -66,6 +80,16 @@ namespace DSA.Shell.ViewModels.Media
             _playlistDataService = playlistDataService;
             _sharingService = sharingService;
             _contentReviewDataService = contentReviewDataService;
+            _categoryContentDataService = categoryContentDataService;
+            _documentInfoDataService = documentInfoDataService;
+
+            // Create an empty list to work from
+            _relatedContent = new List<MediaLink>();
+
+            // Create the flyout
+            _relatedContentFlyout = new RelatedContentFlyout();
+
+            // Setup the messages
             RegisterMessages();
         }
 
@@ -75,6 +99,10 @@ namespace DSA.Shell.ViewModels.Media
                 this,
                 async media =>
                 {
+                    // Close flyout if open
+                    _relatedContentFlyout.CloseFlyout();
+
+                    // Set the media
                     await SetMedia(media);
                     _playList.Clear();
                     _selectedPlayListId = null;
@@ -119,25 +147,40 @@ namespace DSA.Shell.ViewModels.Media
         private async Task SetMedia(MediaLink media)
         {
             _startTime = DateTime.Now;
-            _contentEmailed = _presentationDataService.IsPresentationStarted()
-                              && _presentationDataService.IsEmailMarked(media);
 
+            // Handle setting the Email Icon
+            _contentEmailed = _presentationDataService.IsPresentationStarted() && _presentationDataService.IsEmailMarked(media);
             MailIcon = GetMailIcon(media, _contentEmailed);
+
+            // Set the media
             Media = media;
+
+            // Process associated Playlists
             MediaPlaylists = await GetMediaPlaylists(media);
             AddNewPlaylistViewModel = new AddNewPlaylistViewModel(media, _playlistDataService, MediaPlaylists);
+
+            // Evaluate related content
+            await CreateRelatedContentList(media);
+
+            // Determine whether to hide the Relate Content Icon or not
+            RelatedContentPresent = (_relatedContent == null || _relatedContent.Count == 0) ? false: true;
         }
 
         private ImageSource GetMailIcon(MediaLink media, bool contentEmailed)
-        {
-            if (media.IsShareable == false)
             {
-                return _emailDisableIcon;
+                if (media.IsShareable == false)
+                {
+                    return _emailDisableIcon;
+                }
+
+                return contentEmailed
+                        ? _emailCheckedIcon
+                        : _emailEnableIcon;
             }
 
-            return contentEmailed
-                    ? _emailCheckedIcon
-                    : _emailEnableIcon;
+        public ImageSource RelatedContentIcon
+        {
+            get { return ImageUtil.GetImageSouce("ms-appx:///Assets/related_content.png"); }
         }
 
         private async Task StopShowingMedia(MediaLink media)
@@ -314,6 +357,23 @@ namespace DSA.Shell.ViewModels.Media
             }
         }
 
+        public RelayCommand ShowRelatedContentFlyoutCommand
+        {
+            get
+            {
+                return _showRelatedContentFlyoutCommand ?? (_showRelatedContentFlyoutCommand = new RelayCommand(
+                                        () =>
+                                        {
+                                            _relatedContentFlyout.OpenFlyout();
+
+                                            // Send message to Related Content Flyout View Model
+                                            Messenger.Default.Send(new RelatedContentMessage(_relatedContent));
+                                        }
+                                        ));
+            }
+        }
+
+
         private async Task SwipeMedia(Func<MediaLink , Option<MediaLink>> getMedia)
         {
             var next = getMedia(Media);
@@ -344,6 +404,46 @@ namespace DSA.Shell.ViewModels.Media
             {
                 Set(ref _isPlaylistSelected, value);
             }
+        }
+
+        // //////////////////////////////////////////////////////////
+        // *** Related Content ***
+        // //////////////////////////////////////////////////////////
+        private async Task CreateRelatedContentList(MediaLink media)
+        {
+            // Clear object if not empty
+            _relatedContent.Clear();
+
+            // Get the current user's MAC
+            var mobileAppConfigurationId = await SettingsDataService.GetCurrentMobileConfigurationID();
+
+            // Get the CatCon list based on MACs
+            var categoryContents = await _categoryContentDataService.GetCategoryContent(mobileAppConfigurationId);
+            if (categoryContents != null && categoryContents.Any())
+            {
+                // Filter for the Category List based on the input mediaLink objects Id
+                var categoryList = (categoryContents.Where(cc => cc.ContentId == media.ID)).Select(x => x.CategoryId).Distinct();
+                if (categoryList != null && categoryList.Any())
+                {
+                    // Filter the Content ID List based on the previous category List
+                    var contentIds = categoryContents.Where(cc => categoryList.Contains(cc.CategoryId) && cc.ContentId != media.ID).Select(x => x.ContentId).Distinct();
+                    if (contentIds != null && contentIds.Any())
+                    {
+                        // Generate the MediaLink List
+                        var docInfoList = await _documentInfoDataService.GetContentDocumentsByID(contentIds);
+                        if (docInfoList != null && docInfoList.Any())
+                        {
+                            _relatedContent = docInfoList.Select(d => new MediaLink(d)).ToList();
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool RelatedContentPresent
+        {
+            get { return _relatedContentPresent; }
+            set { Set(ref _relatedContentPresent, value); }
         }
     }
 }

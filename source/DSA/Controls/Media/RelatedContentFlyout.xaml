@@ -1,0 +1,53 @@
+﻿<SettingsFlyout
+    x:Class="DSA.Shell.Controls.Media.RelatedContentFlyout"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DSA.Shell.Controls.Media"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:strings="using:Salesforce.SDK.Strings"
+    mc:Ignorable="d"
+    IconSource="Assets/SmallLogo.png"
+    Title="{Binding Source='Related Content'}"
+    HeaderBackground="Black"
+    Background="#FF404040"
+    Width="500"
+    d:DesignWidth="500" BackClick="SettingsFlyout_BackClick">
+    <!--Opacity="0.75"-->
+    
+    <Grid>
+        <ScrollViewer x:Name="RelatedContentScrollViewer" 
+                          VerticalAlignment="Center" 
+                          VerticalScrollMode="Auto" 
+                          VerticalScrollBarVisibility="Hidden"
+                          HorizontalScrollMode="Disabled"
+                          HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding RelatedContentItems}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button BorderThickness="0"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Background="#FF404040"
+                            Command="{Binding RelatedItemSelectedCommand}"
+                            CommandParameter="{Binding}">
+
+                            <Grid HorizontalAlignment="Stretch">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Grid.Column="0" Source="{Binding Icon}"/>
+                                <TextBlock Margin="10,0,0,0" Foreground="White" Grid.Column="1" Text="{Binding Title}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"  Style="{StaticResource SubheaderTextBlockStyle}" />
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+
+</SettingsFlyout>

@@ -141,6 +141,7 @@
     <Compile Include="Messages\OrientationStateMessage.cs" />
     <Compile Include="Messages\PlaylistChangedMessage.cs" />
     <Compile Include="Messages\PlaylistSelectedMessage.cs" />
+    <Compile Include="Messages\RelatedContentMessage.cs" />
     <Compile Include="Messages\SearchQuerySubmitted.cs" />
     <Compile Include="Messages\ShowSelectConfigurationDialogMessage.cs" />
     <Compile Include="Messages\StartStoryboardMessage.cs" />
