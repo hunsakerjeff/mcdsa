@@ -19,15 +19,18 @@ namespace DSA.Data.Services
         private readonly IDocumentInfoDataService _documentInfoDataService;
         private readonly IFeaturedPlaylistDataService _featuredPlaylistDataService;
         private readonly IUserSessionService _userSessionService;
+        private readonly ISettingsDataService _settingsDataService;
 
         public PlaylistDataService(
           IDocumentInfoDataService documentInfoDataService,
           IFeaturedPlaylistDataService featuredPlaylistDataService,
+          ISettingsDataService settingsDataService,
           IUserSessionService userSessionService)
         {
             _documentInfoDataService = documentInfoDataService;
             _featuredPlaylistDataService = featuredPlaylistDataService;
             _userSessionService = userSessionService;
+            _settingsDataService = settingsDataService;
         }
 
         public async Task<PlaylistData> GetPersonalLibrarData()
@@ -41,18 +44,23 @@ namespace DSA.Data.Services
 
         public async Task<List<PlaylistData>> GetPlayListsData()
         {
-            var playlists = await _featuredPlaylistDataService.GetAllFeaturedPlaylists();
 
+            // Get the current user's MAC
+            var macId = await _settingsDataService.GetCurrentMobileConfigurationID();
+
+            // Get the current User ID
+            var userId = _userSessionService.GetCurrentUserId();
+
+            // Get the Playlists (by user and mac)
+            var playlists = await _featuredPlaylistDataService.GetAllFeaturedPlaylistsByMAC(macId, userId);
             var playlistsIDs = playlists.Select(p => p.Id);
             var playlistsContent = await _featuredPlaylistDataService.GetPlaylistContent(playlistsIDs);
 
             var contentsIDs = playlistsContent.Select(pc => pc.ContentId15);
             var content = await _documentInfoDataService.GetContentDocumentsById15(contentsIDs);
 
-            var documentsList = playlistsContent
-                                     .Join(content, pc => pc.ContentId15, cd => cd.Document.Id15, (pc, cd) => new { PlaylistContent = pc, Document = cd });
+            var documentsList = playlistsContent.Join(content, pc => pc.ContentId15, cd => cd.Document.Id15, (pc, cd) => new { PlaylistContent = pc, Document = cd });
 
-            var userId = _userSessionService.GetCurrentUserId();
 
             return  playlists
                         .GroupJoin(documentsList, pl => pl.Id, dl => dl.PlaylistContent.PlasylistId, (pl, dl) => new PlaylistData { ID = pl.Id, __localId = pl.__localId, Name = pl.Name, IsEditable = pl.OwnerId == userId, OwnerId = pl.OwnerId, PlaylistItems = dl.Select(d => new MediaLink(d.Document, d.PlaylistContent)).OrderBy(d => d.Order).ToList() })

@@ -17,6 +17,9 @@ namespace DSA.Model.Models
 
         public string OwnerId { get; set; }
 
+        [JsonProperty("{0}__Mobile_App_Configuration__c")]
+        public string MobileAppConfiguration { get; set; }
+
         [JsonProperty("__locally_deleted__")]
         public bool __isDeleted { get; set; }
 

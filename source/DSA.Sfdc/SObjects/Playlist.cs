@@ -22,12 +22,29 @@ namespace DSA.Sfdc.SObjects
             new IndexSpec("Id", SmartStoreType.SmartString),
         };
 
+        // Properties
+        public List<string> MacIdList { get; set; }
+
+
         internal override List<string> FieldsToSyncUp { get; set; } = new List<string>()
         {
             "Name"
         };
 
-        internal string SoqlWhereIOwn = "WHERE {0}__IsFeatured__c = true OR {0}__Shared_Internally__c = true OR ownerid = '{1}'";
+        internal string SoqlWhereIOwn()
+        {
+            string mac_check;
+            if (MacIdList.Count != 0)
+            {
+                mac_check = " {0}__Mobile_App_Configuration__c IN ('" + MacIdList.Aggregate((i, j) => i + "','" + j) + "')";
+                return "WHERE ownerid = '{1}' OR (" + mac_check + " AND ({0}__IsFeatured__c = true OR {0}__Shared_Internally__c = true))";
+            }
+            else
+            {
+                return "WHERE ownerid = '{1}' OR {0}__IsFeatured__c = true OR {0}__Shared_Internally__c = true";
+            }
+        }
+
 
         internal string SoqlWhereIFollow
         {
@@ -57,7 +74,7 @@ namespace DSA.Sfdc.SObjects
         {
             get
             {
-                var where = SoqlWhereIOwn;
+                var where = SoqlWhereIOwn();
                 if (GetPlaylistWhichIFollow)
                 {
                     where = SoqlWhereIFollow;
@@ -78,6 +95,7 @@ namespace DSA.Sfdc.SObjects
                             "{0}__Query__c," +
                             "{0}__Shared_Internally__c," +
                             "{0}__Small_Image_URL__c," +
+                            "{0}__Mobile_App_Configuration__c," +
                             "Name, " +
                             "OwnerId " +
                             "FROM {0}__DSA_Playlist__c " +

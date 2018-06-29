@@ -30,6 +30,20 @@ namespace DSA.Data.Services.API
                     .ToList();
             });
         }
+
+        public async Task<List<Playlist>> GetAllFeaturedPlaylistsByMAC(string macId, string userId)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                var globalStore = SmartStore.GetGlobalSmartStore();
+                var querySpec = QuerySpec.BuildAllQuerySpec("Playlist", "Id", QuerySpec.SqlOrder.ASC, SfdcConfig.PageSize).RemoveLimit(globalStore);
+
+                return globalStore.Query(querySpec, 0).Select(item => CustomPrefixJsonConvert.DeserializeObject<Playlist>(item.ToString()))
+                    .Where(pl => ((pl.__isDeleted == false && pl.MobileAppConfiguration == macId) || pl.OwnerId == userId))
+                    .ToList();
+            });
+        }
+
         public async Task<List<PlaylistContent>> GetAllPlaylistContent()
         {
             return await Task.Factory.StartNew(() =>
@@ -161,6 +175,7 @@ namespace DSA.Data.Services.API
             });
 
         }
+
         public Task<Playlist> CreatePlaylist(Playlist playlist)
         {
             return Task<Playlist>.Factory.StartNew(() =>

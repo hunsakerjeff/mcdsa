@@ -9,6 +9,7 @@ namespace DSA.Data.Interfaces
     public interface IFeaturedPlaylistDataService
     {
         Task<List<Playlist>> GetAllFeaturedPlaylists();
+        Task<List<Playlist>> GetAllFeaturedPlaylistsByMAC(string macId, string userId);
         Task<List<PlaylistContent>> GetAllPlaylistContent();
         Task<List<PlaylistContent>> GetPlaylistContent(IEnumerable<string> playlistIDs);
         Task<PlaylistContent> SavePlaylistContent(PlaylistContent playlistContent);

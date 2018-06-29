@@ -105,7 +105,6 @@ namespace DSA.Sfdc.Sync
             // We have dependencies between the SyncDowns so they need to execute in a specifc order
             var syncDownTasks = new List<Task>
             {
-                SyncFeaturedPlaylists(callbackHandler, currentUser, token),
                 SyncContacts(callbackHandler, currentUser, token),
                 SyncMobileAppConfigs(callbackHandler, currentUser, token),
                 SyncCategoryMobileConfigs(callbackHandler, currentUser, token)
@@ -114,6 +113,7 @@ namespace DSA.Sfdc.Sync
             await Task.WhenAll(syncDownTasks);
 
             // Execute these in order
+            (SyncFeaturedPlaylists(callbackHandler, currentUser, token)).Wait();
             (SyncCategories(callbackHandler, currentUser, token)).Wait();
             (SyncCategoryContent(callbackHandler, currentUser, false, token)).Wait();
         }
@@ -194,7 +194,6 @@ namespace DSA.Sfdc.Sync
             // We have dependencies between the SyncDowns so they need to execute in a specifc order
             var syncDownTasks = new List<Task>
             {
-                SyncFeaturedPlaylists(callbackHandler, currentUser, token),
                 SyncContacts(callbackHandler, currentUser, token),
                 SyncMobileAppConfigs(callbackHandler, currentUser, token),
                 SyncCategoryMobileConfigs(callbackHandler, currentUser, token)
@@ -203,6 +202,7 @@ namespace DSA.Sfdc.Sync
             await Task.WhenAll(syncDownTasks);
 
             // Execute these in order
+            (SyncFeaturedPlaylists(callbackHandler, currentUser, token)).Wait();
             (SyncCategories(callbackHandler, currentUser, token)).Wait();
             (SyncCategoryContent(callbackHandler, currentUser, true, token)).Wait();
         }
@@ -482,16 +482,25 @@ namespace DSA.Sfdc.Sync
 
         private async Task SyncFeaturedPlaylists(Action<string> callbackHandler, User currentUser, CancellationToken token = default(CancellationToken))
         {
+            // Get the MAC ID List
+            var mac = new MobileAppConfig(_store, currentUser);
+            var macIdList = mac.GetFromSoup().ToList().Select(x => x.Id).Distinct();
+
             // Get playlist which I own, are shareable internally or are marked as featured 
             SendSyncDetailMessage("Featured Playlists", false, false);
             callbackHandler("Sync Featured Playlists");
             var playlist = new Playlist(_store, currentUser);
+            playlist.MacIdList = macIdList.ToList();
+
             var configsState = await playlist.SyncDownRecords(callbackHandler, token);
             if (configsState.Status != SyncState.SyncStatusTypes.Done)
             {
                 throw new SyncException("Playlists not synced");
             }
             SendSyncDetailMessage("Featured Playlists", true, false);
+
+            // Clear the MacIDList
+            playlist.MacIdList.Clear();
 
             //get entry subscription it is required to retrieve playlist which are follwed by the user
             SendSyncDetailMessage("User Subscription", false, false);
