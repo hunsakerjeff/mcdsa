@@ -64,7 +64,7 @@ namespace DSA.Sfdc.SObjects
                             "OwnerId " +
                             "FROM " +
                             "ContentDocument " +
-                            "WHERE (PublishStatus='P' AND LatestPublishedVersion.{0}__Available_Offline__c = true{1}) OR (PublishStatus = 'R' AND LatestPublishedVersion.{0}__Available_Offline__c = true)";
+                            "WHERE LatestPublishedVersion.{0}__Available_Offline__c = true AND (PublishStatus = 'R' OR (PublishStatus='P'{1}))";
 
                 return string.Format(query, Prefix, GenerateFilter());
             }
