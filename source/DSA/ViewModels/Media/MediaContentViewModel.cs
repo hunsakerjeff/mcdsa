@@ -33,6 +33,8 @@ namespace DSA.Shell.ViewModels.Media
         private readonly IContentReviewDataService _contentReviewDataService;
         private readonly ICategoryContentDataService _categoryContentDataService;
         private readonly IDocumentInfoDataService _documentInfoDataService;
+        private readonly ICategoryDataService _categoryDataService;
+        
 
         private readonly PlayListCollection _playList = new PlayListCollection();
         private ObservableCollection<MediaPlaylistViewModel> _mediaPlaylists;
@@ -73,6 +75,7 @@ namespace DSA.Shell.ViewModels.Media
              IPresentationDataService presentationDataService,
              ICategoryContentDataService categoryContentDataService,
              IDocumentInfoDataService documentInfoDataService,
+             ICategoryDataService categoryDataService,
              IContentReviewDataService contentReviewDataService) : base(settingsDataService)
         {
             _presentationDataService = presentationDataService;
@@ -82,9 +85,11 @@ namespace DSA.Shell.ViewModels.Media
             _contentReviewDataService = contentReviewDataService;
             _categoryContentDataService = categoryContentDataService;
             _documentInfoDataService = documentInfoDataService;
+            _categoryDataService = categoryDataService;
 
-            // Create an empty list to work from
-            _relatedContent = new List<MediaLink>();
+
+        // Create an empty list to work from
+        _relatedContent = new List<MediaLink>();
 
             // Create the flyout
             _relatedContentFlyout = new RelatedContentFlyout();
@@ -416,17 +421,24 @@ namespace DSA.Shell.ViewModels.Media
 
             // Get the current user's MAC
             var mobileAppConfigurationId = await SettingsDataService.GetCurrentMobileConfigurationID();
+            var categories = await _categoryDataService.GetCategories(mobileAppConfigurationId);
+            
 
             // Get the CatCon list based on MACs
             var categoryContents = await _categoryContentDataService.GetCategoryContent(mobileAppConfigurationId);
             if (categoryContents != null && categoryContents.Any())
             {
                 // Filter for the Category List based on the input mediaLink objects Id
-                var categoryList = (categoryContents.Where(cc => cc.ContentId == media.ID)).Select(x => x.CategoryId).Distinct();
-                if (categoryList != null && categoryList.Any())
+                var tempCategoryIdList = (categoryContents.Where(cc => cc.ContentId == media.ID)).Select(x => x.CategoryId).Distinct();
+
+                // Ge thet Parent category Ids and merge
+                var parentCategoryIdList = categories.Where(x => tempCategoryIdList.Contains(x.Id)).Select(x => x.ParentCategory).Distinct();
+                var categoryIdList = tempCategoryIdList.Concat(parentCategoryIdList).Distinct();
+
+                if (categoryIdList != null && categoryIdList.Any())
                 {
                     // Filter the Content ID List based on the previous category List
-                    var contentIds = categoryContents.Where(cc => categoryList.Contains(cc.CategoryId) && cc.ContentId != media.ID).Select(x => x.ContentId).Distinct();
+                    var contentIds = categoryContents.Where(cc => categoryIdList.Contains(cc.CategoryId) && cc.ContentId != media.ID).Select(x => x.ContentId).Distinct();
                     if (contentIds != null && contentIds.Any())
                     {
                         // Generate the MediaLink List
