@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-  <Identity Name="Mastercard.DSA.SFDC" Publisher="CN=MasterCard International Incorporated, OU=Code signing 37, O=MasterCard International Incorporated, L=Waterloo, C=BE" Version="1.3.0.29" />
+  <Identity Name="Mastercard.DSA.SFDC" Publisher="CN=MasterCard International Incorporated, OU=Code signing 37, O=MasterCard International Incorporated, L=Waterloo, C=BE" Version="1.3.0.30" />
   <Properties>
     <DisplayName>Digital Sales Aid</DisplayName>
     <PublisherDisplayName>MasterCard International Incorporated</PublisherDisplayName>
