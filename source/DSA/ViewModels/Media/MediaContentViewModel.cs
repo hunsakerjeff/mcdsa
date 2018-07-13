@@ -160,15 +160,16 @@ namespace DSA.Shell.ViewModels.Media
             // Set the media
             Media = media;
 
-            // Process associated Playlists
-            MediaPlaylists = await GetMediaPlaylists(media);
-            AddNewPlaylistViewModel = new AddNewPlaylistViewModel(media, _playlistDataService, MediaPlaylists);
-
             // Evaluate related content
             await CreateRelatedContentList(media);
 
             // Determine whether to hide the Relate Content Icon or not
             RelatedContentPresent = (_relatedContent == null || _relatedContent.Count == 0) ? false: true;
+            Messenger.Default.Send(new RelatedContentMessage(_relatedContent));
+
+            // Process associated Playlists
+            MediaPlaylists = await GetMediaPlaylists(media);
+            AddNewPlaylistViewModel = new AddNewPlaylistViewModel(media, _playlistDataService, MediaPlaylists);
         }
 
         private ImageSource GetMailIcon(MediaLink media, bool contentEmailed)
@@ -197,6 +198,10 @@ namespace DSA.Shell.ViewModels.Media
 
             var viewedSecond = (DateTime.Now - _startTime).TotalSeconds;
           
+            // Clean up related content
+            _relatedContent.Clear();
+            Messenger.Default.Send(new RelatedContentMessage(_relatedContent));
+
             if(_presentationDataService.IsPresentationStarted())
             {
                 var contentReview = new ContentReview
@@ -369,10 +374,8 @@ namespace DSA.Shell.ViewModels.Media
                 return _showRelatedContentFlyoutCommand ?? (_showRelatedContentFlyoutCommand = new RelayCommand(
                                         () =>
                                         {
-                                            _relatedContentFlyout.OpenFlyout();
-
                                             // Send message to Related Content Flyout View Model
-                                            Messenger.Default.Send(new RelatedContentMessage(_relatedContent));
+                                            _relatedContentFlyout.OpenFlyout();
                                         }
                                         ));
             }

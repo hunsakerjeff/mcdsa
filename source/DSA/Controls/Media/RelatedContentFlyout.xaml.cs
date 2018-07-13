@@ -22,20 +22,14 @@ namespace DSA.Shell.Controls.Media
         // Implementation - Public Methods
         public void OpenFlyout()
         {
-            if (!IsOpen)
-            {
                 IsOpen = true;
                 this.ShowIndependent();
             }
-        }
 
         public void CloseFlyout()
         {
-            if (IsOpen)
-            {
                 IsOpen = false;
                 this.Hide();
-            }
         }
 
         private void SettingsFlyout_BackClick(object sender, BackClickEventArgs e)
