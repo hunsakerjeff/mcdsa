@@ -18,7 +18,7 @@
     </UserControl.Resources>
     <Grid Background="{StaticResource PageBackgroundBrush}">
         <StackPanel Margin="0,20,0,0">
-            <TextBlock Style="{StaticResource SubheaderTextBlockStyle}"
+            <TextBlock Style="{StaticResource SubheaderWhiteTextBlockStyle}"
                    HorizontalAlignment="Center">
              Preview not available
             </TextBlock>

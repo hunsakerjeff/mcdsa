@@ -43,6 +43,7 @@ using Salesforce.SDK.Utilities;
 using Salesforce.SDK.Exceptions;
 using Salesforce.SDK.Adaptation;
 using Windows.Foundation.Diagnostics;
+using Nito.AsyncEx;
 
 namespace Salesforce.SDK.SmartSync.Manager
 {
@@ -56,6 +57,7 @@ namespace Salesforce.SDK.SmartSync.Manager
 
         private static volatile Dictionary<string, SyncManager> _instances;
         private static readonly object Synclock = new Object();
+        private readonly AsyncLock _mutex = new AsyncLock();
         public readonly string ApiVersion;
         public readonly RestClient RestClient;
         private readonly SmartStore.Store.SmartStore _smartStore;
@@ -260,6 +262,8 @@ namespace Salesforce.SDK.SmartSync.Manager
 
         private async Task SyncUp(SyncState sync, Action<SyncState> callback, CancellationToken token = default(CancellationToken), Action<string, string> idChangeHandler = default(Action<string, string>))
         {
+            using (await _mutex.LockAsync(token))
+            {
             if (sync == null)
                 throw new SmartStoreException("SyncState sync was null");
             var target = (SyncUpTarget)sync.Target;
@@ -275,7 +279,8 @@ namespace Salesforce.SDK.SmartSync.Manager
             catch (Exception e)
             {
                 PlatformAdapter.SendToCustomLogger(e, LoggingLevel.Error);
-                if (!string.IsNullOrEmpty(e.Message) && (e.Message.ToUpper().Contains("FORBIDDEN") || e.Message.Contains("403"))) {
+                if (!string.IsNullOrEmpty(e.Message) && (e.Message.ToUpper().Contains("FORBIDDEN") || e.Message.Contains("403")))
+                {
                     throw new OAuthException("Token Expired");
                 }
             }
@@ -283,7 +288,7 @@ namespace Salesforce.SDK.SmartSync.Manager
             HashSet<string> dirtyRecordIds = GetDirtyRecordIds(sync.SoupName, SmartStore.Store.SmartStore.SoupEntryId);
             int totalSize = dirtyRecordIds.Count;
             sync.TotalSize = totalSize;
-            int i = 0;
+            int counter = 0;
             foreach (
                 JObject record in
                     dirtyRecordIds.Select(
@@ -291,19 +296,19 @@ namespace Salesforce.SDK.SmartSync.Manager
             {
                 if (token.IsCancellationRequested)
                 {
-                    token.ThrowIfCancellationRequested();    
+                    token.ThrowIfCancellationRequested();
                 }
 
-                List<string> fields = new List<string>( sync.Options.FieldList );
+                List<string> fields = new List<string>(sync.Options.FieldList);
                 if (record.ExtractValue<bool>(LocallyDeleted)) { }
                 else if (record.ExtractValue<bool>(LocallyCreated))
                 {
-                    
+
                 }
                 else if (record.ExtractValue<bool>(LocallyUpdated))
                 {
                     foreach (string value in sync.Options.fieldsToExcludeOnUpdate)
-                        if(fields.Contains(value))
+                        if (fields.Contains(value))
                         {
                             fields.Remove(value);
                         }
@@ -311,17 +316,18 @@ namespace Salesforce.SDK.SmartSync.Manager
                 bool res = await SyncUpOneRecord(target, sync.SoupName, fields, record, sync.MergeMode, idChangeHandler);
                 if (res)
                 {
-                    i++;
+                    counter++;
                 }
-                int progress = i * 100 / totalSize;
+                int progress = counter * 100 / totalSize;
                 if (progress < 100)
                 {
                     UpdateSync(sync, SyncState.SyncStatusTypes.Running, progress, callback);
                 }
             }
-            if (i<totalSize)
+            if (counter < totalSize)
             {
                 throw new SmartStoreException("Cannot sync all records");
+                }
             }
         }
 

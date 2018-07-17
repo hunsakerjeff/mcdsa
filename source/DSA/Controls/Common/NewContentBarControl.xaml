@@ -10,18 +10,25 @@
     DataContext="{Binding NewContentBar, Source={StaticResource Locator}}">
 
     <UserControl.Resources>
-        <Storyboard x:Name="NewContentAnimation" Completed="NewContentAnimation_Completed">
-            <DoubleAnimation Storyboard.TargetName="CompositeTransform" 
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Storyboard x:Name="NewContentAnimation" Completed="NewContentAnimation_Completed">
+                <DoubleAnimation Storyboard.TargetName="CompositeTransform" 
                              Storyboard.TargetProperty="TranslateY" 
                              To="0" Duration="0:0:1"/>
-        </Storyboard>
-        <Storyboard x:Name="NewContentAnimationHide" >
-            <DoubleAnimation BeginTime="0:0:2"
+            </Storyboard>
+            <Storyboard x:Name="NewContentAnimationHide" >
+                <DoubleAnimation BeginTime="0:0:2"
                              Storyboard.TargetName="CompositeTransform" 
                              Storyboard.TargetProperty="TranslateY" 
                              To="-45" Duration="0:0:1"/>
-        </Storyboard>
+            </Storyboard>
+        </ResourceDictionary>
+        
     </UserControl.Resources>
+    
     <Grid Height="45" x:Name="Root">
         <Grid.RenderTransform>
             <CompositeTransform x:Name="CompositeTransform" 
@@ -32,7 +39,7 @@
         <Grid.Background>
             <SolidColorBrush Color="Black" Opacity="0.5"/>
         </Grid.Background>
-        <TextBlock HorizontalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Height="45">
+        <TextBlock HorizontalAlignment="Center" Style="{StaticResource SubheaderWhiteTextBlockStyle}" Height="45">
             New content available
         </TextBlock>
     </Grid>

@@ -153,7 +153,7 @@ namespace DSA.Shell.ViewModels.Spotlight
             try
             {
                 // Setup the Search model
-                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, NavigateToMediaCommand);
+                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, _navigateToMediaCommand);
 
                 _spotLightItems = await _spotlightDataService.GetSpotlightData();
                 SetSource();

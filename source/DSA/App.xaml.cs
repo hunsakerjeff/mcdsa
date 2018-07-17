@@ -29,12 +29,6 @@ namespace DSA.Shell
             // SfdcSDK
             InitializeSfdcConfig();
 
-            SDKManager.CreateClientManager(false);
-            SDKManager.RootApplicationPage = typeof(VisualBrowserPage);
-            SDKManager.EndLoginCallBack = () => { Messenger.Default.Send(new UserLogInMessage()); };
-
-            PlatformAdapter.Resolve<ISFApplicationHelper>().Initialize();
-
             // Set up the Logging Service and the custom log action function in the PlatformAdapter
             var target = new LogFileTarget();
             target.RetainDays = 10;
@@ -66,6 +60,17 @@ namespace DSA.Shell
                 initialRefresher.Stop();
             };
         }
+
+        private static void InitializeSDK()
+        {
+            // initialize SDKManager and PlatformAdapter here instead of constructor to avoid problems with Live Visual Tree UI debugger
+            SDKManager.CreateClientManager(false);
+            SDKManager.RootApplicationPage = typeof(VisualBrowserPage);
+            SDKManager.EndLoginCallBack = () => { Messenger.Default.Send(new UserLogInMessage()); };
+
+            PlatformAdapter.Resolve<ISFApplicationHelper>().Initialize();
+        }
+
 
         /// <summary>
         /// Refresh access token
@@ -102,6 +107,8 @@ namespace DSA.Shell
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            InitializeSDK();
+
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,

@@ -32,10 +32,12 @@ namespace Salesforce.SDK.SmartStore.Store
         private const string SmartTypeInteger = "integer";
         private const string SmartTypeString = "string";
         private const string SmartTypeFloating = "floating";
+        private const string SmartTypeFullText = "full_text";
 
         public static readonly SmartStoreType SmartInteger = new SmartStoreType(SmartTypeInteger);
         public static readonly SmartStoreType SmartString = new SmartStoreType(SmartTypeString);
         public static readonly SmartStoreType SmartFloating = new SmartStoreType(SmartTypeFloating);
+        public static readonly SmartStoreType SmartFullText = new SmartStoreType(SmartTypeFullText);
 
         public SmartStoreType(string columnType)
         {

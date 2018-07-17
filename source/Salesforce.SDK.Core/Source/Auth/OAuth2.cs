@@ -208,6 +208,25 @@ namespace Salesforce.SDK.Auth
 
         [JsonProperty(PropertyName = "sfdc_community_url")]
         public string CommunityUrl { get; set; }
+
+        public void DebugDump()
+        {
+            PlatformAdapter.SendToCustomLogger("AuthResponse Dump", LoggingLevel.Information);
+
+            DumpString("IdentityUrl", IdentityUrl);
+            DumpString("InstanceUrl", InstanceUrl);
+            DumpString("IssuedAt", IssuedAt);
+            DumpString("AccessToken", AccessToken);
+            DumpString("RefreshToken", RefreshToken);
+            DumpString("CommunityId", CommunityId);
+            DumpString("CommunityUrl", CommunityUrl);
+        }
+
+        public void DumpString(string name, string value)
+        {
+            string output = (value != null) ? string.Format("{0} {1}", name, value) : string.Format("{0}: null", name);
+            PlatformAdapter.SendToCustomLogger(output, LoggingLevel.Information);
+        }
     }
 
     /// <summary>
@@ -332,7 +351,8 @@ namespace Salesforce.SDK.Auth
             {
                 try
                 {
-                    AuthResponse response = await RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
+                    AuthResponse response =
+                        await RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
                     account.AccessToken = response.AccessToken;
                     AuthStorageHelper.GetAuthStorageHelper().PersistCredentials(account);
                 }

@@ -197,12 +197,12 @@ namespace DSA.Shell.ViewModels.Media
             }
 
             var viewedSecond = (DateTime.Now - _startTime).TotalSeconds;
-          
+
             // Clean up related content
             _relatedContent.Clear();
             Messenger.Default.Send(new RelatedContentMessage(_relatedContent));
 
-            if(_presentationDataService.IsPresentationStarted())
+            if (_presentationDataService.IsPresentationStarted())
             {
                 var contentReview = new ContentReview
                 {

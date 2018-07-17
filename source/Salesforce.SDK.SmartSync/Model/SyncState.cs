@@ -30,7 +30,7 @@ using Windows.ApplicationModel.Contacts;
 using Newtonsoft.Json.Linq;
 using Salesforce.SDK.SmartStore.Store;
 using Salesforce.SDK.SmartSync.Util;
-using SQLitePCL;
+using SQLite;
 
 namespace Salesforce.SDK.SmartSync.Model
 {

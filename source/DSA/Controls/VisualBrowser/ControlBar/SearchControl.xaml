@@ -9,6 +9,7 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
+    
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -17,8 +18,9 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <SearchBox x:Name="SearchBox" Grid.Column="3" QueryText="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SearchHistoryEnabled="False" Height="35" VerticalAlignment="Center" FocusOnKeyboardInput="{Binding FocusOnKeyboardInput}" Style="{StaticResource DSASearchBox}" >
-            <interactivity:Interaction.Behaviors>
+        <AutoSuggestBox QueryIcon="Find" Text="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="35" VerticalAlignment="Center">
+        <!--<SearchBox x:Name="SearchBox" Grid.Column="3" QueryText="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SearchHistoryEnabled="False" Height="35" VerticalAlignment="Center" FocusOnKeyboardInput="{Binding FocusOnKeyboardInput}" Style="{StaticResource DSASearchBox}" >-->
+                <interactivity:Interaction.Behaviors>
                 <core:EventTriggerBehavior EventName="LostFocus">
                     <core:InvokeCommandAction Command="{Binding SearchBoxLostFocusCommand}"/>
                 </core:EventTriggerBehavior>
@@ -29,15 +31,15 @@
                     <core:InvokeCommandAction Command="{Binding PrepareForFocusOnKeyboardInput}"/>
                 </core:EventTriggerBehavior>
                 <core:EventTriggerBehavior EventName="QuerySubmitted">
-                    <core:InvokeCommandAction Command="{Binding QuerySubmittedCommand}" CommandParameter="{Binding args}" />
+                    <core:InvokeCommandAction Command="{Binding QuerySubmittedCommand}" />
                 </core:EventTriggerBehavior>
-                <core:EventTriggerBehavior EventName="SuggestionsRequested">
-                    <core:InvokeCommandAction Command="{Binding SuggestionsRequestedCommand}" CommandParameter="{Binding args}" />
-                </core:EventTriggerBehavior>
-                <core:EventTriggerBehavior EventName="ResultSuggestionChosen">
-                    <core:InvokeCommandAction Command="{Binding ResultSuggestionChosenCommand}" CommandParameter="{Binding args}" />
-                </core:EventTriggerBehavior>
+                <!--<core:EventTriggerBehavior EventName="SuggestionsRequested">
+                    <core:InvokeCommandAction Command="{Binding SuggestionsRequestedCommand}" />
+                </core:EventTriggerBehavior>-->
+                <!--<core:EventTriggerBehavior EventName="ResultSuggestionChosen">
+                    <core:InvokeCommandAction Command="{Binding ResultSuggestionChosenCommand}" />
+                </core:EventTriggerBehavior>-->
             </interactivity:Interaction.Behaviors>
-        </SearchBox>
+        </AutoSuggestBox>
     </Grid>
 </UserControl>

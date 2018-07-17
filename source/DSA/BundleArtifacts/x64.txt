@@ -1,0 +1,5 @@
+MainPackage=D:\Projects_GitHub\mcdsa_uwp\source\DSA\bin\x64\Release\DSA.Shell_1.3.1.0_x64.appx
+ResourcePack=D:\Projects_GitHub\mcdsa_uwp\source\DSA\bin\x64\Release\DSA.Shell_1.3.1.0_scale-100.appx
+ResourcePack=D:\Projects_GitHub\mcdsa_uwp\source\DSA\bin\x64\Release\DSA.Shell_1.3.1.0_scale-125.appx
+ResourcePack=D:\Projects_GitHub\mcdsa_uwp\source\DSA\bin\x64\Release\DSA.Shell_1.3.1.0_scale-150.appx
+ResourcePack=D:\Projects_GitHub\mcdsa_uwp\source\DSA\bin\x64\Release\DSA.Shell_1.3.1.0_scale-400.appx

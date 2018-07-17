@@ -28,7 +28,7 @@
                        Text="{Binding Name}"
                        VerticalAlignment="Center"
                        TextWrapping="Wrap"
-                       Margin="14,0,0,0"/>
+                       Margin="14,0,0,0" Foreground="White"/>
                 </Grid>
             </DataTemplate>
             <DataTemplate x:Key="CategoryDataTemplate">
@@ -41,8 +41,8 @@
                        Text="{Binding Name}"
                        TextLineBounds="Tight"
                        VerticalAlignment="Center"
-                       Margin="14,0,0,0" />
-                    <TextBlock Text="&#xE017;" Grid.Column="1" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Segoe UI Symbol"/>
+                       Margin="14,0,0,0" Foreground="White"/>
+                    <TextBlock Text="&#xE017;" Grid.Column="1" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Segoe UI Symbol"  Foreground="White"/>
                 </Grid>
             </DataTemplate>
             <behaviors:MenuBrowserTemplateSelector x:Key="selector" CategoryTemplate="{StaticResource CategoryDataTemplate}" MediaTemplate="{StaticResource MediaItemDataTemplate}"/>
@@ -100,7 +100,7 @@
                          Text="{Binding ElementName=BrowserPanel, Path=Header, Mode=TwoWay}" 
                          VerticalAlignment="Top"
                          Width="369"
-                         Style="{StaticResource SubheaderTextBlockStyle}"
+                         Style="{StaticResource SubheaderWhiteTextBlockStyle}"
                         />
         </Grid>
         <ListView x:Name="listView"

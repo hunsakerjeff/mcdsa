@@ -9,39 +9,44 @@
     mc:Ignorable="d"
     IconSource="Assets/SmallLogo.png"
     Title="{Binding Source='Related Content'}"
-    HeaderBackground="Black"
-    Background="#FF404040"
     Width="500"
     d:DesignWidth="500" BackClick="SettingsFlyout_BackClick">
     <!--Opacity="0.75"-->
-    
-    <Grid>
+
+    <SettingsFlyout.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="RCTitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource SubheaderTextBlockStyle}">
+                <Setter Property="FontSize" Value="20"/>
+            </Style>
+        </ResourceDictionary>
+    </SettingsFlyout.Resources>
+
+    <Grid Margin="0,10,0,0">
         <ScrollViewer x:Name="RelatedContentScrollViewer" 
                           VerticalAlignment="Center" 
                           VerticalScrollMode="Auto" 
                           VerticalScrollBarVisibility="Hidden"
                           HorizontalScrollMode="Disabled"
                           HorizontalScrollBarVisibility="Disabled">
+
+            <!--Background="#FF404040"-->
             <ItemsControl ItemsSource="{Binding RelatedContentItems}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button BorderThickness="0"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Background="#FF404040"
-                            Command="{Binding RelatedItemSelectedCommand}"
-                            CommandParameter="{Binding}">
+                        <Button Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{Binding RelatedItemSelectedCommand}" CommandParameter="{Binding}" Margin="10,5,0,5">
 
                             <Grid HorizontalAlignment="Stretch">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="50"/>
-                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="50"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
+                                
                                 <Image Grid.Column="0" Source="{Binding Icon}"/>
-                                <TextBlock Margin="10,0,0,0" Foreground="White" Grid.Column="1" Text="{Binding Title}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"  Style="{StaticResource SubheaderTextBlockStyle}" />
+                                <TextBlock Margin="10,0,0,0" Foreground="Black" Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"  Style="{StaticResource RCTitleTextBlockStyle}" />
                             </Grid>
                         </Button>
                     </DataTemplate>

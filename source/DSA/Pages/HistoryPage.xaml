@@ -277,7 +277,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Background="{StaticResource PageHeaderBackgroundBrush}">
-            <TextBlock Text="History" VerticalAlignment="Center" HorizontalAlignment="Center"  Style="{StaticResource SubheaderTextBlockStyle}" />
+            <TextBlock Text="History" VerticalAlignment="Center" HorizontalAlignment="Center" Style="{StaticResource SubheaderWhiteTextBlockStyle}" />
         </Grid>
         <ListBox Grid.Row="1"
                  Style="{StaticResource HistoryListBox}"

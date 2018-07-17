@@ -30,8 +30,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using SQLitePCL;
-using SQLitePCL.Extensions;
+using SQLite;
+using Salesforce.SDK.SmartStore.Source.SQLiteExtensions;
 
 namespace Salesforce.SDK.SmartStore.Store
 {
@@ -61,6 +61,9 @@ namespace Salesforce.SDK.SmartStore.Store
         /// </summary>
         private readonly Dictionary<string, IndexSpec[]> SoupNameToIndexSpecsMap;
 
+        // Cache of soup name to boolean indicating if soup uses FTS
+        private readonly Dictionary<string, bool> SoupNameToHasFTS;
+
         /// <summary>
         ///     Cache of soup name to soup table names
         /// </summary>
@@ -74,8 +77,10 @@ namespace Salesforce.SDK.SmartStore.Store
         {
             SoupNameToTableNamesMap = new Dictionary<string, string>();
             SoupNameToIndexSpecsMap = new Dictionary<string, IndexSpec[]>();
+            SoupNameToHasFTS = new Dictionary<string, bool>();
             DatabasePath = sqliteDb;
-            _sqlConnection = (SQLiteConnection) Activator.CreateInstance(_sqliteConnectionType, sqliteDb);
+
+            _sqlConnection = (SQLiteConnection)Activator.CreateInstance(_sqliteConnectionType, sqliteDb, true);
 
         }
 
@@ -87,8 +92,8 @@ namespace Salesforce.SDK.SmartStore.Store
         /// <param name="sqlConnectionType"></param>
         public static void SetSqliteConnectionClass(Type sqlConnectionType)
         {
-            if (sqlConnectionType == null || (!sqlConnectionType.GetTypeInfo().IsSubclassOf(typeof (SQLiteConnection)) &&
-                sqlConnectionType != typeof (SQLiteConnection)))
+            if (sqlConnectionType == null || (!sqlConnectionType.GetTypeInfo().IsSubclassOf(typeof(SQLiteConnection)) &&
+                sqlConnectionType != typeof(SQLiteConnection)))
             {
                 throw new SmartStoreException("sqlConnectionType must be SQLiteConnection or derived from SQLiteConnection");
             }
@@ -127,9 +132,13 @@ namespace Salesforce.SDK.SmartStore.Store
 
         public void CacheIndexSpecs(string soupName, IndexSpec[] indexSpecs)
         {
-            if(SoupNameToIndexSpecsMap.ContainsKey(soupName) == false)
+            if (SoupNameToIndexSpecsMap.ContainsKey(soupName) == false)
             {
                 SoupNameToIndexSpecsMap.Add(soupName, indexSpecs);
+            }
+            if (SoupNameToHasFTS.ContainsKey(soupName) == false)
+            {
+                SoupNameToHasFTS.Add(soupName, IndexSpec.HasFTS(indexSpecs));
             }
         }
 
@@ -147,73 +156,25 @@ namespace Salesforce.SDK.SmartStore.Store
         {
             SoupNameToTableNamesMap.Remove(soupName);
             SoupNameToIndexSpecsMap.Remove(soupName);
+            SoupNameToHasFTS.Remove(soupName);
         }
 
         public long GetNextId(string tableName)
         {
-            using (ISQLiteStatement prog = _sqlConnection.Prepare((SeqSelect)))
-            {
-                prog.Bind(1, tableName);
-                SQLiteResult result = prog.Step();
-                long data = 0;
-                if (prog.DataCount > 0)
-                {
-                     data = prog.GetInteger(0);
-                }
-                return data + 1;
-            }
+            long result = _sqlConnection.ExecuteScalar<long>(SeqSelect, tableName);
+            result++;
+            return result;
         }
 
-        public SQLiteStatement CountQuery(string table, string whereClause)
-        {
-            string selectionStr = (whereClause == null ? "" : " WHERE " + whereClause);
-            string sql = String.Format(CountSelect, table, selectionStr);
-            var stmt = _sqlConnection.Prepare(sql) as SQLiteStatement;
-            if (stmt != null)
-            {
-                stmt.Step();
-                return stmt;
-            }
-            throw new SmartStoreException("Invalid CountQuery statement");
-        }
-
-        public SQLiteStatement LimitRawQuery(string sql, string limit, params string[] args)
+        public SqliteStatement LimitRawQuery(string sql, string limit, params string[] args)
         {
             string limitSql = String.Format(LimitSelect, sql, limit);
-            var stmt = _sqlConnection.Prepare(limitSql) as SQLiteStatement;
-            if (args != null)
-            {
-                for (int i = 0; i < args.Length; i++)
-                {
-                    stmt.Bind(i + 1, args[i]);
-                }
-            }
-            if (stmt != null)
-            {
-                stmt.Step();
-                return stmt;
-            }
-            throw new SmartStoreException("Invalid LimitRawQuery statement");
+            return new SqliteStatement(_sqlConnection, limitSql, NotNull(args));
         }
 
         public long CountRawCountQuery(string countSql, params string[] args)
         {
-            using (ISQLiteStatement prog = _sqlConnection.Prepare((countSql)))
-            {
-                if (args != null)
-                {
-                    for (int i = 0; i < args.Length; i++)
-                    {
-                        prog.Bind(i + 1, args[i]);
-                    }
-                }
-                SQLiteResult result = prog.Step();
-                if (result == SQLiteResult.ROW)
-                {
-                    return prog.GetInteger(0);
-                }
-            }
-            return 0;
+            return _sqlConnection.ExecuteScalar<long>(countSql, NotNull(args));
         }
 
         public long CountRawQuery(String sql, params string[] args)
@@ -222,7 +183,7 @@ namespace Salesforce.SDK.SmartStore.Store
             return CountRawCountQuery(countSql, args);
         }
 
-        public SQLiteStatement Query(string table, string[] columns, string orderBy, string limit, string whereClause,
+        public SQLiteCommand Query(string table, string[] columns, string orderBy, string limit, string whereClause,
             params string[] args)
         {
             if (String.IsNullOrWhiteSpace(table) || columns == null || columns.Length == 0)
@@ -244,16 +205,7 @@ namespace Salesforce.SDK.SmartStore.Store
                 orderBy,
                 limit,
                 String.Empty);
-            ISQLiteStatement stmt = _sqlConnection.Prepare(sql);
-            if (args != null)
-            {
-                for (int i = 0; i < args.Length; i++)
-                {
-                    stmt.Bind(i + 1, args[i]);
-                }
-            }
-            SQLiteResult result = stmt.Step();
-            return stmt as SQLiteStatement;
+            return _sqlConnection.CreateCommand(sql, NotNull(args));
         }
 
         public long Insert(string table, Dictionary<string, object> contentValues)
@@ -276,18 +228,8 @@ namespace Salesforce.SDK.SmartStore.Store
                 table,
                 columns,
                 valueBindingString);
-            using (ISQLiteStatement stmt = _sqlConnection.Prepare(sql))
-            {
-                int count = 1;
-                foreach (string key in contentValues.Keys)
-                {
-                    stmt.Bind(count, contentValues[key]);
-                    count++;
-                }
-                var result = stmt.Step();
-            }
-            long insertId = _sqlConnection.LastInsertRowId();
-            return insertId;
+            var rowsModified = _sqlConnection.Execute(sql, contentValues.Values.ToArray());
+            return LastInsertRowId();
         }
 
         public bool Update(string table, Dictionary<string, object> contentValues, string whereClause,
@@ -310,25 +252,11 @@ namespace Salesforce.SDK.SmartStore.Store
                 table,
                 entries,
                 whereClause);
-            int place = 1;
-            using (ISQLiteStatement stmt = _sqlConnection.Prepare(sql))
-            {
-                foreach (object next in contentValues.Values)
-                {
-                    stmt.Bind(place, next);
-                    place++;
-                }
-                if (!String.IsNullOrWhiteSpace(whereClause) && args != null && args.Length > 0)
-                {
-                    foreach (string next in args)
-                    {
-                        stmt.Bind(place, next);
-                        place++;
-                    }
-                }
-                var result = stmt.Step();
-                return result == SQLiteResult.DONE;
-            }
+
+            var sqlArgs = contentValues.Values.ToArray().Concat(NotNull(args)).ToArray();
+
+            _sqlConnection.Execute(sql, sqlArgs);
+            return true;
         }
 
 
@@ -346,16 +274,9 @@ namespace Salesforce.SDK.SmartStore.Store
             string sql = String.Format(DeleteStatement,
                 table,
                 values);
-            using (ISQLiteStatement stmt = _sqlConnection.Prepare(sql))
-            {
-                int place = 1;
-                foreach (object next in contentValues.Values)
-                {
-                    stmt.Bind(place, next);
-                    place++;
-                }
-                return stmt.Step() == SQLiteResult.DONE;
-            }
+            var args = contentValues.Values.ToArray();
+            _sqlConnection.Execute(sql, args);
+            return true;
         }
 
         public bool Delete(string table, string whereClause)
@@ -367,20 +288,15 @@ namespace Salesforce.SDK.SmartStore.Store
             string sql = String.Format(DeleteStatement,
                 table,
                 whereClause);
-            using (ISQLiteStatement stmt = _sqlConnection.Prepare(sql))
-            {
-                var result = stmt.Step();
-                return result == SQLiteResult.DONE;
-            }
+            _sqlConnection.Execute(sql);
+            return true;
         }
 
         public bool Delete(string table)
         {
             string sql = String.Format(DeleteAllStatement, table);
-            using (ISQLiteStatement stmt = _sqlConnection.Prepare(sql))
-            {
-                return stmt.Step() == SQLiteResult.DONE;
-            }
+            _sqlConnection.Execute(sql);
+            return true;
         }
 
         public string GetSoupTableName(string soupName)
@@ -397,19 +313,17 @@ namespace Salesforce.SDK.SmartStore.Store
             return soupTableName;
         }
 
-        protected string GetSoupTableNameFromDb(string soupName)
+        private string GetSoupTableNameFromDb(string soupName)
         {
-            using (
-                SQLiteStatement stmt = Query(SmartStore.SoupNamesTable, new[] { SmartStore.IdCol }, String.Empty,
+            var cmd = Query(SmartStore.SoupNamesTable, new[] { SmartStore.IdCol }, String.Empty,
                     String.Empty,
-                    SmartStore.SoupNamePredicate, soupName))
+                    SmartStore.SoupNamePredicate, soupName);
+            var soupId = cmd.ExecuteScalar<int>();
+            if (soupId != default(int))
             {
-                if (stmt.DataCount == 0)
-                {
-                    return null;
-                }
-                return SmartStore.GetSoupTableName(stmt.GetInteger(SmartStore.IdCol));
+                return SmartStore.GetSoupTableName(soupId);
             }
+            return null;
         }
 
         internal void ResetConnection()
@@ -418,20 +332,9 @@ namespace Salesforce.SDK.SmartStore.Store
             _sqlConnection = new SQLiteConnection(DatabasePath);
         }
 
-        public SQLiteResult Execute(string sql)
+        public int Execute(string sql)
         {
-            SQLiteStatement statement;
-            return Execute(sql, out statement);
-        }
-
-        public SQLiteResult Execute(string sql, out SQLiteStatement statement)
-        {
-            statement = _sqlConnection.Prepare(sql) as SQLiteStatement;
-            if (statement != null)
-            {
-                return statement.Step();
-            }
-            return SQLiteResult.ERROR;
+            return _sqlConnection.Execute(sql);
         }
 
         public string GetColumnNameForPath(String soupName, String path)
@@ -455,51 +358,80 @@ namespace Salesforce.SDK.SmartStore.Store
             return indexSpecs;
         }
 
-        protected IndexSpec[] GetIndexSpecsFromDb(String soupName)
+        private class GetIndexSpecsResult
         {
-            SQLiteStatement statement = Query(SmartStore.SoupIndexMapTable,
+            public string path { get; set; }
+            public string columnName { get; set; }
+            public string columnType { get; set; }
+        }
+
+        private IndexSpec[] GetIndexSpecsFromDb(String soupName)
+        {
+            var cmd = Query(SmartStore.SoupIndexMapTable,
                 new[] { SmartStore.PathCol, SmartStore.ColumnNameCol, SmartStore.ColumnTypeCol }, null,
                 null, SmartStore.SoupNamePredicate, soupName);
 
-            if (statement.DataCount < 1)
-            {
-                return new IndexSpec[] { };
-            }
+            var list = cmd.ExecuteQuery<GetIndexSpecsResult>();
 
             var indexSpecs = new List<IndexSpec>();
-            do
+
+            foreach (var item in list)
             {
-                String path = statement.GetText(SmartStore.PathCol);
-                String columnName = statement.GetText(SmartStore.ColumnNameCol);
-                var columnType = new SmartStoreType(statement.GetText(SmartStore.ColumnTypeCol));
+                String path = item.path;
+                String columnName = item.columnName;
+                var columnType = new SmartStoreType(item.columnType);
                 indexSpecs.Add(new IndexSpec(path, columnType, columnName));
-            } while (statement.Step() == SQLiteResult.ROW);
-            statement.ResetAndClearBindings();
+            }
+
             return indexSpecs.ToArray();
+        }
+
+        /**
+	    * @param db
+	    * @param soupName
+	    * @return true if soup has full-text-search index
+	    */
+        public bool HasFTS(String soupName)
+        {
+            GetIndexSpecs(soupName); // will populate cache if needed
+            return GetCachedHasFTS(soupName);
+        }
+
+        public Boolean GetCachedHasFTS(String soupName)
+        {
+            bool result;
+            SoupNameToHasFTS.TryGetValue(soupName, out result);
+            return result;
         }
 
         public bool BeginTransaction()
         {
-            using (ISQLiteStatement stmt = _sqlConnection.Prepare("Begin Transaction"))
+            try
             {
-                return SQLiteResult.DONE == stmt.Step();
+                _sqlConnection.BeginTransaction();
             }
+            catch (InvalidOperationException) { return false; }
+            return true;
         }
 
         public bool CommitTransaction()
         {
-            using (ISQLiteStatement stmt = _sqlConnection.Prepare("Commit Transaction"))
+            try
             {
-                return SQLiteResult.DONE == stmt.Step();
+                _sqlConnection.Commit();
             }
+            catch (InvalidOperationException) { return false; }
+            return true;
         }
 
         public bool RollbackTransaction()
         {
-            using (ISQLiteStatement stmt = _sqlConnection.Prepare("Rollback Transaction"))
+            try
             {
-                return SQLiteResult.DONE == stmt.Step();
+                _sqlConnection.Rollback();
             }
+            catch (InvalidOperationException) { return false; }
+            return true;
         }
 
         public void Dispose()
@@ -511,6 +443,16 @@ namespace Salesforce.SDK.SmartStore.Store
             _instances.Remove(DatabasePath);
             SoupNameToIndexSpecsMap.Clear();
             SoupNameToTableNamesMap.Clear();
+        }
+
+        private long LastInsertRowId()
+        {
+            return _sqlConnection.ExecuteScalar<long>("SELECT last_insert_rowid()");
+        }
+
+        private object[] NotNull(object[] args)
+        {
+            return args ?? new object[] { };
         }
     }
 }

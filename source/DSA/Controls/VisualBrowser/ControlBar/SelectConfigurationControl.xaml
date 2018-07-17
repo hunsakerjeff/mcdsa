@@ -141,10 +141,10 @@
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Grid Background="Black">
-                <Button Content="Cancel" Command="{Binding ShowHideMobileConfigurationPopup}" Margin="20,0,0,0" />
+                <Grid Background="#FF404040">
+                <Button Content="Cancel" Command="{Binding ShowHideMobileConfigurationPopup}" Margin="20,0,0,0" Foreground="White" />
                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="Select Configuration" TextAlignment="Center" FontSize="18" FontWeight="Bold"  />
+                    <TextBlock Text="Select Configuration" TextAlignment="Center" FontSize="18" FontWeight="Bold" Foreground="White"/>
                 </Grid>
             </Grid>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">

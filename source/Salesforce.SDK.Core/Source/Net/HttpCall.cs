@@ -125,7 +125,8 @@ namespace Salesforce.SDK.Net
         /// <param name="url"></param>
         /// <param name="requestBody"></param>
         /// <param name="contentType"></param>
-        public HttpCall(HttpMethod method, HttpCallHeaders headers, string url, string requestBody, ContentTypeValues contentType)
+        public HttpCall(HttpMethod method, HttpCallHeaders headers, string url, string requestBody,
+            ContentTypeValues contentType)
         {
             var httpBaseFilter = new HttpBaseProtocolFilter
             {
@@ -249,7 +250,8 @@ namespace Salesforce.SDK.Net
         /// <param name="requestBody"></param>
         /// <param name="contentType"></param>
         /// <returns></returns>
-        public static HttpCall CreatePost(HttpCallHeaders headers, string url, string requestBody, ContentTypeValues contentType)
+        public static HttpCall CreatePost(HttpCallHeaders headers, string url, string requestBody,
+            ContentTypeValues contentType)
         {
             return new HttpCall(HttpMethod.Post, headers, url, requestBody, contentType);
         }
@@ -385,10 +387,8 @@ namespace Salesforce.SDK.Net
 
             using (var sfw = await newFile.OpenStreamForWriteAsync())
             {
-                using (var outStream = sfw.AsOutputStream())
-                {
-                    await message.Content.WriteToStreamAsync(outStream);
-                }
+                var outStream = sfw.AsOutputStream();
+                await message.Content.WriteToStreamAsync(outStream);
             }
         }
 
@@ -484,7 +484,6 @@ namespace Salesforce.SDK.Net
                 }
             }
 
-            // Performance adds
             HttpResponseMessage message;
             if (token.IsCancellationRequested)
             {
@@ -508,6 +507,7 @@ namespace Salesforce.SDK.Net
                 _httpCallErrorException = ex;
                 message = null;
             }
+
             return this;
         }
 
@@ -611,7 +611,6 @@ namespace Salesforce.SDK.Net
 
         public void Dispose()
         {
-            // this does not work like people think.  HttpClient is reentrant and a session object, thus you do not dispose of it.  Its IDisposable does not work that way
             if (_webClient != null)
             {
                 try

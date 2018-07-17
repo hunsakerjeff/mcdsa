@@ -6,8 +6,8 @@
 			 xmlns:ignore="http://www.galasoft.ch/ignore"
              mc:Ignorable="d ignore"
              xmlns:viewModels="using:DSA.Shell.ViewModels"
-             RequestedTheme="Dark">
-
+             RequestedTheme="Light">
+    
     <Application.Resources>
          <!--Application-specific resources--> 
         <ResourceDictionary>

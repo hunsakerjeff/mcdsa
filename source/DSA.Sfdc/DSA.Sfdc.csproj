@@ -1,164 +1,119 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.props" Condition="Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.props')" />
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{DEB040CA-597E-4D07-90A7-581FE3E8E2F7}</ProjectGuid>
+    <ProjectGuid>{55808AF4-465F-49C0-976A-1219EDC10269}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DSA.Sfdc</RootNamespace>
     <AssemblyName>DSA.Sfdc</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetPlatformVersion>8.1</TargetPlatformVersion>
-    <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.16299.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>ARM</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
-    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>ARM</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <NoWarn>;2008</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)..\output\$(AssemblyName)\$(Platform)\$(Configuration)</IntermediateOutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_APP</DefineConstants>
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <Optimize>true</Optimize>
     <NoWarn>;2008</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\DSA.Common\DSA.Common.csproj">
-      <Project>{bc3e59b0-0cc3-4cbd-9fb8-55f90e450278}</Project>
-      <Name>DSA.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DSA.Model\DSA.Model.csproj">
-      <Project>{5facce42-a3af-49e6-a99f-f74b8cc9589f}</Project>
-      <Name>DSA.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PdfViewModel\PdfViewModel.vcxproj">
-      <Project>{03ebab56-27d7-4273-972d-635ff5500fe4}</Project>
-      <Name>PdfViewModel</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Salesforce.SDK.Core\Salesforce.SDK.Core.csproj">
-      <Project>{cd53c7b7-c3ff-4982-935b-22fb096cd559}</Project>
-      <Name>Salesforce.SDK.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Salesforce.SDK.SmartStore\Salesforce.SDK.SmartStore.csproj">
-      <Project>{e0838498-6201-4040-b4f1-a2d0c02405a6}</Project>
-      <Name>Salesforce.SDK.SmartStore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Salesforce.SDK.SmartSync\Salesforce.SDK.SmartSync.csproj">
-      <Project>{923dcd08-e0af-4214-86b0-86e37851046b}</Project>
-      <Name>Salesforce.SDK.SmartSync</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="SerializationUtil\CustomJsonSerializerSettings.cs" />
-    <Compile Include="SerializationUtil\CustomPrefixJsonConvert.cs" />
-    <Compile Include="SerializationUtil\CustomPropertyContractResolver.cs" />
-    <Compile Include="Storage\AttachmentsFolder.cs" />
-    <Compile Include="Sync\AttMetaDropSameFilesForDeltaSieve.cs" />
-    <Compile Include="Sync\AttMetaDropUnchangedFilesForDeltaSieve.cs" />
-    <Compile Include="Storage\ContentThumbnailFolder.cs" />
     <Compile Include="DataWriters\AttachmentFileWriter.cs" />
     <Compile Include="DataWriters\ContentThumbnailFileWriter.cs" />
     <Compile Include="DataWriters\VersionDataFileWriter.cs" />
-    <Compile Include="Sync\DocIndexDeltaSieve.cs" />
-    <Compile Include="Sync\DocMetaByOwnershipAndUsageInCategoriesSieve.cs" />
-    <Compile Include="Sync\DocMetaDeltaSieve.cs" />
-    <Compile Include="Sync\DsaSyncLog.cs" />
-    <Compile Include="SObjects\HistoryInfo.cs" />
-    <Compile Include="SObjects\LastLoggedAccountState.cs" />
-    <Compile Include="SObjects\NewCategoryContent.cs" />
-    <Compile Include="Sync\ObjectSyncDispatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryUtil\QuerySpecUtil.cs" />
+    <Compile Include="SerializationUtil\CustomJsonSerializerSettings.cs" />
+    <Compile Include="SerializationUtil\CustomPrefixJsonConvert.cs" />
+    <Compile Include="SerializationUtil\CustomPropertyContractResolver.cs" />
     <Compile Include="SObjects\Abstract\SObject.cs" />
     <Compile Include="SObjects\AttachmentBody.cs" />
     <Compile Include="SObjects\Category.cs" />
@@ -178,97 +133,70 @@
     <Compile Include="SObjects\CurrentUser.cs" />
     <Compile Include="SObjects\EntitySubscription.cs" />
     <Compile Include="SObjects\Event.cs" />
+    <Compile Include="SObjects\HistoryInfo.cs" />
+    <Compile Include="SObjects\LastLoggedAccountState.cs" />
     <Compile Include="SObjects\MobileAppConfig.cs" />
     <Compile Include="SObjects\MobileAppConfigAttachment.cs" />
+    <Compile Include="SObjects\NewCategoryContent.cs" />
     <Compile Include="SObjects\Playlist.cs" />
     <Compile Include="SObjects\PlaylistContent.cs" />
     <Compile Include="SObjects\SearchTerm.cs" />
+    <Compile Include="SObjects\UserSettings.cs" />
     <Compile Include="SObjects\VersionData.cs" />
+    <Compile Include="Storage\AttachmentsFolder.cs" />
+    <Compile Include="Storage\ContentThumbnailFolder.cs" />
+    <Compile Include="Storage\VersionDataFolder.cs" />
+    <Compile Include="Sync\AttMetaDropSameFilesForDeltaSieve.cs" />
+    <Compile Include="Sync\AttMetaDropUnchangedFilesForDeltaSieve.cs" />
+    <Compile Include="Sync\DocIndexDeltaSieve.cs" />
+    <Compile Include="Sync\DocMetaByOwnershipAndUsageInCategoriesSieve.cs" />
+    <Compile Include="Sync\DocMetaDeltaSieve.cs" />
+    <Compile Include="Sync\DsaSyncLog.cs" />
+    <Compile Include="Sync\ObjectSyncDispatcher.cs" />
     <Compile Include="Sync\SuccessfulSyncState.cs" />
     <Compile Include="Sync\SyncException.cs" />
     <Compile Include="Sync\SyncResult.cs" />
-    <Compile Include="Util\ThumbnailUtil.cs" />
-    <Compile Include="SObjects\UserSettings.cs" />
     <Compile Include="Util\FolderUtil.cs" />
-    <Compile Include="Storage\VersionDataFolder.cs" />
+    <Compile Include="Util\ThumbnailUtil.cs" />
+    <EmbeddedResource Include="Properties\DSA.Sfdc.rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <SDKReference Include="Microsoft.VCLibs, version=12.0">
-      <Name>Microsoft Visual C++ 2013 Runtime Package for Windows</Name>
-    </SDKReference>
-    <SDKReference Include="SQLite.WinRT81, Version=3.22.0">
-      <Name>SQLite for Windows Runtime %28Windows 8.1%29</Name>
-    </SDKReference>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>6.1.5</Version>
+    </PackageReference>
+    <PackageReference Include="MvvmLightLibs">
+      <Version>5.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="Nito.AsyncEx">
+      <Version>5.0.0-pre-02</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="GalaSoft.MvvmLight, Version=5.3.0.19026, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
-      <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\windows81\GalaSoft.MvvmLight.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="GalaSoft.MvvmLight.Extras, Version=5.3.0.19032, Culture=neutral, PublicKeyToken=669f0b5e8f868abf, processorArchitecture=MSIL">
-      <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\windows81\GalaSoft.MvvmLight.Extras.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.3.0.19033, Culture=neutral, PublicKeyToken=7a953f43091b5a17, processorArchitecture=MSIL">
-      <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\windows81\GalaSoft.MvvmLight.Platform.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\win8\Microsoft.Threading.Tasks.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Threading.Tasks.Extensions, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\win8\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Nito.AsyncEx, Version=4.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nito.AsyncEx.4.0.1\lib\netcore451\Nito.AsyncEx.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Nito.AsyncEx.Concurrent, Version=4.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nito.AsyncEx.4.0.1\lib\netcore451\Nito.AsyncEx.Concurrent.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Nito.AsyncEx.Enlightenment, Version=4.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nito.AsyncEx.4.0.1\lib\netcore451\Nito.AsyncEx.Enlightenment.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="SQLitePCL, Version=3.8.7.2, Culture=neutral, PublicKeyToken=bddade01e9c850c5, processorArchitecture=MSIL">
-      <HintPath>..\packages\SQLitePCL.3.8.7.2\lib\netcore451\SQLitePCL.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <ProjectReference Include="..\DSA.Common\DSA.Common.csproj">
+      <Project>{373d9e93-b138-49ba-bb56-4eb53ed32db0}</Project>
+      <Name>DSA.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DSA.Model\DSA.Model.csproj">
+      <Project>{e3efb827-b073-41a7-ad3f-2d1c74974060}</Project>
+      <Name>DSA.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Salesforce.SDK.Core\Salesforce.SDK.Core.csproj">
+      <Project>{9294b61e-c58b-4f47-8ebf-30c773509ef0}</Project>
+      <Name>Salesforce.SDK.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Salesforce.SDK.SmartStore\Salesforce.SDK.SmartStore.csproj">
+      <Project>{2e653fa6-5c65-4e39-8478-df60131c4ffc}</Project>
+      <Name>Salesforce.SDK.SmartStore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Salesforce.SDK.SmartSync\Salesforce.SDK.SmartSync.csproj">
+      <Project>{c45cf658-bc2a-4833-9117-04fa96842b6f}</Project>
+      <Name>Salesforce.SDK.SmartSync</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
-    <VisualStudioVersion>12.0</VisualStudioVersion>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
-    <Error Condition="!Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.props'))" />
-    <Error Condition="!Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets'))" />
-  </Target>
-  <Import Project="..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets" Condition="Exists('..\packages\SQLitePCL.3.8.7.2\build\netcore451\SQLitePCL.targets')" />
-  <!-- 
-  <PropertyGroup>
-    <SDKReferenceDirectoryRoot>$(SolutionDir)Libs\ExtensionSDKs;$(SDKReferenceDirectoryRoot)</SDKReferenceDirectoryRoot>
-  </PropertyGroup>
-   -->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

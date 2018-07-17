@@ -6,9 +6,9 @@ namespace DSA.Shell.Controls.Common
 {
     public class DSAMenuFlyoutItem : MenuFlyoutItem
     {
-        public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(ImageSource), typeof(DSAMenuFlyoutItem), new PropertyMetadata(null));
+        public new static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(ImageSource), typeof(DSAMenuFlyoutItem), new PropertyMetadata(null));
 
-        public ImageSource Icon
+        public new ImageSource Icon
         {
             get { return (ImageSource)GetValue(IconProperty); }
             set { SetValue(IconProperty, value); }

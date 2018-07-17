@@ -55,5 +55,10 @@ namespace Salesforce.SDK.SmartStore.Store
         {
             return indexSpecs.ToDictionary(indexSpec => indexSpec.Path);
         }
+
+        public static bool HasFTS(IndexSpec[] indexSpecs)
+        {
+            return indexSpecs.Any(it => it.SmartType == SmartStoreType.SmartFullText);
+        }
     }
 }

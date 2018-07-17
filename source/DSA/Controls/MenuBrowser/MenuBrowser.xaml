@@ -30,7 +30,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <menuBrowser:MenuBrowserPanel Header="{Binding Header}" CategoryContent="{Binding CategoryContent}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"/>
+                        <menuBrowser:MenuBrowserPanel Header="{Binding Header}" CategoryContent="{Binding CategoryContent}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" Foreground="White"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

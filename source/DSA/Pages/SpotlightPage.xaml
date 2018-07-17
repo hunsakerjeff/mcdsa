@@ -47,7 +47,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid x:Name="spotlightHeaders" Grid.Row="0" Background="{StaticResource PageHeaderBackgroundBrush}">
-                <Button Content="VIEW" Margin="20,0,0,0">
+                <Button Content="VIEW" Margin="20,0,0,0" Foreground="White">
                     <Button.Flyout>
                         <MenuFlyout>
                             <ToggleMenuFlyoutItem Text="All" IsChecked="{Binding Path=AllFilterSelected, Mode=TwoWay}" />
@@ -56,7 +56,7 @@
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>
-                <TextBlock Text="Spotlight" VerticalAlignment="Center" HorizontalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" />
+                <TextBlock Text="Spotlight" VerticalAlignment="Center" HorizontalAlignment="Center" Style="{StaticResource SubheaderWhiteTextBlockStyle}" />
             </Grid>
             <Grid x:Name="spotlightTableHeaders" 
                    Grid.Row="1" 
@@ -67,10 +67,10 @@
                     <ColumnDefinition Width="3*" />
                     <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Type" Style="{StaticResource SubheaderTextBlockStyle}"  VerticalAlignment="Top"   HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="1" Text="Description" Style="{StaticResource SubheaderTextBlockStyle}"  VerticalAlignment="Top" />
-                <TextBlock Grid.Column="2" Text="Location" Style="{StaticResource SubheaderTextBlockStyle}" VerticalAlignment="Top"  />
-                <TextBlock Grid.Column="3" Text="Date Added" Style="{StaticResource SubheaderTextBlockStyle}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,0,20,0" />
+                <TextBlock Grid.Column="0" Text="Type" Style="{StaticResource SubheaderWhiteTextBlockStyle}"  VerticalAlignment="Top"   HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="Description" Style="{StaticResource SubheaderWhiteTextBlockStyle}"  VerticalAlignment="Top" />
+                <TextBlock Grid.Column="2" Text="Location" Style="{StaticResource SubheaderWhiteTextBlockStyle}" VerticalAlignment="Top"  />
+                <TextBlock Grid.Column="3" Text="Date Added" Style="{StaticResource SubheaderWhiteTextBlockStyle}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,0,20,0" />
             </Grid>
             <ListView x:Name="spotlightTable" 
                       Grid.Row="2" 
@@ -97,11 +97,11 @@
                                     <RowDefinition/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Text="{Binding Name}" Style="{StaticResource SubheaderTextBlockStyle}"  VerticalAlignment="Center"/>
-                                <TextBlock Grid.Row="1" Text="{Binding Description}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="0" Text="{Binding Name}" Style="{StaticResource SubheaderWhiteTextBlockStyle}"  VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Text="{Binding Description}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                             </Grid>
-                            <TextBlock Grid.Column="2" Text="{Binding Location}" Style="{StaticResource SubheaderTextBlockStyle}" VerticalAlignment="Center"  Margin="10,0,0,0"/>
-                            <TextBlock Grid.Column="3" Text="{Binding DateAddedString}" Style="{StaticResource SubheaderTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="2" Text="{Binding Location}" Style="{StaticResource SubheaderWhiteTextBlockStyle}" VerticalAlignment="Center"  Margin="10,0,0,0"/>
+                            <TextBlock Grid.Column="3" Text="{Binding DateAddedString}" Style="{StaticResource SubheaderWhiteTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Right" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -110,7 +110,7 @@
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate>
                                 <Grid Width="10000" Height="45" Background="{StaticResource ControlSubHeaderBackgroundBrush}">
-                                    <TextBlock Text='{Binding DisplayName}' VerticalAlignment="Top"  Style="{StaticResource SubheaderTextBlockStyle}" Margin="20,5,5,0"/>
+                                    <TextBlock Text='{Binding DisplayName}' VerticalAlignment="Top"  Style="{StaticResource SubheaderWhiteTextBlockStyle}" Margin="20,5,5,0"/>
                                 </Grid>
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>

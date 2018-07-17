@@ -22,6 +22,7 @@ using PlaylistsPage = DSA.Shell.Pages.PlaylistsPage;
 using SearchPage = DSA.Shell.Pages.SearchPage;
 using SpotlightPage = DSA.Shell.Pages.SpotlightPage;
 
+
 namespace DSA.Shell.ViewModels
 {
     public class ViewModelLocator

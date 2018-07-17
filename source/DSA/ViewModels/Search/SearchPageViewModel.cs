@@ -30,7 +30,7 @@ namespace DSA.Shell.ViewModels.Search
         private RelayCommand _searchBoxLostFocusCommand;
         private RelayCommand _searchBoxGotFocusCommand;
         private RelayCommand _prepareForFocusOnKeyboardInput;
-        private RelayCommand<SearchBoxQuerySubmittedEventArgs> _querySubmittedCommand;
+        private RelayCommand _querySubmittedCommand;
 
         private List<MediaLink> _mediaLinks;
         private List<SearchItemViewModel> _results;
@@ -150,14 +150,14 @@ namespace DSA.Shell.ViewModels.Search
             }
         }
 
-        public RelayCommand<SearchBoxQuerySubmittedEventArgs> QuerySubmittedCommand
+        public RelayCommand QuerySubmittedCommand
         {
             get
             {
-                return _querySubmittedCommand ?? (_querySubmittedCommand = new RelayCommand<SearchBoxQuerySubmittedEventArgs>(
-                    async (arg) =>
+                return _querySubmittedCommand ?? (_querySubmittedCommand = new RelayCommand(
+                    async () =>
                     {
-                        await ProcessSearch(arg.QueryText);
+                        await ProcessSearch(SearchBoxQueryText);
                     }));
             }
         }

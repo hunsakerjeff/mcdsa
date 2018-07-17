@@ -8,6 +8,14 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Grid>
         <Popup x:Name="OverlayPopup" LayoutUpdated="OnGridLayoutUpdated"
                IsOpen="{Binding IsAboutPopupOpen}">
@@ -24,17 +32,17 @@
                     <RowDefinition Height="60"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Background="Black">
-                    <Button Content="Close" Command="{Binding ShowHideAboutCommand}" Margin="20,0,0,0" />
+                <Grid Background="#FF404040">
+                    <Button Content="Close" Command="{Binding ShowHideAboutCommand}" Margin="20,0,0,0"  Foreground="White"/>
                     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="About This App" TextAlignment="Center" FontSize="18" FontWeight="Bold"  />
+                        <TextBlock Text="About This App" TextAlignment="Center" FontSize="18" FontWeight="Bold" Foreground="White" />
                     </Grid>
                 </Grid>
                 <Grid Grid.Row="1" Margin="15">
                     <TextBlock TextAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Foreground="Black">
                         Digital Sales Aid
                     </TextBlock>
-                    <TextBlock  FontSize="20" TextAlignment="Center" Text="{Binding VersionText}" VerticalAlignment="Bottom" Margin="0,0,0,0" Foreground="Black" Style="{StaticResource SubheaderTextBlockStyle}"/>
+                    <TextBlock  FontSize="20" TextAlignment="Center" Text="{Binding VersionText}" VerticalAlignment="Bottom" Margin="0,0,0,0" Foreground="Black" Style="{StaticResource SubheaderWhiteTextBlockStyle}"/>
                 </Grid>
             </Grid>
         </Popup>

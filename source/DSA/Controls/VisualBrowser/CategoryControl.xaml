@@ -9,7 +9,13 @@
     d:DesignWidth="1200">
 
     <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Skins/MainSkin.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
+
 
     <Grid Background="{Binding BackgroundImageBrush}">
         <Rectangle Stretch="UniformToFill" Fill="{Binding BackgroundBrush}"/>
@@ -21,7 +27,7 @@
                 </Grid.RowDefinitions>
                 <!--<Border Grid.Row="0" BorderThickness="4,0,0,0" BorderBrush="Black" Visibility="{Binding Converter={StaticResource NullToVis}, FallbackValue=Collapsed}">-->
                     <StackPanel Margin="20,0,0,0">
-                        <TextBlock Text="{Binding Header}" Style="{StaticResource SubheaderTextBlockStyle}" Foreground="{Binding HeaderTextBrush}" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding Header}" Style="{StaticResource SubheaderTextBlockStyle}" Foreground="{Binding HeaderTextBrush}" Margin="0,0,0,10"/>
                         <TextBlock Text="{Binding Name}" Style="{StaticResource HeaderTextBlockStyle}"  Foreground="{Binding TextBrush}"/>
                     </StackPanel>
                 <!--</Border>-->
@@ -53,14 +59,14 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Image Grid.Column="0" Source="{Binding Icon}"/>
-                                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Grid.Column="1" Text="{Binding Name}"  Style="{StaticResource SubheaderTextBlockStyle}" />
+                                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Grid.Column="1" Text="{Binding Name}" Style="{StaticResource SubheaderWhiteTextBlockStyle}" />
                                     </Grid>
                                 </Button>
                                 <Button Grid.Column="1" BorderThickness="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Tapped="Button_Tapped">
                                     <Button.Content>
                                         <Grid HorizontalAlignment="Center"  VerticalAlignment="Center" >
                                             <Ellipse Width="25" Height="25" Stroke="White" StrokeThickness="2" Canvas.Left="141" Canvas.Top="61"/>
-                                            <TextBlock Text="i" HorizontalAlignment="Center"  VerticalAlignment="Center" FontSize="{ThemeResource ControlContentThemeFontSize}" />
+                                            <TextBlock Text="i" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="{ThemeResource ControlContentThemeFontSize}" />
                                         </Grid>
                                     </Button.Content>
                                     <Button.Flyout>
@@ -72,15 +78,15 @@
                                                 </Grid.RowDefinitions>
                                                 <TextBlock Text="{Binding Description}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="WrapWholeWords" FontSize="14.5"/>
                                                 <StackPanel Grid.Row="1">
-                                                    <TextBlock >
+                                                    <TextBlock FontSize="11">
                                                         <Run Text="Content Owner: "/>
                                                         <Run Text="{Binding ContentOwner}"/>
                                                     </TextBlock>
-                                                    <TextBlock>
+                                                    <TextBlock FontSize="11">
                                                         <Run Text="Authored/Last Updated: "/>
                                                         <Run Text="{Binding ContentLastUpdatedDate}"/>
                                                     </TextBlock>
-                                                    <TextBlock>
+                                                    <TextBlock FontSize="11">
                                                         <Run Text="Last Reviewed/Recertified: "/>
                                                         <Run Text="{Binding ContentLastReviewedDate}"/>
                                                     </TextBlock>

@@ -12,14 +12,12 @@
     d:DesignWidth="346">
 
     <!-- This StackPanel acts as a root panel for vertical layout of the content sections -->
-    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
-
-        <!-- The StackPanel(s) below define individual content sections -->
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,10,0,0">
 
         <!-- Content Section 1-->
         <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
 
-            <ToggleSwitch Margin="-6,0,0,0" Header="{Binding Source='Use Auto Sync'}" HorizontalAlignment="Left" HorizontalContentAlignment="Left" IsOn="{Binding UseAutoSync, Mode=TwoWay}" />
+            <ToggleSwitch Margin="10,0,0,0" Header="{Binding Source='Use Auto Sync'}" HorizontalAlignment="Left" HorizontalContentAlignment="Left" IsOn="{Binding UseAutoSync, Mode=TwoWay}" />
 
         </StackPanel>
 

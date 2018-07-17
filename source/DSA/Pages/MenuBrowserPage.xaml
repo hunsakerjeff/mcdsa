@@ -40,7 +40,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Background="{StaticResource PageHeaderBackgroundBrush}">
-            <TextBlock Text="Menu Browser" VerticalAlignment="Center" HorizontalAlignment="Center"  Style="{StaticResource SubheaderTextBlockStyle}" />
+            <TextBlock Text="Menu Browser" VerticalAlignment="Center" HorizontalAlignment="Center"  Style="{StaticResource SubheaderWhiteTextBlockStyle}" />
         </Grid>
         <Grid Grid.Row="1">
             <menuBrowser:MenuBrowser Margin="0,0,0,90"/>

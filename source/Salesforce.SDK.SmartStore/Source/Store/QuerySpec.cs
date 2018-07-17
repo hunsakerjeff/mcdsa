@@ -26,6 +26,9 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Salesforce.SDK.SmartStore.Store
 {
@@ -36,7 +39,8 @@ namespace Salesforce.SDK.SmartStore.Store
             Smart,
             Exact,
             Range,
-            Like
+            Like,
+            Match
         };
 
         public enum SqlOrder
@@ -62,9 +66,11 @@ namespace Salesforce.SDK.SmartStore.Store
         public readonly SmartQueryType QueryType;
         public readonly string SmartSql;
         public readonly string SoupName;
+        public readonly string[] SelectPaths;
+        public readonly string OrderPath;
 
-        private QuerySpec(string soupName, string path, SmartQueryType queryType, string matchKey, string beginKey,
-            string endKey, string likeKey, SqlOrder order, int pageSize)
+        private QuerySpec(string soupName, string[] selectPaths, SmartQueryType queryType, string matchKey, string beginKey,
+            string endKey, string likeKey, string orderPath, SqlOrder order, int pageSize, string path)
         {
             SoupName = soupName;
             Path = path;
@@ -75,6 +81,8 @@ namespace Salesforce.SDK.SmartStore.Store
             LikeKey = likeKey;
             Order = order;
             PageSize = pageSize;
+            this.SelectPaths = selectPaths;
+            this.OrderPath = orderPath;
             SmartSql = ComputeSmartSql();
             CountSmartSql = ComputeCountSql();
         }
@@ -91,6 +99,8 @@ namespace Salesforce.SDK.SmartStore.Store
             BeginKey = null;
             EndKey = null;
             LikeKey = null;
+            this.SelectPaths = null;
+            this.OrderPath = null;
         }
 
         public static QuerySpec BuildAllQuerySpec(string soupName, string path, SqlOrder order, int pageSize)
@@ -100,26 +110,36 @@ namespace Salesforce.SDK.SmartStore.Store
 
         public static QuerySpec BuildExactQuerySpec(string soupName, string path, string exactMatchKey, int pageSize)
         {
-            return new QuerySpec(soupName, path, SmartQueryType.Exact, exactMatchKey, null, null, null, SqlOrder.ASC,
-                pageSize);
+            return new QuerySpec(soupName, null, SmartQueryType.Exact, exactMatchKey, null, null, null, null, SqlOrder.ASC,
+                pageSize, path);
         }
 
         public static QuerySpec BuildRangeQuerySpec(string soupName, string path, string beginKey, string endKey,
             SqlOrder order, int pageSize)
         {
-            return new QuerySpec(soupName, path, SmartQueryType.Range, null, beginKey, endKey, null, order, pageSize);
+            return new QuerySpec(soupName, null, SmartQueryType.Range, null, beginKey, endKey, null, null, order, pageSize, path);
         }
 
         public static QuerySpec BuildLikeQuerySpec(string soupName, string path, string likeKey, SqlOrder order,
             int pageSize)
         {
-            return new QuerySpec(soupName, path, SmartQueryType.Like, null, null, null, likeKey, order, pageSize);
+            return new QuerySpec(soupName, null, SmartQueryType.Like, null, null, null, likeKey, null, order, pageSize, path);
+        }
+
+        public static QuerySpec BuildMatchQuerySpec(String soupName, String path, String matchKey, String orderPath, SqlOrder order, int pageSize)
+        {
+            return BuildMatchQuerySpec(soupName, null, path, matchKey, orderPath, order, pageSize);
+        }
+
+        public static QuerySpec BuildMatchQuerySpec(String soupName, String[] selectPaths, String path, String matchKey, String orderPath, SqlOrder order, int pageSize)
+        {
+            return new QuerySpec(soupName, selectPaths, SmartQueryType.Match, matchKey, null, null, null, orderPath, order, pageSize, path);
         }
 
         public static QuerySpec BuildContainQuerySpec(string soupName, string path, string likeKey, SqlOrder order,
            int pageSize)
         {
-            return new QuerySpec(soupName, path, SmartQueryType.Like, null, null, null, $"%{likeKey}%", order, pageSize);
+            return new QuerySpec(soupName, null, SmartQueryType.Like, null, null, null, $"%{likeKey}%", null, order, pageSize, path);
         }
 
         public static QuerySpec BuildSmartQuerySpec(string smartSql, int pageSize)
@@ -163,7 +183,17 @@ namespace Salesforce.SDK.SmartStore.Store
         /// <returns>select clause for exact/like/range queries</returns>
         private string ComputeSelectClause()
         {
-            return Select + ComputeFieldReference(SmartStore.Soup) + " ";
+            var fieldReferences = new List<string>();
+            var paths = SelectPaths ?? new[] { SmartStore.Soup };
+            foreach (var selectPath in paths)
+            {
+                fieldReferences.Add(ComputeFieldReference(selectPath));
+            }
+            if (QueryType == SmartQueryType.Match)
+            {
+                fieldReferences.Add("RANK");
+            }
+            return Select + String.Join(", ", fieldReferences) + " ";
         }
 
         /// <summary>
@@ -208,10 +238,53 @@ namespace Salesforce.SDK.SmartStore.Store
                     }
                     pred = field + " >= ?  AND " + field + " <= ? ";
                     break;
+                case SmartQueryType.Match:
+                    pred = ComputeFieldReference(SmartStore.SoupEntryId) + " IN ("
+                            + Select + SmartStore.RowIdCol + " " + From + ComputeSoupFtsReference() + " " + Where
+                            + ComputeSoupFtsReference() + " MATCH '" + QualifyMatchKey(field, MatchKey) + "'"
+                            // statement arg binding doesn't seem to work so inlining matchKey
+                            + ") ";
+                    break;
                 default:
                     throw new SmartStoreException("Fell through switch: " + QueryType);
             }
             return (pred.Equals("") ? "" : Where + pred);
+        }
+
+
+        private static readonly string[] QualifiedTerms = new[] { "and", "or", "not" };
+
+        /**
+        * fts5 doesn't allow WHERE column MATCH 'value' - only allows WHERE table MATCH 'column:value'
+        * This method changes the matchKey to add field: in the right places
+        * @param field
+        * @param matchKey
+        * @return
+        */
+        public static string QualifyMatchKey(string field, string matchKey)
+        {
+            if (field == null)
+            {
+                return matchKey;
+            }
+
+            string result = Regex.Replace(matchKey, "[^\\(\\) ]+", match =>
+            {
+                string fullMatch = match.ToString();
+                string fullMatchLowerCase = fullMatch.ToLower();
+                if (QualifiedTerms.Contains(fullMatchLowerCase))
+                {
+                    return fullMatch;
+                }
+                return $"{field}:{fullMatch}";
+            });
+
+            return result;
+        }
+
+        private String ComputeSoupFtsReference()
+        {
+            return ComputeSoupReference() + SmartStore.FtsSuffix;
         }
 
         /// <summary>
@@ -250,19 +323,21 @@ namespace Salesforce.SDK.SmartStore.Store
             switch (QueryType)
             {
                 case SmartQueryType.Exact:
-                    return new[] {MatchKey};
+                    return new[] { MatchKey };
                 case SmartQueryType.Like:
-                    return new[] {LikeKey};
+                    return new[] { LikeKey };
                 case SmartQueryType.Range:
                     if (BeginKey == null && EndKey == null)
                         return null;
                     if (EndKey == null)
-                        return new[] {BeginKey};
+                        return new[] { BeginKey };
                     if (BeginKey == null)
-                        return new[] {EndKey};
-                    return new[] {BeginKey, EndKey};
+                        return new[] { EndKey };
+                    return new[] { BeginKey, EndKey };
                 case SmartQueryType.Smart:
                     return null;
+                case SmartQueryType.Match:
+                    return null; // baking matchKey into query
                 default:
                     throw new SmartStoreException("Fell through switch: " + QueryType);
             }

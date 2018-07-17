@@ -1,4 +1,5 @@
-﻿using Windows.UI.Xaml.Navigation;
+﻿using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Navigation;
 
 namespace DSA.Shell.Pages
 {

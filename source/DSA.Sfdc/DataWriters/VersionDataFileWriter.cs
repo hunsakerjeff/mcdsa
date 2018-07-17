@@ -124,10 +124,8 @@ namespace DSA.Sfdc.DataWriters
 
                 using (var sfw = await newFile.OpenStreamForWriteAsync())
                 {
-                    using (var outStream = sfw.AsOutputStream())
-                    {
-                        ulong x = await content.WriteToStreamAsync(outStream);
-                    }
+                    var outStream = sfw.AsOutputStream();
+                    ulong x = await content.WriteToStreamAsync(outStream);
                 }
                 await ThumbnailUtil.SaveThumbnail(newFile, attFolder, _meta);
             }

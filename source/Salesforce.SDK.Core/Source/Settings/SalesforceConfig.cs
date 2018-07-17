@@ -125,7 +125,7 @@ namespace Salesforce.SDK.Source.Settings
             var configJson = settings.Values[ConfigSettings] as string;
             if (String.IsNullOrWhiteSpace(configJson))
             {
-                SetupServers();
+                SetupServers().Wait();
                 SaveConfig();
             }
         }
@@ -165,7 +165,7 @@ namespace Salesforce.SDK.Source.Settings
         ///     in the account creation UI.  If there is only a single server, and new connections is disabled, add account will
         ///     immediately go to oauth.
         /// </summary>
-        protected async void SetupServers()
+        protected async Task SetupServers()
         {
             String xml;
             try

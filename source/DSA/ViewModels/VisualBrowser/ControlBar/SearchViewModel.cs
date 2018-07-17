@@ -28,9 +28,11 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
         private readonly INavigationService _navigationService;
         private readonly IDocumentInfoDataService _documentInfoDataService;
 
-        private RelayCommand<SearchBoxResultSuggestionChosenEventArgs> _resultSuggestionChosenCommand;
-        private RelayCommand<SearchBoxSuggestionsRequestedEventArgs> _suggestionsRequestedCommand;
-        private RelayCommand<SearchBoxQuerySubmittedEventArgs> _querySubmittedCommand;
+        //private RelayCommand<SearchBoxResultSuggestionChosenEventArgs> _resultSuggestionChosenCommand;
+        //private RelayCommand<SearchBoxSuggestionsRequestedEventArgs> _suggestionsRequestedCommand;
+        //private RelayCommand<SearchBoxQuerySubmittedEventArgs> _querySubmittedCommand;
+
+        private RelayCommand _querySubmittedCommand;
         private RelayCommand _searchBoxLostFocusCommand;
         private RelayCommand _searchBoxGotFocusCommand;
         private RelayCommand _prepareForFocusOnKeyboardInput;
@@ -82,6 +84,52 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
              }));
         }
 
+        public RelayCommand QuerySubmittedCommand
+        {
+            get
+            {
+                return _querySubmittedCommand ?? (_querySubmittedCommand = new RelayCommand(
+                    () =>
+                    {
+                        if(String.IsNullOrWhiteSpace(SearchBoxQueryText))
+                        {
+                            return;
+                        }
+
+                        if (SfdcConfig.AppSearchMode == SearchMode.UseSearchPage)
+                        {
+                            if (!_overrideFocusOnKeyboardInput)
+                            {
+                                FocusOnKeyboardInput = true;
+                            }
+
+                            // Capture current page name so we know what to go back to via the back buttun
+                            var frame = Window.Current.Content as Frame;
+                            string currentPage = (frame != null) ? frame.SourcePageType.Name: ViewModelLocator.VisualBrowserPageKey;
+
+                            // Send the Submit Query message and navigate to the page
+                            Messenger.Default.Send(new SearchQuerySubmitted { Query = SearchBoxQueryText, CallingPage = currentPage });
+                            _navigationService.NavigateTo(ViewModelLocator.SearchPageKey);
+                            return;
+                        }
+
+                        if (string.IsNullOrEmpty(_firstSuggestionID))
+                        {
+                            SearchBoxQueryText = string.Empty;
+                            return;
+                        }
+
+                        if (!_overrideFocusOnKeyboardInput)
+                        {
+                            FocusOnKeyboardInput = true;
+                        }
+                        var mediaLink = _mediaLinks.FirstOrDefault(ml => ml.ID == _firstSuggestionID);
+                        _navigateToMediaCommand.Execute(new MediaWrapper { Media = mediaLink });
+                    }));
+            }
+        }
+
+        /*
         public RelayCommand<SearchBoxResultSuggestionChosenEventArgs> ResultSuggestionChosenCommand
         {
             get
@@ -89,7 +137,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                 return _resultSuggestionChosenCommand ?? (_resultSuggestionChosenCommand = new RelayCommand<SearchBoxResultSuggestionChosenEventArgs>(
                     (arg) =>
                     {
-                        if(SfdcConfig.AppSearchMode != SearchMode.PopulatedInDropDown)
+                        if (SfdcConfig.AppSearchMode != SearchMode.PopulatedInDropDown)
                         {
                             return;
                         }
@@ -108,7 +156,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                 return _querySubmittedCommand ?? (_querySubmittedCommand = new RelayCommand<SearchBoxQuerySubmittedEventArgs>(
                     (arg) =>
                     {
-                        if(String.IsNullOrWhiteSpace(arg.QueryText))
+                        if (String.IsNullOrWhiteSpace(arg.QueryText))
                         {
                             return;
                         }
@@ -120,9 +168,9 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                                 FocusOnKeyboardInput = true;
                             }
 
-                            // Capture current page name so we no what to go back to via the back buttun
+                            // Capture current page name so we know what to go back to via the back buttun
                             var frame = Window.Current.Content as Frame;
-                            string currentPage = (frame != null) ? frame.SourcePageType.Name: ViewModelLocator.VisualBrowserPageKey;
+                            string currentPage = (frame != null) ? frame.SourcePageType.Name : ViewModelLocator.VisualBrowserPageKey;
 
                             // Send the Submit Query message and navigate to the page
                             Messenger.Default.Send(new SearchQuerySubmitted { Query = arg.QueryText, CallingPage = currentPage });
@@ -153,9 +201,9 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                 return _suggestionsRequestedCommand ?? (_suggestionsRequestedCommand = new RelayCommand<SearchBoxSuggestionsRequestedEventArgs>(
                     async (arg) =>
                     {
-                        if (string.IsNullOrWhiteSpace(arg.QueryText) 
+                        if (string.IsNullOrWhiteSpace(arg.QueryText)
                             || SfdcConfig.AppSearchMode != SearchMode.PopulatedInDropDown
-                            || _mediaLinks == null 
+                            || _mediaLinks == null
                             || _mediaLinks.Any() == false)
                         {
                             return;
@@ -176,6 +224,7 @@ namespace DSA.Shell.ViewModels.VisualBrowser.ControlBar
                     }));
             }
         }
+*/
 
         private async Task PopulateResults(SearchBoxSuggestionsRequestedEventArgs arg)
         {

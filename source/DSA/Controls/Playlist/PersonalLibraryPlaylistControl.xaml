@@ -23,7 +23,8 @@
                     </Grid.Background>
                     <TextBlock  VerticalAlignment="Center"
                             HorizontalAlignment="Center"
-                            TextAlignment="Center">
+                            TextAlignment="Center"
+                            Foreground="White">
                    <Run>NO CONTENT</Run>
                     <LineBreak/>
                    <Run>Files can be added to your Personal Library in Salesforce</Run>
@@ -49,8 +50,8 @@
                 <ColumnDefinition Width="40" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <SymbolIcon Grid.Column="0" Symbol="Contact" HorizontalAlignment="Right" VerticalAlignment="Center" />
-            <TextBlock Grid.Column="1" FontSize="18" VerticalAlignment="Center">
+            <SymbolIcon Grid.Column="0" Symbol="Contact" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" />
+            <TextBlock Grid.Column="1" FontSize="18" VerticalAlignment="Center" Margin="20 0 20 0" Foreground="White">
                 <Run Text="PERSONAL LIBRARY"/>
                 <Run Text=" "/>
                 <Run Text="Permanent Shelf" FontStyle="Italic"/>

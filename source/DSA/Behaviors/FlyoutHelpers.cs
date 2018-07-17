@@ -1,4 +1,7 @@
-﻿using Windows.UI.Xaml;
+﻿using System;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 namespace DSA.Util
@@ -61,7 +64,6 @@ namespace DSA.Util
         private static void OnIsOpenPropertyChanged(DependencyObject d,
             DependencyPropertyChangedEventArgs e)
         {
-
             var flyout = d as Flyout;
             var parent = (Button)d.GetValue(ParentProperty);
 
@@ -69,10 +71,14 @@ namespace DSA.Util
             {
                 var newValue = (bool)e.NewValue;
 
-                if (newValue)
-                    flyout.ShowAt(parent);
-                else
-                    flyout.Hide();
+                // make sure that flyout is opened or showed by dispatcher
+                CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    if (newValue)
+                        flyout.ShowAt(parent);
+                    else
+                        flyout.Hide();
+                }).AsTask();
             }
         }
     }

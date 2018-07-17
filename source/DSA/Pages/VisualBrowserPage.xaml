@@ -53,7 +53,7 @@
         <visualBrowser:BrowserControl Visibility="{Binding IsCategorySelected, Converter={StaticResource BoolToVis}}"/>
         <Grid Height="88" VerticalAlignment="Bottom">
             <common1:MainAppBar />
-            <controlBar:SearchControl Width="435" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right"  Margin="0,0,40,0"/>
+            <controlBar:SearchControl Width="435" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right" Margin="0,0,40,0"/>
         </Grid>
         <Border Style="{StaticResource InternalModeBorder}" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}" />
     </Grid>

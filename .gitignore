@@ -2,3 +2,20 @@
 
 output/
 *.diagsession
+*.suo
+bin
+obj
+*.user
+~*
+*.~*
+/TestResults
+/packages
+.vs
+[d|D]ebug
+[r|R]elease
+*.db
+*.opendb
+AppPackages
+[t|T]humbs.db
+UpgradeLog*.htm
+*.sdf

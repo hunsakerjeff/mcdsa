@@ -77,7 +77,7 @@ namespace DSA.Shell.Controls.Media
 
         private static async Task ShowProgressIndicatorIfNecessary(PdfViewerControl control, StorageFile file)
         {
-            var size = await file.GetSize();
+            var size = await file.GetSizeAsync();
             var sizeInMB = size / 1048576.0;
             if (sizeInMB > ProgressIndicationFileSizeLimitInMB)
             {

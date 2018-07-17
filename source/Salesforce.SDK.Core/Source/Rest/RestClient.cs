@@ -36,7 +36,6 @@ using Salesforce.SDK.Utilities;
 using Salesforce.SDK.Exceptions;
 using Salesforce.SDK.Adaptation;
 using Windows.Foundation.Diagnostics;
-using System;
 
 namespace Salesforce.SDK.Rest
 {
@@ -46,12 +45,13 @@ namespace Salesforce.SDK.Rest
 
     public class RestClient
     {
-        // Attributes
         private readonly AccessTokenProvider _accessTokenProvider;
+
         private readonly string _instanceUrl;
+
+
         private string _accessToken;
 
-        // CTOR
         public RestClient(string instanceUrl, string accessToken, AccessTokenProvider accessTokenProvider)
         {
             _instanceUrl = instanceUrl;
@@ -99,7 +99,12 @@ namespace Salesforce.SDK.Rest
             string url = _instanceUrl + request.Path;
             var headers = request.AdditionalHeaders != null ? new HttpCallHeaders(_accessToken, request.AdditionalHeaders) : new HttpCallHeaders(_accessToken, new Dictionary<string, string>());
 
-            HttpCall call = await new HttpCall(request.Method, headers, url, request.RequestBody, request.ContentType).Execute(token).ConfigureAwait(false);
+            HttpCall call =
+                await
+                    new HttpCall(request.Method, headers, url, request.RequestBody, request.ContentType).Execute(token)
+                        .ConfigureAwait(false);
+
+
             if (!call.HasResponse)
             {
                 throw call.Error;
@@ -147,13 +152,28 @@ namespace Salesforce.SDK.Rest
             string url = _instanceUrl + request.Path;
             var headers = request.AdditionalHeaders != null ? new HttpCallHeaders(_accessToken, request.AdditionalHeaders) : new HttpCallHeaders(_accessToken, new Dictionary<string, string>());
 
-            HttpCall call = await new HttpCall(request.Method, headers, url, request.RequestBody, request.ContentType).ExecuteAndSaveAsync(outStream, token).ConfigureAwait(false);
+            HttpCall call =
+                await
+                    new HttpCall(request.Method, headers, url, request.RequestBody, request.ContentType).ExecuteAndSaveAsync(outStream, token)
+                        .ConfigureAwait(false);
+
             if (!call.HasResponse)
             {
                 System.Diagnostics.Debug.WriteLine("***HttpCall !call.HasResponse ");
-                PlatformAdapter.SendToCustomLogger("HttpCall: no valid response", LoggingLevel.Error);
-
-                throw new NetworkErrorException();
+                // The following error message occurs on 8.1 if Syncing Content and when Suspend or Sleep happens and then App wakes up again
+                // "Exception from HRESULT: 0x80072EFF"
+                // If this is the case, it means network connection reset, so we just invoke the call again
+                if (call.Error != null && !System.String.IsNullOrEmpty(call.Error.Message) && call.Error.Message.Contains("0x80072EFF"))
+                {
+                    call = 
+                        await 
+                            new HttpCall(request.Method, headers, url, request.RequestBody, request.ContentType).ExecuteAndSaveAsync(outStream, token)
+                                .ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new NetworkErrorException();
+                }
             }
 
             if (call.StatusCode == HttpStatusCode.Unauthorized || call.StatusCode == HttpStatusCode.Forbidden)

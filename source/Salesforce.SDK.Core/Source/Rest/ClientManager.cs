@@ -25,15 +25,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Threading.Tasks;
-using Windows.Foundation.Diagnostics;
 using Windows.Foundation.Metadata;
-using Windows.Web.Http;
-using Windows.Web.Http.Filters;
 using Salesforce.SDK.Adaptation;
 using Salesforce.SDK.Auth;
-
 
 namespace Salesforce.SDK.Rest
 {
@@ -84,7 +79,8 @@ namespace Salesforce.SDK.Rest
                     async () =>
                     {
                         account = AccountManager.GetAccount();
-                        AuthResponse authResponse = await OAuth2.RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
+                        AuthResponse authResponse =
+                            await OAuth2.RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
                         account.AccessToken = authResponse.AccessToken;
                         AuthStorageHelper.GetAuthStorageHelper().PersistCredentials(account);
                         return account.AccessToken;

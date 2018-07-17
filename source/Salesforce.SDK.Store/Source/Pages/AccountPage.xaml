@@ -120,6 +120,13 @@
                             HorizontalAlignment="Center" />
             </StackPanel>
         </Flyout>
+
+        <Style x:Key="WhiteButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="White" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
     </UserControl.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="PageRoot">
@@ -183,13 +190,17 @@
                     <Button x:Name="LoginToSalesforce"
                             DataContext="login_to_salesforce"
                             Content="{Binding Converter={StaticResource Localize}}"
-                            Margin="10 0 10 0"
+                            Margin="10 5"
+                            Style="{StaticResource WhiteButton}"
+                            RequestedTheme="Dark"
                             Click="LoginToSalesforce_OnClick"
                             HorizontalAlignment="Center" />
                     <Button x:Name="ChooseConnection"
                             DataContext="choose_connection"
                             Content="{Binding Converter={StaticResource Localize}}"
-                            Margin="10 0 10 0"
+                            Margin="10 5"
+                            Style="{StaticResource WhiteButton}"
+                            RequestedTheme="Dark"
                             Click="ShowServerFlyout"
                             Width="{Binding ElementName=LoginToSalesforce, Path=ActualWidth}"
                             HorizontalAlignment="Center"/>

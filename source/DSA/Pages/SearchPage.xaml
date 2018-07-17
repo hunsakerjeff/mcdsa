@@ -278,8 +278,8 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Background="{StaticResource PageHeaderBackgroundBrush}">
-            <Button x:Name="backButton" Margin="20,20,0,0" 
-                        Style="{StaticResource NavigationBackButtonNormalStyle}"
+            <Button x:Name="backButton" Margin="20,20,0,0"  BorderThickness="0" IsTabStop="false"
+                        Style="{StaticResource DSANavigationBackButtonNormalStyle}"
                         VerticalAlignment="Top"
                         AutomationProperties.Name="Back"
                         AutomationProperties.AutomationId="BackButton"
@@ -288,8 +288,10 @@
             <TextBlock Text="Search" VerticalAlignment="Center" HorizontalAlignment="Center"  Style="{StaticResource SubheaderTextBlockStyle}" />
         </Grid>
         <Grid Grid.Row="1">
-            <SearchBox Margin="15,0" x:Name="SearchBox" QueryText="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SearchHistoryEnabled="False" Height="35" VerticalAlignment="Center" FocusOnKeyboardInput="{Binding FocusOnKeyboardInput}" Style="{StaticResource DSASearchBox}" >
+            <AutoSuggestBox Margin="15,0" QueryIcon="Find" Text="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="35" VerticalAlignment="Center">
+                <!--<SearchBox Margin="15,0" x:Name="SearchBox" QueryText="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SearchHistoryEnabled="False" Height="35" VerticalAlignment="Center" Style="{StaticResource DSASearchBox}" >-->
                 <interactivity:Interaction.Behaviors>
+                    <!--FocusOnKeyboardInput="{Binding FocusOnKeyboardInput}"-->
                     <core:EventTriggerBehavior EventName="LostFocus">
                         <core:InvokeCommandAction Command="{Binding SearchBoxLostFocusCommand}"/>
                     </core:EventTriggerBehavior>
@@ -300,10 +302,11 @@
                         <core:InvokeCommandAction Command="{Binding PrepareForFocusOnKeyboardInput}"/>
                     </core:EventTriggerBehavior>
                     <core:EventTriggerBehavior EventName="QuerySubmitted">
-                        <core:InvokeCommandAction Command="{Binding QuerySubmittedCommand}" CommandParameter="{Binding args}" />
+                        <core:InvokeCommandAction Command="{Binding QuerySubmittedCommand}" />
                     </core:EventTriggerBehavior>
                 </interactivity:Interaction.Behaviors>
-            </SearchBox>
+            </AutoSuggestBox>
+            <!--</SearchBox>-->
         </Grid>
         <TextBlock Grid.Row="2" Margin="0,30,0,0" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center" Text="{Binding NoResultsText}" Visibility="{Binding Path=NoResultsMessageVisible, Converter={StaticResource BoolToVis}}"/>
         <ListBox Grid.Row="2"
@@ -345,6 +348,3 @@
         <Border Style="{StaticResource InternalModeBorder}" Grid.RowSpan="3" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}" />
     </Grid>
 </abstract:PageBase>
-
-
-

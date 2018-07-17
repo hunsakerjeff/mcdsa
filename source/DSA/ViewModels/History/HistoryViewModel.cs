@@ -45,7 +45,7 @@ namespace DSA.Shell.ViewModels.History
             try
             {
                 // Setup the Search model
-                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, NavigateToMediaCommand);
+                SearchViewModel = new SearchControlViewModel(_documentInfoDataService, _searchContentDataService, _navigationService, _navigateToMediaCommand);
 
                 var data = await _historyDataService.GetHistoryData();
                 _allHistoryItems = HistoryItemViewModelBuilder.Create(data);

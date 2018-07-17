@@ -6,7 +6,7 @@ using WinRTXamlToolkit.Controls.Extensions;
 
 namespace DSA.Util
 {
-    public class AutoScrollBehavior : Behavior<ScrollViewer>, IBehavior
+    public class AutoScrollBehavior : WinRTXamlToolkit.Interactivity.Behavior<ScrollViewer>, IBehavior
     {
         private ScrollViewer _scrollViewer = null;
         private double _width = 0.0d;
@@ -31,7 +31,7 @@ namespace DSA.Util
         {
             if (_scrollViewer.ExtentWidth != _width)
             {
-                _scrollViewer.ScrollToHorizontalOffsetWithAnimation(_scrollViewer.ExtentWidth);
+                _scrollViewer.ScrollToHorizontalOffsetWithAnimationAsync(_scrollViewer.ExtentWidth);
                 _width = _scrollViewer.ExtentWidth;
             }
         }

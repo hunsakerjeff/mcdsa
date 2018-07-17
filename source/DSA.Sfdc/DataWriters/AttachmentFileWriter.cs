@@ -43,10 +43,8 @@ namespace DSA.Sfdc.DataWriters
                 StorageFile newFile = await attFolder.CreateFileAsync(_meta.Name, CreationCollisionOption.ReplaceExisting);
                 using (var sfw = await newFile.OpenStreamForWriteAsync())
                 {
-                    using (var outStream = sfw.AsOutputStream())
-                    {
-                        ulong x = await content.WriteToStreamAsync(outStream);
-                    }
+                    var outStream = sfw.AsOutputStream();
+                    ulong x = await content.WriteToStreamAsync(outStream);
                 }
             }
             catch (UnauthorizedAccessException ex)

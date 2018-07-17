@@ -172,7 +172,7 @@
                         <Grid Grid.Row="0" Margin="15,0,15,0">
                             <Grid Visibility="{Binding Content.HasImage, Converter={StaticResource BoolToVisRev}}">
                                 <Ellipse Width="100" Height="100" Stroke="White" Fill="White" StrokeThickness="2" Canvas.Left="141" Canvas.Top="61"/>
-                                <TextBlock Text="{Binding Content.SubName}" Foreground="Black" FontSize="45" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                <TextBlock Text="{Binding Content.SubName}" Foreground="White" FontSize="45" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                             </Grid>
                             <Image Visibility="{Binding Content.HasImage, Converter={StaticResource BoolToVis}}" Source="{Binding Content.NavigationAreaImage}"/>
                         </Grid>

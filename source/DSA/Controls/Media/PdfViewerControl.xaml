@@ -91,7 +91,7 @@
                       IsActive="True"
                       Foreground="{StaticResource ProgressRingForegroudBrush}" />
         <TextBlock Visibility="{Binding IsPdfError, ElementName=pdfControl, Converter={StaticResource BoolToVis}}" 
-                   Style="{StaticResource SubheaderTextBlockStyle}"
+                   Style="{StaticResource SubheaderWhiteTextBlockStyle}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Top"
                    Margin="0,30,0,0">

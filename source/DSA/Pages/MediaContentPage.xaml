@@ -131,21 +131,21 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Background="{StaticResource PageHeaderBackgroundBrush}">
             <Button x:Name="backButton" Margin="20,20,0,0" 
-                        Style="{StaticResource NavigationBackButtonNormalStyle}"
+                        Style="{StaticResource DSANavigationBackButtonNormalStyle}"
                         VerticalAlignment="Top"
                         AutomationProperties.Name="Back"
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"
                         Command="{Binding NavigateBackCommand}"/>
             <Button Margin="160,0,0,0" Command="{Binding GoToPreviousCommand}" Visibility="{Binding IsPlaylistSelected, Converter={StaticResource BoolToVis}}" Style="{StaticResource NextPreviousButtonStyle}">
-                <SymbolIcon Symbol="Play" RenderTransformOrigin="0.5,0.5" >
+                <SymbolIcon Symbol="Play" RenderTransformOrigin="0.5,0.5" Foreground="White" >
                     <SymbolIcon.RenderTransform>
                         <CompositeTransform ScaleX="2" ScaleY="2" Rotation="180"/>
                     </SymbolIcon.RenderTransform>
                 </SymbolIcon>
             </Button>
             <Button Margin="0,0,160,0" HorizontalAlignment="Right" Command="{Binding GoToNextCommand}" Visibility="{Binding IsPlaylistSelected, Converter={StaticResource BoolToVis}}" Style="{StaticResource NextPreviousButtonStyle}">
-                <SymbolIcon Symbol="Play" RenderTransformOrigin="0.5,0.5" >
+                <SymbolIcon Symbol="Play" RenderTransformOrigin="0.5,0.5" Foreground="White">
                     <SymbolIcon.RenderTransform>
                         <CompositeTransform ScaleX="2" ScaleY="2"/>
                     </SymbolIcon.RenderTransform>
@@ -155,22 +155,19 @@
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        Text="{Binding Path=Name}"
-                       Style="{StaticResource SubheaderTextBlockStyle}" 
+                       Style="{StaticResource SubheaderWhiteTextBlockStyle}" 
                        IsHitTestVisible="false" 
                        TextWrapping="NoWrap"/>
-            <StackPanel Margin="0,0,20,0" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal" >
-                <Button x:Name="RelatedContentButton" BorderThickness="0" Command="{Binding ShowRelatedContentFlyoutCommand}" Visibility="{Binding RelatedContentPresent, Converter={StaticResource BoolToVis}}" Height="45">
+            <StackPanel Margin="0,0,20,0" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
+                <!--<Button x:Name="RelatedContentButton" BorderThickness="0" Command="{Binding ShowRelatedContentFlyoutCommand}" Visibility="{Binding RelatedContentPresent, Converter={StaticResource BoolToVis}}" Height="45" Background="Transparent">-->
+                <Button x:Name="RelatedContentButton" BorderThickness="0" Command="{Binding ShowRelatedContentFlyoutCommand}" Height="45" Background="Transparent">
                     <Image Source="{Binding RelatedContentIcon}"/>
                 </Button>
-                <Button BorderThickness="0" Command="{Binding ShareMediaCommand}" Height="45">
+                <Button BorderThickness="0" Command="{Binding ShareMediaCommand}" Height="45" Background="Transparent">
                     <Image Source="{Binding MailIcon}"/>
                 </Button>
-                <Button x:Name="addToPlaylistButton" BorderThickness="0">
-                    <SymbolIcon Symbol="OutlineStar" RenderTransformOrigin="0.5,0.5" >
-                        <SymbolIcon.RenderTransform>
-                            <CompositeTransform ScaleX="1.2" ScaleY="1.2"/>
-                        </SymbolIcon.RenderTransform>
-                    </SymbolIcon>
+                <Button x:Name="addToPlaylistButton" BorderThickness="0"  Height="45"  Background="Transparent">
+                    <TextBlock FontFamily="Segoe UI Symbol" Text="&#57806;" FontSize="28" Foreground="White"/>
                     <Button.Flyout>
                         <Flyout util:FlyoutHelpers.Parent="{Binding ElementName=addToPlaylistButton}"
                                 util:FlyoutHelpers.IsOpen="{Binding AddNewPlaylistViewModel.IsFlyoutOpen, Mode=TwoWay}"

@@ -80,10 +80,11 @@
             <ToggleButton IsEnabled="{Binding EditButtonDisabled}"
                 Content="{Binding EditButtonText}" 
                 Style="{StaticResource EditToggleButtonStyle}"
-                IsChecked="{Binding IsPlaylistEditMode, Mode=TwoWay}" Margin="20,0,0,0" />
-            <TextBlock Text="Playlists" VerticalAlignment="Center" HorizontalAlignment="Center"  Style="{StaticResource SubheaderTextBlockStyle}" />
+                IsChecked="{Binding IsPlaylistEditMode, Mode=TwoWay}" Margin="20,0,0,0" Foreground="White" />
+            <TextBlock Text="Playlists" VerticalAlignment="Center" HorizontalAlignment="Center"  Style="{StaticResource SubheaderWhiteTextBlockStyle}" />
             <Button x:Name="newPlaylistButton" 
                     Content="New Playlist"
+                    Foreground="White"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center" 
                     Margin="0,26,38,16"
@@ -93,7 +94,7 @@
                     <Flyout util:FlyoutHelpers.Parent="{Binding ElementName=newPlaylistButton}"
                             util:FlyoutHelpers.IsOpen="{Binding Path=DataContext.IsFlyoutOpen, ElementName=newPlaylistFlyoutPanel, Mode=TwoWay}">
                         <StackPanel Width="360" x:Name="newPlaylistFlyoutPanel" Orientation="Horizontal" DataContext="{Binding NewPlaylistViewModel}">
-                            <TextBox Width="220" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="shelf name" />
+                            <TextBox Width="220" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="shelf name"/>
                             <Button Content="Create Playlist" Command="{Binding CreateNewPlaylistCommand}" Margin="20,0,0,0" />
                         </StackPanel>
                     </Flyout>
