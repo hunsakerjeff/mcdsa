@@ -12,7 +12,7 @@
     xmlns:controlBar="using:DSA.Shell.Controls.VisualBrowser.ControlBar"
     mc:Ignorable="d"
     d:DesignHeight="45"
-    d:DesignWidth="165">
+    d:DesignWidth="110">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -41,7 +41,6 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="55" />
-            <ColumnDefinition Width="55" />
             <ColumnDefinition  />
         </Grid.ColumnDefinitions>
         <Button Grid.Column="0" BorderThickness="0" Height="40" Width="55" Command="{Binding NewContentShowDeltaSynchronizationPopupCommand}" Visibility="{Binding NewContentButtonVisibility, Converter={StaticResource BoolToVis}}" >
@@ -53,7 +52,7 @@
                 </Image>
             </Grid>
         </Button>
-        <Button Grid.Column="1" BorderThickness="0" Height="40" Width="55" x:Name="CheckInOutButton" Command="{Binding CheckInOutViewModel.CheckInOutOpenCommand}" >
+        <!--<Button Grid.Column="1" BorderThickness="0" Height="40" Width="55" x:Name="CheckInOutButton" Command="{Binding CheckInOutViewModel.CheckInOutOpenCommand}" >
             <Button.Content>
                 <Image Source="{Binding CheckInOutIcon}"/>
             </Button.Content>
@@ -64,8 +63,8 @@
                     <checkInOut:CheckInOutControl x:Name="checkInOutControl" DataContext="{Binding CheckInOutViewModel}" />
                 </Flyout>
             </Button.Flyout>
-        </Button>
-        <Button Grid.Column="2" BorderThickness="0" Height="40" Width="55">
+        </Button>-->
+        <Button Grid.Column="1" BorderThickness="0" Height="40" Width="55">
             <Button.Content>
                 <Image Source="{Binding SettingsIcon}"/>
             </Button.Content>

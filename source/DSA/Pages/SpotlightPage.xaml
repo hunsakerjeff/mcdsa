@@ -89,7 +89,7 @@
                                 <ColumnDefinition Width="2*" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="60"/>
+                                <RowDefinition Height="70"/>
                             </Grid.RowDefinitions>
                             <Image Grid.Column="0" Source="{Binding Icon}" VerticalAlignment="Center" Margin="5"/>
                             <Grid  Grid.Column="1">
@@ -97,11 +97,11 @@
                                     <RowDefinition/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Text="{Binding Name}" Style="{StaticResource SubheaderWhiteTextBlockStyle}"  VerticalAlignment="Center"/>
-                                <TextBlock Grid.Row="1" Text="{Binding Description}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="0" Text="{Binding Name}" Style="{StaticResource SubheaderWhiteTextBlockStyle}"  VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Grid.Row="1" Text="{Binding Description}" Foreground="White" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                             </Grid>
-                            <TextBlock Grid.Column="2" Text="{Binding Location}" Style="{StaticResource SubheaderWhiteTextBlockStyle}" VerticalAlignment="Center"  Margin="10,0,0,0"/>
-                            <TextBlock Grid.Column="3" Text="{Binding DateAddedString}" Style="{StaticResource SubheaderWhiteTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="2" Text="{Binding Location}" Style="{StaticResource SubheaderWhiteTextBlockStyle}" VerticalAlignment="Center"  Margin="10,0,0,0" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="3" Text="{Binding DateAddedString}" Style="{StaticResource SubheaderWhiteTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -143,8 +143,14 @@
             </ListView>
         </Grid>
         <Grid Grid.Row="2" Height="88" VerticalAlignment="Bottom">
-            <common1:MainAppBar />
-            <controlBar:SearchControl Width="435" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right"  Margin="0,0,40,0"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <common1:MainAppBar Grid.ColumnSpan="3" Grid.Column="0"/>
+            <controlBar:SearchControl Grid.Column="2" Width="350" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right" Margin="0,0,40,0"/>
         </Grid>
         <Border Style="{StaticResource InternalModeBorder}" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}"/>
     </Grid>

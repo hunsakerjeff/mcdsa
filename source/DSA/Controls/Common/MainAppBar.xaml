@@ -17,14 +17,20 @@
         <Grid.Background>
             <SolidColorBrush Opacity="0.5" Color="Black"/>
         </Grid.Background>
-        <Image Width="150" Height="29"  Source="{Binding Path=LogoImage}" VerticalAlignment="Center"  HorizontalAlignment="Left" Margin="40,0,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Image Grid.Column="0" Width="150" Height="29"  Source="{Binding Path=LogoImage}" VerticalAlignment="Center"  HorizontalAlignment="Left" Margin="40,0,0,0">
             <interactivity:Interaction.Behaviors>
                 <core:EventTriggerBehavior EventName="Tapped">
                     <core:InvokeCommandAction Command="{Binding NavigateVisualBrowserTopLevelCommand}" />
                 </core:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
         </Image>
-        <StackPanel x:Name="CenterPanel" Orientation="Horizontal" Grid.Column="0" HorizontalAlignment="Center">
+        <StackPanel x:Name="CenterPanel" Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
             <common:AppBarButton Text="Home" Width="80" Source="{Binding HomeImage}" Command="{Binding NavigateVisualBrowserTopLevelCommand}"/>
             <common:AppBarButton Text="Visual Browser" Width="96" Source="{Binding VisualBrowserImage}" IsChecked="{Binding VisualBrowserCheck, Mode=TwoWay}"  Command="{Binding NavigateVisualBrowserCommand}" />
             <common:AppBarButton Text="Menu Browser" Width="96" Source="{Binding MenuBrowserImage}" IsChecked="{Binding MenuBrowserCheck, Mode=TwoWay}"  Command="{Binding NavigateMenuBrowserCommand}" IsEnabled="{Binding IsConfigurationSelected}" />

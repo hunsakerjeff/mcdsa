@@ -177,7 +177,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="45"  />
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" Background="{StaticResource PageBackgroundBrush}">
+            <Grid Grid.Row="0" Background="{StaticResource DarkGreyBrush}">
                 <Button Content="Cancel" Visibility="{Binding IsChooseAtCheckOutFlow, Converter={StaticResource BoolToVisRev}}" BorderThickness="0" Command="{Binding CancelCommand}" Foreground="White" Background="Transparent" />
                 <Button Content="Review Materials" Visibility="{Binding IsChooseAtCheckOutFlow, Converter={StaticResource BoolToVis}}" BorderThickness="0" Command="{Binding GoToContentReviewCommand}" Foreground="White" Background="Transparent" />
                 <TextBlock Text="Select Contact" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="White" FontSize="18" />
@@ -250,7 +250,7 @@
                 <RowDefinition Height="45"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" Background="{StaticResource PageBackgroundBrush}">
+            <Grid Grid.Row="0" Background="{StaticResource DarkGreyBrush}">
                 <Button Content="Cancel" Command="{Binding CancelCommand}" BorderThickness="0" Foreground="White" Background="Transparent" />
                 <TextBlock Text="Review Materials" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="White" FontSize="18" />
                 <Button Content="Done" Visibility="{Binding IsChooseAtCheckOutFlow, Converter={StaticResource BoolToVisRev}}" Command="{Binding FinishCheckOutCommand}" HorizontalAlignment="Right" BorderThickness="0" Foreground="White" Background="Transparent" />

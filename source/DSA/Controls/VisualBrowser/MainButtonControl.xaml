@@ -47,7 +47,7 @@
         <Grid>
             <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center" Source="{Binding CurrentImage}" ImageOpened="ButtonImage_OnImageOpened"/>
             <TextBlock x:Name="ButtonText" Text="{Binding Category}" Margin="0,-8,0,0"
-                       Opacity="{Binding Opacity}" LineHeight="28"
+                       Opacity="{Binding Opacity}"
                        Foreground="{Binding CurrentTextColor}" 
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"

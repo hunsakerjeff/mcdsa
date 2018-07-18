@@ -11,7 +11,8 @@
     
     <UserControl.Resources>
         <converters:BooleanToVisibilityConverter x:Name="BoolToVis" />
-        
+        <converters:BooleanToVisibilityConverter x:Name="BoolToVisRev" IsReversed="True" />
+        <converters:MarginConverter x:Name="LeftMarginConverter" MarginType="Left" />
         <Style x:Name="TopCategoriesListBoxItem" TargetType="ListBoxItem">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="TabNavigation" Value="Local" />
@@ -103,7 +104,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
         <Style x:Name="TopCategoriesListBox" TargetType="ListBox">
             <Setter Property="Foreground" Value="{ThemeResource ListBoxForegroundThemeBrush}" />
             <Setter Property="Background" Value="{ThemeResource ListBoxBackgroundThemeBrush}" />
@@ -177,7 +177,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RenderTransform>
-            <TranslateTransform X="{Binding TopCategoriesMargin}"/>
+            <TranslateTransform x:Name="ShowHideOffset" X="{Binding TopCategoriesMargin}" />
         </Grid.RenderTransform>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -193,14 +193,15 @@
             </Rectangle.Fill>
         </Rectangle>
         <Grid Grid.Column="1">
-            <Rectangle Stretch="UniformToFill" Fill="White" Opacity="1" Margin="0" >
+            <Rectangle Grid.Column="1" Stretch="UniformToFill" Fill="White" Opacity="1" Margin="0" >
             </Rectangle>
             <Button VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderBrush="Transparent" Command="{Binding CategoryWithChildrenUnselectedCommand}"/>
         </Grid>
-        <ListBox Grid.ColumnSpan="2" Grid.Column="0"
+        <ListBox Grid.ColumnSpan="2"
                  Background="Transparent"
                          BorderThickness="0"
                          VerticalAlignment="Center"
+                         x:Name="TopCategoriesList"
                          Style="{StaticResource TopCategoriesListBox}"
                          ItemContainerStyle="{StaticResource TopCategoriesListBoxItem}"
                          ItemsSource="{Binding TopCategories}"
@@ -211,27 +212,26 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <Canvas VerticalAlignment="Top" HorizontalAlignment="Left" Width="40" Height="20" Grid.Column="1">
         <TextBlock Visibility="{Binding SelectedCategoryHasChildren, Converter={StaticResource BoolToVis}}"
                            HorizontalAlignment="Left" 
                            IsHitTestVisible="False"
-                           Margin="30,155,-50,0"
-                           TextTrimming="CharacterEllipsis"
-                           TextWrapping="NoWrap"
+                   TextWrapping="NoWrap" 
+                   TextTrimming="CharacterEllipsis"
                            Text="{Binding SelectedTopCategory.Name}"
                            VerticalAlignment="Top"
-                           Width="300"
-                           RenderTransformOrigin="0.5,0.5" 
+                   Width="235"
+                   RenderTransformOrigin="0,0.5" 
                            UseLayoutRounding="False"
-                           FontSize="18"
-                           d:LayoutRounding="Auto" Grid.ColumnSpan="2" Grid.Column="0">
-            
-
+                           FontSize="20"
+                   d:LayoutRounding="Auto" Grid.ColumnSpan="2" >
             <TextBlock.RenderTransform>
-                <CompositeTransform Rotation="90"/>
+                    <CompositeTransform Rotation="90" TranslateX="20"/>
             </TextBlock.RenderTransform>
             <TextBlock.Foreground>
                 <SolidColorBrush Color="#FF9D9D9D" />
             </TextBlock.Foreground>
         </TextBlock>
+        </Canvas>
     </Grid>
 </UserControl>

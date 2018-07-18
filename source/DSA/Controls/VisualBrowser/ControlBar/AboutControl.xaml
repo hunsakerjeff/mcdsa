@@ -39,7 +39,7 @@
                     </Grid>
                 </Grid>
                 <Grid Grid.Row="1" Margin="15">
-                    <TextBlock TextAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Foreground="Black">
+                    <TextBlock TextAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Foreground="{StaticResource DarkGreyBrush}">
                         Digital Sales Aid
                     </TextBlock>
                     <TextBlock  FontSize="20" TextAlignment="Center" Text="{Binding VersionText}" VerticalAlignment="Bottom" Margin="0,0,0,0" Foreground="Black" Style="{StaticResource SubheaderWhiteTextBlockStyle}"/>
