@@ -202,7 +202,7 @@ namespace DSA.Shell.ViewModels
             SimpleIoc.Default.Register<ICategoryInfoDataService, CategoryInfoDataService>();
             SimpleIoc.Default.Register<ISettingsDataService, SettingsDataService>();
             SimpleIoc.Default.Register<IFileService, FileService>();
-            SimpleIoc.Default.Register<IGeolocationService, GeolocationService>();
+            //SimpleIoc.Default.Register<IGeolocationService, GeolocationService>();
             SimpleIoc.Default.Register<ISharingService, SharingService>(createInstanceImmediately: true);
 
         }

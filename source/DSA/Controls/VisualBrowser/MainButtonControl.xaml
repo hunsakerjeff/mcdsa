@@ -19,7 +19,7 @@
         <converters:ScreenScaleConverter x:Key="scrScConvXRev" PositionType="X" Reverse="True"/>
         <converters:ScreenScaleConverter x:Key="scrScConvYRev" PositionType="Y" Reverse="True"/>
         <Style x:Key="MainButtonStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
-            <Setter Property="FontSize" Value="25"/>
+            <Setter Property="FontSize" Value="20"/>
         </Style>
     </UserControl.Resources>
     
@@ -35,7 +35,7 @@
         </core:EventTriggerBehavior>
     </interactivity:Interaction.Behaviors>
     
-    <Grid MinWidth="50" MinHeight="50" VerticalAlignment="Top" HorizontalAlignment="Left">
+    <Grid MinWidth="300" MinHeight="50" VerticalAlignment="Top" HorizontalAlignment="Left">
         <Grid.RenderTransform>
             <CompositeTransform 
                 ScaleX="{Binding CurrentImage, Converter={StaticResource scrScConvX}}" 

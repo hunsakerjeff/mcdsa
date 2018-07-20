@@ -220,7 +220,7 @@
                    TextTrimming="CharacterEllipsis"
                            Text="{Binding SelectedTopCategory.Name}"
                            VerticalAlignment="Top"
-                   Width="235"
+                   Width="135"
                    RenderTransformOrigin="0,0.5" 
                            UseLayoutRounding="False"
                            FontSize="20"

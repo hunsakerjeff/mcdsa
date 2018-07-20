@@ -26,12 +26,13 @@ namespace DSA.Data.Services.API
     {
         //private const string SoupEntryId = "_soupEntryId";
         private const string SoupName = "ContentReview";
-        private readonly IGeolocationService _geolocationService;
+        //private readonly IGeolocationService _geolocationService;
 
         public ContentReviewDataService(
-            IGeolocationService geolocationService)
+            //IGeolocationService geolocationService
+            )
         {
-            _geolocationService = geolocationService;
+            //_geolocationService = geolocationService;
         }
 
         private IndexSpec[] _indexSpecs => new[]
@@ -47,14 +48,14 @@ namespace DSA.Data.Services.API
         {
             await DispatcherHelper.RunAsync(async () =>
             {
-                var location = await _geolocationService.GetLocation();
+                //var location = await _geolocationService.GetLocation();
                 var store = SmartStore.GetGlobalSmartStore();
                 SetupSoupIfNotExistsNeeded(store, SoupName);
-                contentReviews.ForEach(cr =>
-                {
-                    cr.GeolocationLatitude = location.Latitude;
-                    cr.GeolocationLongitude = location.Longitude;
-                });
+                //contentReviews.ForEach(cr =>
+                //{
+                //    cr.GeolocationLatitude = location.Latitude;
+                //    cr.GeolocationLongitude = location.Longitude;
+                //});
 
                 contentReviews.ForEach(cr => SaveReview(store, cr));
                 SyncUpContentReview();
@@ -65,7 +66,7 @@ namespace DSA.Data.Services.API
         {
             await DispatcherHelper.RunAsync(async () =>
             {
-                var location = await _geolocationService.GetLocation();
+                //var location = await _geolocationService.GetLocation();
                 var store = SmartStore.GetGlobalSmartStore();
                 SetupSoupIfNotExistsNeeded(store, SoupName);
 
@@ -75,8 +76,8 @@ namespace DSA.Data.Services.API
                     ContentTitle = mediaLink.Name,
                     PlaylistId = string.IsNullOrWhiteSpace(playListId) ? string.Empty : playListId,
                     ContactId = string.IsNullOrWhiteSpace(contactId) ? string.Empty : contactId,
-                    GeolocationLatitude = location.Latitude,
-                    GeolocationLongitude = location.Longitude,
+                    //GeolocationLatitude = location.Latitude,
+                    //GeolocationLongitude = location.Longitude,
                     DocumentEmailed = emailed,
                     Rating = 0,
                     TimeViewed = viewedTime

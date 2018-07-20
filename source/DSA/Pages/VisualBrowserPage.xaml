@@ -46,7 +46,7 @@
         <common1:NewContentBarControl  VerticalAlignment="Top"/>
 
         <Grid Height="40" Width="165" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,40,0">
-            <controlBar1:ControlBarControl DataContext="{Binding ControlBarViewModel}"/>
+            <controlBar1:ControlBarControl DataContext="{Binding ControlBarViewModel}" HorizontalAlignment="Right"/>
         </Grid>
 
         <visualBrowser:MainButtonsControl Visibility="{Binding IsCategorySelected, Converter={StaticResource BoolToVisRev}}"/>
@@ -54,12 +54,12 @@
         <Grid Height="88" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition MinWidth="512" Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <common1:MainAppBar Grid.ColumnSpan="3" Grid.Column="0"/>
-            <controlBar:SearchControl Grid.Column="2" Width="350" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right" Margin="0,0,40,0"/>
+            <controlBar:SearchControl Grid.Column="2" Width="350" DataContext="{Binding SearchViewModel}" HorizontalAlignment="Right"/>
         </Grid>
         <Border Style="{StaticResource InternalModeBorder}" Visibility="{Binding IsInternalModeEnable, Converter={StaticResource BoolToVis}}" />
     </Grid>

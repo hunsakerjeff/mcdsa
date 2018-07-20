@@ -18,7 +18,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <AutoSuggestBox QueryIcon="Find" Text="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="35" VerticalAlignment="Center">
+        <AutoSuggestBox QueryIcon="Find" Text="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="10,0,40,0" MinWidth="150" Height="35" VerticalAlignment="Center">
         <!--<SearchBox x:Name="SearchBox" Grid.Column="3" QueryText="{Binding SearchBoxQueryText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SearchHistoryEnabled="False" Height="35" VerticalAlignment="Center" FocusOnKeyboardInput="{Binding FocusOnKeyboardInput}" Style="{StaticResource DSASearchBox}" >-->
                 <interactivity:Interaction.Behaviors>
                 <core:EventTriggerBehavior EventName="LostFocus">

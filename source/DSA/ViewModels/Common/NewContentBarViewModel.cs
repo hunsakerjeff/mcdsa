@@ -37,12 +37,9 @@ namespace DSA.Shell.ViewModels.Common
                         if (config.UseAutoAsync)
                         {
                             // requested to not autosync on Fridays
-                            if ((DateTime.Now).DayOfWeek != DayOfWeek.Friday)
+                            if (!_settingsDataService.InSynchronizationInProgress)
                             {
-                                if (!_settingsDataService.InSynchronizationInProgress)
-                                {
-                                    Messenger.Default.Send(new SynchronizationAutoStartMessage());
-                                }
+                                Messenger.Default.Send(new SynchronizationAutoStartMessage());
                             }
                         }
                         else
