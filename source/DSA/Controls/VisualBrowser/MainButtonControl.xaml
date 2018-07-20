@@ -19,7 +19,7 @@
         <converters:ScreenScaleConverter x:Key="scrScConvXRev" PositionType="X" Reverse="True"/>
         <converters:ScreenScaleConverter x:Key="scrScConvYRev" PositionType="Y" Reverse="True"/>
         <Style x:Key="MainButtonStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
-            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontSize" Value="22"/>
         </Style>
     </UserControl.Resources>
     
