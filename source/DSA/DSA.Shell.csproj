@@ -118,6 +118,8 @@
     <Compile Include="Commands\RelatedItemSelectedCommand.cs" />
     <Compile Include="Common\DisplayOrientationsHelper.cs" />
     <Compile Include="Common\NavigationHelper.cs" />
+    <Compile Include="Printing\PdfPageElement.cs" />
+    <Compile Include="Printing\PrintHelper.cs" />
     <Compile Include="Common\SuspensionManager.cs" />
     <Compile Include="Common\ThumbnailIconResolver.cs" />
     <Compile Include="Common\TypeIconResolver.cs" />

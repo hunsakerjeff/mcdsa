@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="Mastercard.DSA.SFDC" Publisher="CN=MasterCard International Incorporated, OU=Code signing 37, O=MasterCard International Incorporated, L=Waterloo, C=BE" Version="1.3.4.0" />
+  <Identity Name="Mastercard.DSA.SFDC" Publisher="CN=MasterCard International Incorporated, OU=Code signing 37, O=MasterCard International Incorporated, L=Waterloo, C=BE" Version="1.3.5.0" />
   <mp:PhoneIdentity PhoneProductId="04e33b50-6214-49d4-956b-be05f7c4bb47" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Digital Sales Aid</DisplayName>

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
 using Windows.UI.Xaml.Media;
+using DSA.Common;
 using DSA.Common.Utils;
 using DSA.Data.Interfaces;
 using DSA.Model.Dto;
@@ -19,6 +20,7 @@ using GalaSoft.MvvmLight.Views;
 using WinRTXamlToolkit.Tools;
 using DSA.Shell.Controls.Media;
 using System.Collections.Generic;
+using Windows.Graphics.Printing;
 
 
 namespace DSA.Shell.ViewModels.Media
@@ -34,7 +36,7 @@ namespace DSA.Shell.ViewModels.Media
         private readonly ICategoryContentDataService _categoryContentDataService;
         private readonly IDocumentInfoDataService _documentInfoDataService;
         private readonly ICategoryDataService _categoryDataService;
-        
+        private readonly IFileService _fileService;
 
         private readonly PlayListCollection _playList = new PlayListCollection();
         private ObservableCollection<MediaPlaylistViewModel> _mediaPlaylists;
@@ -56,6 +58,7 @@ namespace DSA.Shell.ViewModels.Media
         private RelayCommand _openInExternalAppCommand;
         private RelayCommand _goToPreviousCommand;
         private RelayCommand _goToNextCommand;
+        private RelayCommand _printMediaCommand;
 
         private bool _isPlaylistSelected;
 
@@ -64,6 +67,10 @@ namespace DSA.Shell.ViewModels.Media
         private List<MediaLink> _relatedContent;
         private bool _relatedContentPresent;
         private RelatedContentFlyout _relatedContentFlyout;
+
+        // *** Print Services ***
+        private PrintHelper _printHelper;
+        private bool _isPrintable;
 
 
         // CTOR
@@ -76,6 +83,7 @@ namespace DSA.Shell.ViewModels.Media
              ICategoryContentDataService categoryContentDataService,
              IDocumentInfoDataService documentInfoDataService,
              ICategoryDataService categoryDataService,
+             IFileService fileService,
              IContentReviewDataService contentReviewDataService) : base(settingsDataService)
         {
             _presentationDataService = presentationDataService;
@@ -86,10 +94,14 @@ namespace DSA.Shell.ViewModels.Media
             _categoryContentDataService = categoryContentDataService;
             _documentInfoDataService = documentInfoDataService;
             _categoryDataService = categoryDataService;
+            _fileService = fileService;
 
+            // Printing defaults
+            IsPrintable = false;
+            _printHelper = null;
 
-        // Create an empty list to work from
-        _relatedContent = new List<MediaLink>();
+            // Create an empty list to work from
+            _relatedContent = new List<MediaLink>();
 
             // Create the flyout
             _relatedContentFlyout = new RelatedContentFlyout();
@@ -109,6 +121,15 @@ namespace DSA.Shell.ViewModels.Media
 
                     // Set the media
                     await SetMedia(media);
+
+                    // Enable Print Icon
+                    SetupPrintContract(media);
+                    //if (media.Type == MediaType.PDF)
+                    //{
+                    //    IsPrintable = true;
+                    //}
+
+                    // Set defaults
                     _playList.Clear();
                     _selectedPlayListId = null;
                     IsPlaylistSelected = false;
@@ -278,6 +299,10 @@ namespace DSA.Shell.ViewModels.Media
             {
                 return _navigateBackCommand ?? (_navigateBackCommand = new RelayCommand(async () =>
                 {
+                    // Disable printing
+                    //IsPrintable = false;
+                    TeardownPrintContract();
+
                     await StopShowingMedia(Media);
                     _navigationService.GoBack();
                 }));
@@ -381,7 +406,6 @@ namespace DSA.Shell.ViewModels.Media
             }
         }
 
-
         private async Task SwipeMedia(Func<MediaLink , Option<MediaLink>> getMedia)
         {
             var next = getMedia(Media);
@@ -413,6 +437,7 @@ namespace DSA.Shell.ViewModels.Media
                 Set(ref _isPlaylistSelected, value);
             }
         }
+
 
         // //////////////////////////////////////////////////////////
         // *** Related Content ***
@@ -459,6 +484,69 @@ namespace DSA.Shell.ViewModels.Media
         {
             get { return _relatedContentPresent; }
             set { Set(ref _relatedContentPresent, value); }
+        }
+
+
+        // //////////////////////////////////////////////////////////
+        // *** Print Services ***
+        // //////////////////////////////////////////////////////////
+        public bool IsPrintable
+        {
+            get { return _isPrintable; }
+            set { Set(ref _isPrintable, value); }
+        }
+
+        public RelayCommand PrintMediaCommand
+        {
+            get
+            {
+                return _printMediaCommand ?? (_printMediaCommand = new RelayCommand(
+                    async () =>
+                    {
+                        //var mediaFile = await _fileService.GetMediaFile(_media);
+                        //await Windows.System.Launcher.LaunchFileAsync(mediaFile);
+                        await _printHelper.ShowPrintUIAsync();
+                    }));
+            }
+        }
+
+        protected void SetupPrintContract(MediaLink media)
+        {
+            if (PrintManager.IsSupported())
+            {
+                // Tell the user how to print
+                //MainPage.Current.NotifyUser("Print contract registered with customization, use the Print button to print.", NotifyType.StatusMessage);
+                if (media.Type == MediaType.PDF)
+                {
+                    IsPrintable = true;
+
+                    // Initalize common helper class and register for printing
+                    _printHelper = new PrintHelper(media);
+                    _printHelper.RegisterForPrinting();
+
+                    // Initialize print content for this scenario
+                    _printHelper.PreparePrintContent();
+                    return;
+                }
+            }
+
+            // Remove the print button
+            IsPrintable = false;
+
+            // Inform user that Printing is not supported
+            //MainPage.Current.NotifyUser("Printing is not supported.", NotifyType.ErrorMessage);
+
+            // Printing-related event handlers will never be called if printing
+            // is not supported, but it's okay to register for them anyway.
+        }
+
+        protected void TeardownPrintContract()
+        {
+            if (_printHelper != null)
+            {
+                IsPrintable = false;
+                _printHelper.UnregisterForPrinting();
+            }
         }
     }
 }
