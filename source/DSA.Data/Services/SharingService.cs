@@ -7,6 +7,10 @@ using Windows.Storage;
 using DSA.Data.Interfaces;
 using DSA.Model;
 using DSA.Model.Dto;
+using System.Text;
+using System.IO;
+//using Outlook = Microsoft.Office.Interop.Outlook;
+//using Office = Microsoft.Office.Core;
 
 namespace DSA.Data.Services
 {
@@ -60,6 +64,42 @@ namespace DSA.Data.Services
                 await UseDataTransfer(mediaList);
             }
         }
+
+        //private async Task UseMailToOutlook(MediaLink media)
+        //{
+        //    StringBuilder sb = new StringBuilder();
+        //    string htmlBody = "";
+        //    try
+        //    {
+        //        using (StreamReader sr = new StreamReader("arefin.txt"))
+        //        {
+        //            String line;
+        //            while ((line = sr.ReadLine()) != null)
+        //            {
+        //                sb.Append(line);
+        //            }
+        //            htmlBody = sb.ToString();
+        //        }
+
+        //        Outlook.Application app = new Outlook.Application();
+        //        Outlook.NameSpace NS = app.GetNamespace("MAPI");
+        //        Outlook.MAPIFolder objFolder = NS.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderOutbox);
+        //        Outlook.MailItem objMail = (Outlook.MailItem)objFolder.Items.Add(Microsoft.Office.Interop.Outlook.OlItemType.olMailItem);
+        //        objMail.BodyFormat = Outlook.OlBodyFormat.olFormatHTML;
+        //        objMail.HTMLBody = htmlBody;
+        //        objMail.Subject = "From Arefins Blog(https://arefinblog.wordpress.com)";
+        //        objMail.To = "mr.arefin @yahoo.com";
+        //        objMail.CC = "arefin.sust @gmail.com";
+        //        //objMail.Send();
+        //        objMail.Display();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //    }
+
+        //}
+
 
         private async Task UseMailTo(MediaLink media)
         {

@@ -63,6 +63,11 @@ namespace DSA.Sfdc.DataWriters
                 PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
                 Debug.WriteLine($"Exception Opening Thumbnail File For Write { _meta.Name } ");
             }
+            catch (Exception ex)
+            {
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
+                Debug.WriteLine($"Exception Opening Thumbnail File For Write { _meta.Name } ");
+            }
         }
     }
 }

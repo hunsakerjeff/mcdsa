@@ -455,6 +455,10 @@
       <Project>{55808af4-465f-49c0-976a-1219edc10269}</Project>
       <Name>DSA.Sfdc</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PdfViewModel\PdfViewModel.vcxproj">
+      <Project>{03ebab56-27d7-4273-972d-635ff5500fe4}</Project>
+      <Name>PdfViewModel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Salesforce.SDK.App\Salesforce.SDK.App.csproj">
       <Project>{7bfef23d-1f0b-4a0f-86e2-fd299f3e9e20}</Project>
       <Name>Salesforce.SDK.App</Name>
@@ -637,12 +641,6 @@
   <ItemGroup>
     <Folder Include="Assets\SplashScreen\" />
     <Folder Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="PdfViewModel, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\PdfViewModel\$(Platform)\PdfViewModel.winmd</HintPath>
-    </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

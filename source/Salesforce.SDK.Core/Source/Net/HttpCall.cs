@@ -369,6 +369,8 @@ namespace Salesforce.SDK.Net
             }
             catch (Exception ex)
             {
+                PlatformAdapter.SendToCustomLogger("HttpClient.Execute threw an exception", LoggingLevel.Error);
+                PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
                 _httpCallErrorException = ex;
                 message = null;
             }
@@ -402,6 +404,7 @@ namespace Salesforce.SDK.Net
             catch (Exception ex)
             {
                 _httpCallErrorException = ex;
+                PlatformAdapter.SendToCustomLogger("HttpClient.HandleMessageResponse - EnsureSuccessStatusCode IsSuccessStatusCode is false", LoggingLevel.Error);
             }
 
             if (response != null)
@@ -423,6 +426,7 @@ namespace Salesforce.SDK.Net
             catch (Exception ex)
             {
                 _httpCallErrorException = ex;
+                PlatformAdapter.SendToCustomLogger("HttpClient.HandleMessageResponseForBinary - EnsureSuccessStatusCode IsSuccessStatusCode is false", LoggingLevel.Error);
             }
 
             if (response != null)
@@ -498,11 +502,13 @@ namespace Salesforce.SDK.Net
             }
             catch (OperationCanceledException oce)
             {
+                PlatformAdapter.SendToCustomLogger("HttpClient.ExecuteAndSaveAsync - Operation Cancelled", LoggingLevel.Error);
                 PlatformAdapter.SendToCustomLogger(oce, LoggingLevel.Error);
                 throw;
             }
             catch (Exception ex)
             {
+                PlatformAdapter.SendToCustomLogger("HttpClient.ExecuteAndSaveAsync threw an exception", LoggingLevel.Error);
                 PlatformAdapter.SendToCustomLogger(ex, LoggingLevel.Error);
                 _httpCallErrorException = ex;
                 message = null;

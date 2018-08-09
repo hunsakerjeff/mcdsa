@@ -103,7 +103,6 @@ namespace DSA.Sfdc.DataWriters
 
         public async Task PushToStreamAsync(Func<IOutputStream, IAsyncOperationWithProgress<ulong, ulong>> writeToStreamAsync, IHttpContent content)
         {
-
             if (content == null)
             {
                 throw new NullReferenceException("Parameter content is null");

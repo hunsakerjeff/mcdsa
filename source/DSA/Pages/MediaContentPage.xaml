@@ -161,7 +161,7 @@
             <StackPanel Margin="0,0,20,0" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
                 
                 <Button x:Name="PrintContentButton" Visibility="{Binding IsPrintable, Converter={StaticResource BoolToVis}}" BorderThickness="0" Command="{Binding PrintMediaCommand}" Height="45" Background="Transparent">
-                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#59209;" FontSize="28" Foreground="White"/>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#59209;" FontSize="30" Foreground="White"/>
                 </Button>
                 <Button x:Name="RelatedContentButton" BorderThickness="0" Command="{Binding ShowRelatedContentFlyoutCommand}" Height="45" Background="Transparent">
                     <Image Source="{Binding RelatedContentIcon}"/>
